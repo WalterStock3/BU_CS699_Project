@@ -1,0 +1,11 @@
+/.quarto/
+/*.qmd
+/_site/
+/_site_libs/
+/.Rproj.user/
+/_book/
+/_bookdown_files/
+/*.html
+/*.pdf
+/*.epub
+/*.docx

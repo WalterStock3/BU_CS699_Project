@@ -1,0 +1,13 @@
+This is a list of command line commands.  It is available for easy reference.
+
+Command used to initiate Quarto Book: 
+quarto create-project BU_CS699_Project --type book
+
+Basic command to render the book (run from within BU_CS699_Project).  
+If rendering to PDF then the PDF document can be found in the _book folder.
+quarto render
+
+
+
+
+
