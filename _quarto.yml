@@ -8,11 +8,11 @@ book:
   chapters:
     - index.qmd
     - intro.qmd
-    - data_mining_tools
-    - classification_algorithms
-    - data_mining_procedure
-    - preprocessing
-    - data_mining_results
+    - data_mining_tools.qmd
+    - classification_algorithms.qmd
+    - data_mining_procedure.qmd
+    - preprocessing.qmd
+    - data_mining_results.qmd
 
 bibliography: references.bib
 
