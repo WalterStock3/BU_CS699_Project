@@ -2,14 +2,17 @@ project:
   type: book
 
 book:
-  title: "BU_CS699_Project"
-  author: "Norah Jones"
+  title: "BU CS699 Datamining Project - Spring 2025"
+  author: "Walter Stock and Arfaan Jeddy"
   date: "2/16/2025"
   chapters:
     - index.qmd
     - intro.qmd
-    - summary.qmd
-    - references.qmd
+    - data_mining_tools
+    - classification_algorithms
+    - data_mining_procedure
+    - preprocessing
+    - data_mining_results
 
 bibliography: references.bib
 
