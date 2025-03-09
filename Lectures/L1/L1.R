@@ -9,7 +9,7 @@ library(dplyr)
 # 
 
 # set working directory
-setwd('C:/Courses/C2025/699/Slides-Spring2025/L1')
+setwd("~/Source/BU_CS699_Project/Lectures/L1")
 
 df <- read.csv('cirrhosis-1.csv')
 dim(df)
