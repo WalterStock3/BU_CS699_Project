@@ -27,6 +27,30 @@ dim(df) # 4318  117
 df$Class <- ifelse(df$Class == 'Yes', 1, 0)
 df$Class <- as.factor(df$Class)
 
+# Load the PUMS data dictionary
+data_dict_loc <- "~/Source/BU_CS699_Project/CS699_Added_Artifacts/"
+data_dict_file <- "PUMS_Data_Dictionary_2023.csv"
+data_dict_df <- read.csv(paste(data_dict_loc, data_dict_file, sep = ""))
+
+data_dict_names <- data_dict_df %>%
+  filter(Record_Type_Name_or_Val == "Name") %>%
+  select(Name = Record_Type_Name_or_Val, Value = Value_All)
+
+data_dict_values
+
+# Preview the data dictionary
+head(data_dict_df)
+
+# Example: Filter variables based on descriptions
+# Assuming the data dictionary has columns 'Variable' and 'Description'
+selected_vars <- data_dict %>%
+  filter(grepl("income|employment", Description, ignore.case = TRUE)) %>%
+  pull(Variable)
+
+# Use the selected variables in your dataset
+df_selected <- df %>%
+  select(all_of(selected_vars))
+
 ### Remove columns with no info - iterative - purposefully including here
 # All values are equal:
 # ADJINC - Adjustment factor for income and earnings dollar amounts - all same
@@ -164,6 +188,10 @@ df_balanced2_select1 <- df_balanced2
 # Identify zero or near zero variance variables
 nzv <- nearZeroVar(df_balanced2, saveMetrics = TRUE)
 nzv
+##### Near Zero Variance Variables
+# Keeping HINS data as it is a binary variable.
+# Keeeping MIL as military may be relevant classification.
+# Keep NWAV as available for work may be relevant classification.
 
 # Filter out variables with zero or near zero variance
 df_balanced2_select1 <- df_balanced2 %>%
