@@ -22,6 +22,7 @@ df <- read.csv(paste(loc, data_file, sep = ""))
 
 print("df - dim")
 dim(df) # 4318  117
+print(paste("df dim:", dim(df)[1], ",", dim(df)[2]))
 
 # Update df Class to be a binary factor variable.
 df$Class <- ifelse(df$Class == 'Yes', 1, 0)
@@ -33,34 +34,33 @@ data_dict_file <- "PUMS_Data_Dictionary_2023.csv"
 data_dict_df <- read.csv(paste(data_dict_loc, data_dict_file, sep = ""))
 
 data_dict_names <- data_dict_df %>%
-  filter(Record_Type_Name_or_Val == "Name") %>%
-  select(Name = Record_Type_Name_or_Val, Value = Value_All)
+  filter(Record_Type_Name_or_Val == "NAME") %>%
+  select(Code = Record_Name, Name = Value_All, Description = Value_Description)
 
-data_dict_values
+data_dict_vals <- data_dict_df %>%
+  filter(Record_Type_Name_or_Val == "VAL") %>%
+  select(Code = Record_Name, Value = Value_All, Description = Value_Description)
 
-# Preview the data dictionary
-head(data_dict_df)
+### Remove columns with no info - iterative - purposefully including here before
+#   row removal
+#    * ADJINC - Adjustment factor for income and earnings dollar amounts
+#    * RACNH - Native Hawaiian and Other Pacific Islander - all 0
+#    * RT - Record Type - all are P for person records
+#    * SERIALNO - Serial Number
+#    * SPORDER - Person Number - Spouse Order
 
-# Example: Filter variables based on descriptions
-# Assuming the data dictionary has columns 'Variable' and 'Description'
-selected_vars <- data_dict %>%
-  filter(grepl("income|employment", Description, ignore.case = TRUE)) %>%
-  pull(Variable)
+df_processed <- df %>% select(-c("STATE", "REGION", "DIVISION",
+                                 "ADJINC", "RACNH", "RT",
+                                 "SERIALNO", "SPORDER"))
 
-# Use the selected variables in your dataset
-df_selected <- df %>%
-  select(all_of(selected_vars))
+print(paste("df_preprocessed - post column removal dim:",
+            dim(df_processed)[1], ",", dim(df_processed)[2]))
 
-### Remove columns with no info - iterative - purposefully including here
-# All values are equal:
-# ADJINC - Adjustment factor for income and earnings dollar amounts - all same
-# RACNH - Native Hawaiian and Other Pacific Islander - all 0
-# RT - Record Type - all are P for person records
-df <- df %>%
-  select(-c("STATE", "REGION", "DIVISION", "ADJINC", "RACNH", "RT"))
+# Retrieve the class of each column
+column_classes <- sapply(df_processed, class)
+print(column_classes)
 
-print("df - post no-info-column removal dim")
-dim(df)
+
 
 # Convert integer variables to numeric
 df_numeric <- df %>% mutate(across(where(is.integer), as.numeric))
@@ -177,25 +177,22 @@ df_balanced2 <- train
 
 ### 4-1 Select Attributes - Method 1 - Project Step 4
 
-#### balanced dataset 1
+#### 4-1-1 balanced dataset 1
 df_balanced1_select1 <- df_balanced1 %>%
   select(Class, ANC1P, ANC2P) # Selecting Class and AGE as the additional column
 
-#### balanced dataset 2
+#### 4-1-2 balanced dataset 2
 
 df_balanced2_select1 <- df_balanced2
 
 # Identify zero or near zero variance variables
-nzv <- nearZeroVar(df_balanced2, saveMetrics = TRUE)
-nzv
-##### Near Zero Variance Variables
+
+
 # Keeping HINS data as it is a binary variable.
 # Keeeping MIL as military may be relevant classification.
 # Keep NWAV as available for work may be relevant classification.
 
-# Filter out variables with zero or near zero variance
-df_balanced2_select1 <- df_balanced2 %>%
-    select(-which(nzv$nzv))
+
 
 ### 4-2 Select Attributes - Method 2 - Project Step 4
 
