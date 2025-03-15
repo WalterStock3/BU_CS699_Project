@@ -20,12 +20,12 @@ loc <- "~/Source/BU_CS699_Project/CS699_Provided_Artifacts/"
 data_file <- "project_data.csv"
 df <- read.csv(paste(loc, data_file, sep = ""))
 
-print("df - dim")
-dim(df) # 4318  117
-print(paste("df dim:", dim(df)[1], ",", dim(df)[2]))
+# 4318  117
+print(paste("df - dim:", dim(df)[1], ",", dim(df)[2]))
+print(paste("df - total missing values:", sum(is.na(df)))) # 141635
 
 # Update df Class to be a binary factor variable.
-df$Class <- ifelse(df$Class == 'Yes', 1, 0)
+df$Class <- ifelse(df$Class == "Yes", 1, 0)
 df$Class <- as.factor(df$Class)
 
 # Load the PUMS data dictionary
@@ -53,67 +53,45 @@ df_processed <- df %>% select(-c("STATE", "REGION", "DIVISION",
                                  "ADJINC", "RACNH", "RT",
                                  "SERIALNO", "SPORDER"))
 
-print(paste("df_preprocessed - post column removal dim:",
+print(paste("df_processed - post specific column removal dim:",
             dim(df_processed)[1], ",", dim(df_processed)[2]))
 
-# Retrieve the class of each column
-column_classes <- sapply(df_processed, class)
-print(column_classes)
-
-
-
-# Convert integer variables to numeric
-df_numeric <- df %>% mutate(across(where(is.integer), as.numeric))
-
-### Handle missing values
-
-print("df - missing values")
-sum(is.na(df_numeric)) # 141635
-
 # Columns
-missing_values_col_count <- sapply(df_numeric, function(x) sum(is.na(x)))
-missing_values_col_percent <- (missing_values_col_count / nrow(df_numeric))
+in_limit_missing_col_percent <- 0.05
+print(paste("df_processed - missing column percent limit:",
+            in_limit_missing_col_percent))
 
-# input
-in_limit_missing_col_percent <- 0.1
+missing_values_col_count <- sapply(df_processed, function(x) sum(is.na(x)))
+missing_values_col_percent <- (missing_values_col_count / nrow(df_processed))
 
-print("missing column percent limit")
-in_limit_missing_col_percent
-
-df_numeric_filt1_columns <- df_numeric %>%
+df_processed_filt_columns <- df_processed %>%
   select(which(missing_values_col_percent <= in_limit_missing_col_percent))
 
-print("df_filt1_columns - dim")
-dim(df_numeric_filt1_columns)
+print(paste("df_processed - post_column_filt - dim:",
+            dim(df_processed_filt_columns)[1], ",",
+            dim(df_processed_filt_columns)[2]))
 
-# Rows - purposefully starting with the filtered dataset
-df_numeric_filt2_rows <- df_numeric_filt1_columns %>%
+# Rows
+in_limit_missing_row_percent <- 0.01
+print(paste("df_processed - missing row values percent limit:",
+            in_limit_missing_row_percent))
+
+df_processed_filt_rows <- df_processed_filt_columns %>%
   mutate(calc_missing_values_row_count = rowSums(is.na(.))) %>%
   mutate(calc_missing_values_row_percent = (calc_missing_values_row_count /
-                                              ncol(df_numeric)))
+                                              ncol(df_processed_filt_columns)))
 
-# input
-print("missing row percent limit")
-in_limit_missing_row_percent <- 0.1
-
-df_numeric_filt2_rows <- df_numeric_filt2_rows %>%
+df_processed_filt_rows <- df_processed_filt_rows %>%
   filter(calc_missing_values_row_percent <= in_limit_missing_row_percent)
 
-print("df_filt2_rows - dim")
-dim(df_numeric_filt2_rows)
+print(paste("df_processed - post_row_filt - dim:",
+            dim(df_processed_filt_rows)[1], ",",
+            dim(df_processed_filt_rows)[2]))
+print(paste("df_processed - total missing values:",
+            sum(is.na(df_processed_filt_rows))))
 
-df_numeric_filt <- df_numeric_filt2_rows
-
-df_numeric_filt_no_missing <- df_numeric_filt %>%
-  mutate(
-    across(where(is.numeric), ~ replace(., is.na(.), median(., na.rm = TRUE)))
-  )
-
-print("df_filt_no_missing - dim")
-dim(df_numeric_filt_no_missing)
-
-print("df_filt_no_missing - missing values")
-sum(is.na(df_numeric_filt_no_missing)) # 141635
+# Retrieve the class of all columns in the dataset
+column_classes <- sapply(df_processed_filt_rows, class)
 
 ### Outliers
 
