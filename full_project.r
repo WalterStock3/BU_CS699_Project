@@ -11,9 +11,11 @@
 library(tidyverse)
 library(ggplot2)
 library(gridExtra)
-library(caret)
 
-## Preprocessing - Project Step 1
+################################################################################
+## 1 Preprocessing - Project Step 1
+################################################################################
+
 loc <- "~/Source/BU_CS699_Project/CS699_Provided_Artifacts/"
 data_file <- "project_data.csv"
 df <- read.csv(paste(loc, data_file, sep = ""))
@@ -26,11 +28,15 @@ df$Class <- ifelse(df$Class == 'Yes', 1, 0)
 df$Class <- as.factor(df$Class)
 
 ### Remove columns with no info - iterative - purposefully including here
+# All values are equal:
+# ADJINC - Adjustment factor for income and earnings dollar amounts - all same
+# RACNH - Native Hawaiian and Other Pacific Islander - all 0
+# RT - Record Type - all are P for person records
 df <- df %>%
-  select(-c("STATE", "REGION", "DIVISION"))
+  select(-c("STATE", "REGION", "DIVISION", "ADJINC", "RACNH", "RT"))
 
 print("df - post no-info-column removal dim")
-dim(df) # 4318  117
+dim(df)
 
 # Convert integer variables to numeric
 df_numeric <- df %>% mutate(across(where(is.integer), as.numeric))
@@ -93,39 +99,121 @@ numeric_columns <- df_numeric_filt_no_missing %>% select(where(is.numeric))
 # Generate boxplots dynamically for all numeric columns
 boxplots <- lapply(names(numeric_columns), function(col) {
   ggplot(df_numeric_filt_no_missing, aes(x = "", y = .data[[col]])) +
-    geom_boxplot()
+    geom_boxplot() +
+    theme(axis.title.x = element_blank(),
+          axis.text.x = element_blank(), 
+          axis.ticks.x = element_blank())
 })
 
 # Arrange boxplots in a grid
+boxplots <- boxplots[order(names(numeric_columns))]
 grid.arrange(grobs = boxplots, ncol = 10)
 
+df_processed <- df_numeric_filt_no_missing
+
+################################################################################
 ## Split - Project Step 2
+################################################################################
+#    Split the dataset into training and testing datasets.
 
-## Training Dataset - Create Balanced Training Dataset - Project Step 3
+library(caret)
+library(rsample)
+set.seed(123)
 
-### Training Dataset - Create Balanced Training Dataset - Method 1 - Project Step 3
+split <- initial_split(df_processed, prop = 0.7, strata = "Class")
+train <- training(split)
+test <- testing(split)
 
-### Training Dataset - Create Balanced Training Dataset - Method 2 - Project Step 3
+dim(train) # 3022  65
+dim(test) # 1296  65
+table(train$Class)
+table(test$Class)
 
-## Balance the Training Dataset - Select Attributes - Project Step 4
+################################################################################
+## 3 Create Balanced Training Dataset - Project Step 3
+################################################################################
 
-### Balance the Training Dataset - Select Attributes - Method 1 - Project Step 4
+### 3 Create Balanced Training Dataset - Method 1 - Project Step 3
 
-### Balance the Training Dataset - Select Attributes - Method 2 - Project Step 4
+df_balanced1 <- train
 
-### Balance the Training Dataset - Select Attributes - Method 3 - Project Step 4
+### 3 Create Balanced Training Dataset - Method 2 - Project Step 3
 
-## Balanced Training Dataset - Models - Project Step 5
+df_balanced2 <- train
 
-### Balanced Training Dataset - Model 1 - Project Step 5
+################################################################################
+## 4 Select Attributes - Project Step 4
+################################################################################
+#    Data Reduction - Dimension Reduction - Lecture 2 - Data Reduction Slides
+#    * Remove irrelevant attributes
+#    * Remove duplicate attributes
+#    * Remove zero-variance attributes
+#    * Remove attributes to avoid collinearity
+#    * Feature selection
 
-### Balanced Training Dataset - Model 2 - Project Step 5
+### 4-1 Select Attributes - Method 1 - Project Step 4
 
-### Balanced Training Dataset - Model 3 - Project Step 5
+#### balanced dataset 1
+df_balanced1_select1 <- df_balanced1 %>%
+  select(Class, ANC1P, ANC2P) # Selecting Class and AGE as the additional column
 
-### Balanced Training Dataset - Model 4 - Project Step 5
+#### balanced dataset 2
 
-### Balanced Training Dataset - Model 5 - Project Step 5
+df_balanced2_select1 <- df_balanced2
 
-### Balanced Training Dataset - Model 6 - Project Step 5
+# Identify zero or near zero variance variables
+nzv <- nearZeroVar(df_balanced2, saveMetrics = TRUE)
+nzv
+
+# Filter out variables with zero or near zero variance
+df_balanced2_select1 <- df_balanced2 %>%
+    select(-which(nzv$nzv))
+
+### 4-2 Select Attributes - Method 2 - Project Step 4
+
+
+df_balanced1_select2 <- df_balanced1 %>% 
+
+df_balanced2_select2 <- df_balanced2
+
+### 4-3 Select Attributes - Method 3 - Project Step 4
+#     ----------------------------------
+
+df_balanced1_select3 <- df_balanced1
+
+df_balanced2_select3 <- df_balanced2
+
+## Models - Project Step 5
+# Lecture 1 - Classification Slide:
+# * Decision trees,
+# * Naive Bayesian classification,
+# * Support vector machines,
+# * K-nearest neighbors,
+# * Neural networks.
+
+### Balanced Training Dataset - Model 1 Logistic Regression - Project Step 5
+
+df_balanced1_select1_model1
+
+### Balanced Training Dataset - Model 2 K-Nearest Neighbors - Project Step 5
+
+train_control <- trainControl(method = "cv",
+                              number = 10) # 10-fold cross-validation
+
+knn_model <- train(Class ~ ., data = df_balanced1_select1,
+                   method = "knn",
+                   trControl = train_control,
+                   preProcess = c("center", "scale"),
+                   tuneLength = 10)
+
+print(knn_model)
+plot(knn_model)
+
+### Balanced Training Dataset - Model 3 Decision Tree - Project Step 5
+
+### Balanced Training Dataset - Model 4 Random Forest - Project Step 5
+
+### Balanced Training Dataset - Model 5 Support Vector Machine - Project Step 5
+
+### Balanced Training Dataset - Model 6 Gradient Booston - Project Step 5
 
