@@ -178,10 +178,14 @@ df_balanced2 <- train
 #-------------------------------------------------------------------------------
 
 #### 4-1-1 balanced dataset 1 ####
+#-------------------------------------------------------------------------------
+
 df_balanced1_select1 <- df_balanced1 %>%
   select(Class, ANC1P, ANC2P) # Selecting Class and AGE as the additional column
 
 #### 4-1-2 balanced dataset 2 ####
+#-------------------------------------------------------------------------------
+
 df_balanced2_select1 <- df_balanced2
 
 # Check for collinearity using correlation matrix
