@@ -15,6 +15,8 @@ library(caret)
 library(rsample)
 library(ROSE)
 
+in_select1_cor_threshold <- 0.5
+
 ################################################################################
 ## 1 Preprocessing - Project Step 1
 ################################################################################
@@ -200,8 +202,8 @@ repeat {
   most_correlated_vars <- colnames(correlation_matrix)[most_correlated_location]
   most_correlated_correlation <- correlation_matrix[most_correlated_location]
 
-  # Break the loop if the highest correlation is <= 0.5
-  if (abs(most_correlated_correlation) <= 0.2) {
+  # Break the loop if the highest correlation is less than a threshold.
+  if (abs(most_correlated_correlation) <= in_select1_cor_threshold) {
     break
   }
 
@@ -217,6 +219,9 @@ repeat {
   row_to_sum2 <- abs(correlation_matrix_full[most_correlated_vars[2],
                                              , drop = FALSE])
   row_sum2 <- sum(row_to_sum2, na.rm = TRUE)
+
+  print(paste("Variable:", most_correlated_vars[1], "Row Sum:", row_sum1))
+  print(paste("Variable:", most_correlated_vars[2], "Row Sum:", row_sum2))
 
   # Remove the variable with the highest sum of correlations
   highly_correlated <- ifelse(row_sum1 > row_sum2, most_correlated_vars[1],
@@ -273,21 +278,29 @@ df_balanced2_select3 <- df_balanced2
 ### 5-1 Balanced Training Dataset - Model 1 Logistic Regression - Project Step 5
 #-------------------------------------------------------------------------------
 
+# Logistic Regression Model
+logistic_model <- glm(Class ~ ., data = df_balanced1_select1, family = binomial)
+
+# Summary of the model
+summary(logistic_model)
+
+# Predict on the test dataset
+test_predictions <- predict(logistic_model, newdata = test, type = "response")
+
+# Convert probabilities to binary predictions
+test_predicted_class <- ifelse(test_predictions > 0.5, 1, 0)
+
+# Confusion matrix
+confusion_matrix <- table(Predicted = test_predicted_class, Actual = test$Class)
+print(confusion_matrix)
+
+# Calculate accuracy
+accuracy <- sum(diag(confusion_matrix)) / sum(confusion_matrix)
+print(paste("Accuracy:", accuracy))
+
 #-------------------------------------------------------------------------------
 ### 5-2 Balanced Training Dataset - Model 2 K-Nearest Neighbors - Project Step 5
 #-------------------------------------------------------------------------------
-
-train_control <- trainControl(method = "cv",
-                              number = 10) # 10-fold cross-validation
-
-knn_model <- train(Class ~ ., data = df_balanced1_select1,
-                   method = "knn",
-                   trControl = train_control,
-                   preProcess = c("center", "scale"),
-                   tuneLength = 10)
-
-print(knn_model)
-plot(knn_model)
 
 #-------------------------------------------------------------------------------
 ### 5-3 Balanced Training Dataset - Model 3 Decision Tree - Project Step 5
