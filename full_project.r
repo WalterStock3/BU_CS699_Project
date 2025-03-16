@@ -15,7 +15,9 @@ library(caret)
 library(rsample)
 library(ROSE)
 
-in_select1_cor_threshold <- 0.5
+in_limit_missing_col_percent <- 0.01
+in_limit_missing_row_percent <- 0.01
+in_select1_cor_threshold <- 0.75
 
 ################################################################################
 ## 1 Preprocessing - Project Step 1
@@ -62,7 +64,6 @@ print(paste("df_processing - post specific column removal dim:",
             dim(df_processing)[1], ",", dim(df_processing)[2]))
 
 # Columns
-in_limit_missing_col_percent <- 0.05
 print(paste("df_processing - missing column percent limit:",
             in_limit_missing_col_percent))
 
@@ -77,7 +78,6 @@ print(paste("df_processing - post_column_filt - dim:",
             dim(df_processing_filt_columns)[2]))
 
 # Rows
-in_limit_missing_row_percent <- 0.01
 print(paste("df_processing - missing row values percent limit:",
             in_limit_missing_row_percent))
 
