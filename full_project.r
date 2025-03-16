@@ -49,58 +49,57 @@ data_dict_vals <- data_dict_df %>%
 #    * SERIALNO - Serial Number
 #    * SPORDER - Person Number - Spouse Order
 
-df_processed <- df %>% select(-c("STATE", "REGION", "DIVISION",
-                                 "ADJINC", "RACNH", "RT",
-                                 "SERIALNO", "SPORDER"))
+df_processing <- df %>% select(-c("STATE", "REGION", "DIVISION",
+                                  "ADJINC", "RACNH", "RT",
+                                  "SERIALNO", "SPORDER"))
 
-print(paste("df_processed - post specific column removal dim:",
-            dim(df_processed)[1], ",", dim(df_processed)[2]))
+print(paste("df_processing - post specific column removal dim:",
+            dim(df_processing)[1], ",", dim(df_processing)[2]))
 
 # Columns
 in_limit_missing_col_percent <- 0.05
-print(paste("df_processed - missing column percent limit:",
+print(paste("df_processing - missing column percent limit:",
             in_limit_missing_col_percent))
 
-missing_values_col_count <- sapply(df_processed, function(x) sum(is.na(x)))
-missing_values_col_percent <- (missing_values_col_count / nrow(df_processed))
+missing_values_col_count <- sapply(df_processing, function(x) sum(is.na(x)))
+missing_values_col_percent <- (missing_values_col_count / nrow(df_processing))
 
-df_processed_filt_columns <- df_processed %>%
+df_processing_filt_columns <- df_processing %>%
   select(which(missing_values_col_percent <= in_limit_missing_col_percent))
 
-print(paste("df_processed - post_column_filt - dim:",
-            dim(df_processed_filt_columns)[1], ",",
-            dim(df_processed_filt_columns)[2]))
+print(paste("df_processing - post_column_filt - dim:",
+            dim(df_processing_filt_columns)[1], ",",
+            dim(df_processing_filt_columns)[2]))
 
 # Rows
 in_limit_missing_row_percent <- 0.01
-print(paste("df_processed - missing row values percent limit:",
+print(paste("df_processing - missing row values percent limit:",
             in_limit_missing_row_percent))
 
-df_processed_filt_rows <- df_processed_filt_columns %>%
+df_processing_filt_rows <- df_processing_filt_columns %>%
   mutate(calc_missing_values_row_count = rowSums(is.na(.))) %>%
   mutate(calc_missing_values_row_percent = (calc_missing_values_row_count /
-                                              ncol(df_processed_filt_columns)))
+                                              ncol(df_processing_filt_columns)))
 
-df_processed_filt_rows <- df_processed_filt_rows %>%
+df_processing_filt_rows <- df_processing_filt_rows %>%
   filter(calc_missing_values_row_percent <= in_limit_missing_row_percent)
 
-print(paste("df_processed - post_row_filt - dim:",
-            dim(df_processed_filt_rows)[1], ",",
-            dim(df_processed_filt_rows)[2]))
-print(paste("df_processed - total missing values:",
-            sum(is.na(df_processed_filt_rows))))
+print(paste("df_processing - post_row_filt - dim:",
+            dim(df_processing_filt_rows)[1], ",",
+            dim(df_processing_filt_rows)[2]))
+print(paste("df_processing - total missing values:",
+            sum(is.na(df_processing_filt_rows))))
 
 # Retrieve the class of all columns in the dataset
-column_classes <- sapply(df_processed_filt_rows, class)
+column_classes <- sapply(df_processing_filt_rows, class)
 
 ### Outliers
-
 # Create boxplots for each numeric variable in the dataset
-numeric_columns <- df_numeric_filt_no_missing %>% select(where(is.numeric))
+integer_columns <- df_processing_filt_rows %>% select(where(is.integer))
 
 # Generate boxplots dynamically for all numeric columns
-boxplots <- lapply(names(numeric_columns), function(col) {
-  ggplot(df_numeric_filt_no_missing, aes(x = "", y = .data[[col]])) +
+boxplots <- lapply(names(integer_columns), function(col) {
+  ggplot(integer_columns, aes(x = "", y = .data[[col]])) +
     geom_boxplot() +
     theme(axis.title.x = element_blank(),
           axis.text.x = element_blank(), 
@@ -108,10 +107,10 @@ boxplots <- lapply(names(numeric_columns), function(col) {
 })
 
 # Arrange boxplots in a grid
-boxplots <- boxplots[order(names(numeric_columns))]
+boxplots <- boxplots[order(names(integer_columns))]
 grid.arrange(grobs = boxplots, ncol = 10)
 
-df_processed <- df_numeric_filt_no_missing
+df_processed <- df_processing_filt_rows
 
 ################################################################################
 ## Split - Project Step 2
@@ -126,10 +125,12 @@ split <- initial_split(df_processed, prop = 0.7, strata = "Class")
 train <- training(split)
 test <- testing(split)
 
-dim(train) # 3022  65
-dim(test) # 1296  65
-table(train$Class)
-table(test$Class)
+print(paste("training dataset - dim:", dim(train)[1], ",", dim(train)[2]))
+print(paste("testing dataset - dim:", dim(test)[1], ",", dim(test)[2]))
+print(paste("train dataset - class distribution:",
+            table(train$Class)[1], ",", table(train$Class)[2]))
+print(paste("test dataset - class distribution:",
+            table(test$Class)[1], ",", table(test$Class)[2]))
 
 ################################################################################
 ## 3 Create Balanced Training Dataset - Project Step 3
@@ -155,28 +156,45 @@ df_balanced2 <- train
 
 ### 4-1 Select Attributes - Method 1 - Project Step 4
 
-#### 4-1-1 balanced dataset 1
+# Check covariances
+# Convert integer columns to numeric
+df_numeric <- df_balanced1 %>%
+  mutate(across(where(is.integer), as.numeric))
+
+# Check for collinearity using a correlation matrix
+correlation_matrix <- cor(df_numeric %>% select(-Class))
+
+# Identify the two variables that are most correlated
+correlation_matrix[upper.tri(correlation_matrix, diag = TRUE)] <- NA
+most_correlated_location <- which(abs(correlation_matrix) ==
+                                    max(abs(correlation_matrix),
+                                        na.rm = TRUE), arr.ind = TRUE)
+most_correlated_vars <- colnames(correlation_matrix)[most_correlated]
+most_correlated_correlation <- correlation_matrix[most_correlated_location]
+print(paste("Most correlated:", most_correlated_vars[1],
+            "and", most_correlated_vars[2], "at", most_correlated_correlation))
+
+
+# Update df_balanced1 with reduced attributes
+df_balanced1 <- df_numeric
+
+# Optionally, remove highly correlated attributes
+df_balanced1 <- df_numeric %>%
+    select(-all_of(names(df_numeric)[highly_correlated]))
+
+#### 4-1-1 Select Attributes - Method 1 - Balanced Dataset 1
 df_balanced1_select1 <- df_balanced1 %>%
   select(Class, ANC1P, ANC2P) # Selecting Class and AGE as the additional column
 
-#### 4-1-2 balanced dataset 2
-
+#### 4-1-2 Select Attributes - Method 1 - Balanced Dataset 2
 df_balanced2_select1 <- df_balanced2
-
-# Identify zero or near zero variance variables
-
-
-# Keeping HINS data as it is a binary variable.
-# Keeeping MIL as military may be relevant classification.
-# Keep NWAV as available for work may be relevant classification.
-
-
 
 ### 4-2 Select Attributes - Method 2 - Project Step 4
 
+#### 4-2-1 Select Attributes - Method 2 - Balanced Dataset 1
+df_balanced1_select2 <- df_balanced1
 
-df_balanced1_select2 <- df_balanced1 %>% 
-
+#### 4-2-2 Select Attributes - Method 2 - Balanced Dataset 1
 df_balanced2_select2 <- df_balanced2
 
 ### 4-3 Select Attributes - Method 3 - Project Step 4
@@ -195,8 +213,6 @@ df_balanced2_select3 <- df_balanced2
 # * Neural networks.
 
 ### Balanced Training Dataset - Model 1 Logistic Regression - Project Step 5
-
-df_balanced1_select1_model1
 
 ### Balanced Training Dataset - Model 2 K-Nearest Neighbors - Project Step 5
 
@@ -219,4 +235,3 @@ plot(knn_model)
 ### Balanced Training Dataset - Model 5 Support Vector Machine - Project Step 5
 
 ### Balanced Training Dataset - Model 6 Gradient Booston - Project Step 5
-
