@@ -155,47 +155,50 @@ df_balanced2 <- train
 #    * Feature selection
 
 ### 4-1 Select Attributes - Method 1 - Project Step 4
+# Collinearity
 
-# Check covariances
-# Convert integer columns to numeric
-df_numeric <- df_balanced1 %>%
-  mutate(across(where(is.integer), as.numeric))
+df_balanced1_select1 <- df_balanced1
 
-# Check for collinearity using a correlation matrix
-correlation_matrix_full <- cor(df_numeric %>% select(-Class))
-correlation_matrix <- correlation_matrix_full
+repeat {
+  df_numeric <- df_balanced1_select1 %>%
+    mutate(across(where(is.integer), as.numeric))
 
-# Identify the two variables that are most correlated
-correlation_matrix[upper.tri(correlation_matrix, diag = TRUE)] <- NA
-most_correlated_location <- which(abs(correlation_matrix) ==
-                                    max(abs(correlation_matrix),
-                                        na.rm = TRUE), arr.ind = TRUE)
-most_correlated_vars <- colnames(correlation_matrix)[most_correlated]
-most_correlated_correlation <- correlation_matrix[most_correlated_location]
-print(paste("Most correlated:", most_correlated_vars[1],
-            "and", most_correlated_vars[2], "at", most_correlated_correlation))
+  # Check for collinearity using a correlation matrix
+  correlation_matrix_full <- cor(df_numeric %>% select(-Class))
+  correlation_matrix <- correlation_matrix_full
 
-# Sum the correlations to decide which one to remove.
-row_to_sum1 <- correlation_matrix_full[most_correlated_vars[1], ]
-row_sum1 <- sum(row_to_sum1, na.rm = TRUE)
+  # Identify the two variables that are most correlated
+  correlation_matrix[upper.tri(correlation_matrix, diag = TRUE)] <- NA
+  most_correlated_location <- which(abs(correlation_matrix) ==
+                                      max(abs(correlation_matrix),
+                                          na.rm = TRUE), arr.ind = TRUE)
+  most_correlated_vars <- colnames(correlation_matrix)[most_correlated_location]
+  most_correlated_correlation <- correlation_matrix[most_correlated_location]
 
-row_to_sum2 <- correlation_matrix_full[most_correlated_vars[2], ]
-row_sum2 <- sum(row_to_sum2, na.rm = TRUE)
+  # Break the loop if the highest correlation is <= 0.5
+  if (abs(most_correlated_correlation) <= 0.2) {
+    break
+  }
 
-# Remove the variable with the highest sum of correlations
-highly_correlated <- ifelse(row_sum1 > row_sum2, most_correlated_vars[1],
-                            most_correlated_vars[2])
+  print(paste("Most correlated:", most_correlated_vars[1],
+              "and", most_correlated_vars[2],
+              "at", most_correlated_correlation))
 
-# Remove the highly correlated variable from df_balanced1
-df_balanced1 <- df_numeric %>%
-  select(-all_of(highly_correlated))
+  # Sum the correlations to decide which one to remove
+  row_to_sum1 <- correlation_matrix_full[most_correlated_vars[1], ]
+  row_sum1 <- sum(row_to_sum1, na.rm = TRUE)
 
-# Update df_balanced1 with reduced attributes
-df_balanced1 <- df_numeric
+  row_to_sum2 <- correlation_matrix_full[most_correlated_vars[2], ]
+  row_sum2 <- sum(row_to_sum2, na.rm = TRUE)
 
-# Optionally, remove highly correlated attributes
-df_balanced1 <- df_numeric %>%
-    select(-all_of(names(df_numeric)[highly_correlated]))
+  # Remove the variable with the highest sum of correlations
+  highly_correlated <- ifelse(row_sum1 > row_sum2, most_correlated_vars[1],
+                              most_correlated_vars[2])
+  df_balanced1_select1 <- df_numeric %>%
+    select(-all_of(highly_correlated))
+
+  print(paste("Removed variable:", highly_correlated))
+}
 
 #### 4-1-1 Select Attributes - Method 1 - Balanced Dataset 1
 df_balanced1_select1 <- df_balanced1 %>%
