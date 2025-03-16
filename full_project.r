@@ -140,21 +140,25 @@ print(paste("test dataset - class distribution:",
 ## 3 Create Balanced Training Dataset - Project Step 3
 ################################################################################
 
-### 3 Create Balanced Training Dataset - Method 1 - Project Step 3
+#-------------------------------------------------------------------------------
+### 3.1 Create Balanced Training Dataset - Method 1 - Project Step 3
+#-------------------------------------------------------------------------------
 
-# Balance the training dataset using oversampling and undersampling
-# Ensure the Class column is a factor
-train$Class <- as.factor(train$Class)
-
+# Simply undersampling
 df_balanced1 <- downSample(x = train[, -which(names(train) %in% "Class")],
                            y = train$Class)
 
-# Check the class distribution after balancing
-print(paste("Balanced training dataset - class distribution:",
-            table(df_balanced1$Class)[1], ",", table(df_balanced1$Class)[2]))
+print(paste("balanced1 dataset - dim:", dim(df_balanced1)[1],
+            ",", dim(df_balanced1)[2]))
 
+print(paste("balanced1 dataset - class distribution:",
+            table(df_balanced1$Class)[1], ",",
+            table(df_balanced1$Class)[2]))
+
+#-------------------------------------------------------------------------------
 ### 3 Create Balanced Training Dataset - Method 2 - Project Step 3
-
+#-------------------------------------------------------------------------------
+#TODO: Complete balanced dataet 2 possibly with SMOTE
 df_balanced2 <- train
 
 ################################################################################
