@@ -11,6 +11,9 @@
 library(tidyverse)
 library(ggplot2)
 library(gridExtra)
+library(caret)
+library(rsample)
+library(ROSE)
 
 ################################################################################
 ## 1 Preprocessing - Project Step 1
@@ -90,6 +93,9 @@ print(paste("df_processing - post_row_filt - dim:",
 print(paste("df_processing - total missing values:",
             sum(is.na(df_processing_filt_rows))))
 
+df_processing_filt_rows <- df_processing_filt_rows %>%
+  select(-calc_missing_values_row_count, -calc_missing_values_row_percent)
+
 # Retrieve the class of all columns in the dataset
 column_classes <- sapply(df_processing_filt_rows, class)
 
@@ -117,8 +123,6 @@ df_processed <- df_processing_filt_rows
 ################################################################################
 #    Split the dataset into training and testing datasets.
 
-library(caret)
-library(rsample)
 set.seed(123)
 
 split <- initial_split(df_processed, prop = 0.7, strata = "Class")
@@ -138,7 +142,16 @@ print(paste("test dataset - class distribution:",
 
 ### 3 Create Balanced Training Dataset - Method 1 - Project Step 3
 
-df_balanced1 <- train
+# Balance the training dataset using oversampling and undersampling
+# Ensure the Class column is a factor
+train$Class <- as.factor(train$Class)
+
+df_balanced1 <- downSample(x = train[, -which(names(train) %in% "Class")],
+                           y = train$Class)
+
+# Check the class distribution after balancing
+print(paste("Balanced training dataset - class distribution:",
+            table(df_balanced1$Class)[1], ",", table(df_balanced1$Class)[2]))
 
 ### 3 Create Balanced Training Dataset - Method 2 - Project Step 3
 
@@ -155,12 +168,13 @@ df_balanced2 <- train
 #    * Feature selection
 
 ### 4-1 Select Attributes - Method 1 - Project Step 4
+#----------------------------------
 
-#### 4-1-1 balanced dataset 1
+#### 4-1-1 balanced dataset 1 ####
 df_balanced1_select1 <- df_balanced1 %>%
   select(Class, ANC1P, ANC2P) # Selecting Class and AGE as the additional column
 
-#### 4-1-2 balanced dataset 2
+#### 4-1-2 balanced dataset 2 ####
 df_balanced2_select1 <- df_balanced2
 
 # Check for collinearity using correlation matrix
@@ -185,14 +199,15 @@ if (length(high_cor_pairs) > 0) {
 }
 
 ### 4-2 Select Attributes - Method 2 - Project Step 4
+#----------------------------------
 
-#### 4-2-1 balanced dataset 1
+#### 4-2-1 balanced dataset 1 ####
 df_balanced1_select2 <- df_balanced1
 
 df_balanced2_select2 <- df_balanced2
 
 ### 4-3 Select Attributes - Method 3 - Project Step 4
-#     ----------------------------------
+#----------------------------------
 
 df_balanced1_select3 <- df_balanced1
 
