@@ -121,7 +121,6 @@ df_processed <- df_processing_filt_rows
 ################################################################################
 ## Split - Project Step 2
 ################################################################################
-#    Split the dataset into training and testing datasets.
 
 set.seed(123)
 
@@ -158,12 +157,15 @@ print(paste("balanced1 dataset - class distribution:",
 #-------------------------------------------------------------------------------
 ### 3 Create Balanced Training Dataset - Method 2 - Project Step 3
 #-------------------------------------------------------------------------------
+
 #TODO: Complete balanced dataet 2 possibly with SMOTE
+
 df_balanced2 <- train
 
 ################################################################################
 ## 4 Select Attributes - Project Step 4
 ################################################################################
+
 #    Data Reduction - Dimension Reduction - Lecture 2 - Data Reduction Slides
 #    * Remove irrelevant attributes
 #    * Remove duplicate attributes
@@ -171,8 +173,9 @@ df_balanced2 <- train
 #    * Remove attributes to avoid collinearity
 #    * Feature selection
 
+#-------------------------------------------------------------------------------
 ### 4-1 Select Attributes - Method 1 - Project Step 4
-#----------------------------------
+#-------------------------------------------------------------------------------
 
 #### 4-1-1 balanced dataset 1 ####
 df_balanced1_select1 <- df_balanced1 %>%
@@ -202,20 +205,26 @@ if (length(high_cor_pairs) > 0) {
     print("No highly correlated pairs found.")
 }
 
+#-------------------------------------------------------------------------------
 ### 4-2 Select Attributes - Method 2 - Project Step 4
-#----------------------------------
+#-------------------------------------------------------------------------------
 
 #### 4-2-1 balanced dataset 1 ####
 df_balanced1_select2 <- df_balanced1
 
 df_balanced2_select2 <- df_balanced2
 
+#-------------------------------------------------------------------------------
 ### 4-3 Select Attributes - Method 3 - Project Step 4
-#----------------------------------
+#-------------------------------------------------------------------------------
 
 df_balanced1_select3 <- df_balanced1
 
 df_balanced2_select3 <- df_balanced2
+
+################################################################################
+## 5 Models - Project Step 5
+################################################################################
 
 ## Models - Project Step 5
 # Lecture 1 - Classification Slide:
@@ -225,9 +234,13 @@ df_balanced2_select3 <- df_balanced2
 # * K-nearest neighbors,
 # * Neural networks.
 
-### Balanced Training Dataset - Model 1 Logistic Regression - Project Step 5
+#-------------------------------------------------------------------------------
+### 5-1 Balanced Training Dataset - Model 1 Logistic Regression - Project Step 5
+#-------------------------------------------------------------------------------
 
-### Balanced Training Dataset - Model 2 K-Nearest Neighbors - Project Step 5
+#-------------------------------------------------------------------------------
+### 5-2 Balanced Training Dataset - Model 2 K-Nearest Neighbors - Project Step 5
+#-------------------------------------------------------------------------------
 
 train_control <- trainControl(method = "cv",
                               number = 10) # 10-fold cross-validation
@@ -241,10 +254,18 @@ knn_model <- train(Class ~ ., data = df_balanced1_select1,
 print(knn_model)
 plot(knn_model)
 
-### Balanced Training Dataset - Model 3 Decision Tree - Project Step 5
+#-------------------------------------------------------------------------------
+### 5-3 Balanced Training Dataset - Model 3 Decision Tree - Project Step 5
+#-------------------------------------------------------------------------------
 
-### Balanced Training Dataset - Model 4 Random Forest - Project Step 5
+#-------------------------------------------------------------------------------
+### 5-4 Balanced Training Dataset - Model 4 Random Forest - Project Step 5
+#-------------------------------------------------------------------------------
 
-### Balanced Training Dataset - Model 5 Support Vector Machine - Project Step 5
+#-------------------------------------------------------------------------------
+### 5-5 Balanced Training Dataset - Model 5 Support Vector Machine - Project Step 5
+#-------------------------------------------------------------------------------
 
-### Balanced Training Dataset - Model 6 Gradient Booston - Project Step 5
+#-------------------------------------------------------------------------------
+### 5-6 Balanced Training Dataset - Model 6 Gradient Booston - Project Step 5
+#-------------------------------------------------------------------------------
