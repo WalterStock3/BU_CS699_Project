@@ -191,18 +191,19 @@ numeric_columns <- df_balanced1 %>% select(where(is.numeric))
 cor_matrix <- cor(numeric_columns, use = "complete.obs")
 
 # Find highly correlated pairs (absolute correlation > 0.8)
-high_cor_pairs <- which(abs(cor_matrix) > 0.8 & lower.tri(cor_matrix), arr.ind = TRUE)
+high_cor_pairs <- which(abs(cor_matrix) > 0.8 &
+                          lower.tri(cor_matrix), arr.ind = TRUE)
 
 # Display highly correlated pairs
 if (length(high_cor_pairs) > 0) {
-    high_cor_pairs_df <- data.frame(
-        Var1 = rownames(cor_matrix)[high_cor_pairs[, 1]],
-        Var2 = colnames(cor_matrix)[high_cor_pairs[, 2]],
-        Correlation = cor_matrix[high_cor_pairs]
-    )
-    print(high_cor_pairs_df)
+  high_cor_pairs_df <- data.frame(
+    Var1 = rownames(cor_matrix)[high_cor_pairs[, 1]],
+    Var2 = colnames(cor_matrix)[high_cor_pairs[, 2]],
+    Correlation = cor_matrix[high_cor_pairs]
+  )
+  print(high_cor_pairs_df)
 } else {
-    print("No highly correlated pairs found.")
+  print("No highly correlated pairs found.")
 }
 
 #-------------------------------------------------------------------------------
@@ -263,7 +264,7 @@ plot(knn_model)
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
-### 5-5 Balanced Training Dataset - Model 5 Support Vector Machine - Project Step 5
+### 5-5 Balanced Training Dataset - Model 5 Support Vect Machine - Proj Step 5
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
