@@ -162,7 +162,8 @@ df_numeric <- df_balanced1 %>%
   mutate(across(where(is.integer), as.numeric))
 
 # Check for collinearity using a correlation matrix
-correlation_matrix <- cor(df_numeric %>% select(-Class))
+correlation_matrix_full <- cor(df_numeric %>% select(-Class))
+correlation_matrix <- correlation_matrix_full
 
 # Identify the two variables that are most correlated
 correlation_matrix[upper.tri(correlation_matrix, diag = TRUE)] <- NA
@@ -174,6 +175,20 @@ most_correlated_correlation <- correlation_matrix[most_correlated_location]
 print(paste("Most correlated:", most_correlated_vars[1],
             "and", most_correlated_vars[2], "at", most_correlated_correlation))
 
+# Sum the correlations to decide which one to remove.
+row_to_sum1 <- correlation_matrix_full[most_correlated_vars[1], ]
+row_sum1 <- sum(row_to_sum1, na.rm = TRUE)
+
+row_to_sum2 <- correlation_matrix_full[most_correlated_vars[2], ]
+row_sum2 <- sum(row_to_sum2, na.rm = TRUE)
+
+# Remove the variable with the highest sum of correlations
+highly_correlated <- ifelse(row_sum1 > row_sum2, most_correlated_vars[1],
+                            most_correlated_vars[2])
+
+# Remove the highly correlated variable from df_balanced1
+df_balanced1 <- df_numeric %>%
+  select(-all_of(highly_correlated))
 
 # Update df_balanced1 with reduced attributes
 df_balanced1 <- df_numeric
