@@ -108,7 +108,7 @@ boxplots <- lapply(names(integer_columns), function(col) {
   ggplot(integer_columns, aes(x = "", y = .data[[col]])) +
     geom_boxplot() +
     theme(axis.title.x = element_blank(),
-          axis.text.x = element_blank(), 
+          axis.text.x = element_blank(),
           axis.ticks.x = element_blank())
 })
 
