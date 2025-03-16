@@ -180,35 +180,55 @@ df_balanced2 <- train
 #### 4-1-1 balanced dataset 1 ####
 #-------------------------------------------------------------------------------
 
-df_balanced1_select1 <- df_balanced1 %>%
-  select(Class, ANC1P, ANC2P) # Selecting Class and AGE as the additional column
+# Collinearity
+
+df_balanced1_select1 <- df_balanced1
+
+repeat {
+  df_numeric <- df_balanced1_select1 %>%
+    mutate(across(where(is.integer), as.numeric))
+
+  # Check for collinearity using a correlation matrix
+  correlation_matrix_full <- cor(df_numeric %>% select(-Class))
+  correlation_matrix <- correlation_matrix_full
+
+  # Identify the two variables that are most correlated
+  correlation_matrix[upper.tri(correlation_matrix, diag = TRUE)] <- NA
+  most_correlated_location <- which(abs(correlation_matrix) ==
+                                      max(abs(correlation_matrix),
+                                          na.rm = TRUE), arr.ind = TRUE)
+  most_correlated_vars <- colnames(correlation_matrix)[most_correlated_location]
+  most_correlated_correlation <- correlation_matrix[most_correlated_location]
+
+  # Break the loop if the highest correlation is <= 0.5
+  if (abs(most_correlated_correlation) <= 0.2) {
+    break
+  }
+
+  print(paste("Most correlated:", most_correlated_vars[1],
+              "and", most_correlated_vars[2],
+              "at", most_correlated_correlation))
+
+  # Sum the correlations to decide which one to remove
+  row_to_sum1 <- correlation_matrix_full[most_correlated_vars[1], ]
+  row_sum1 <- sum(row_to_sum1, na.rm = TRUE)
+
+  row_to_sum2 <- correlation_matrix_full[most_correlated_vars[2], ]
+  row_sum2 <- sum(row_to_sum2, na.rm = TRUE)
+
+  # Remove the variable with the highest sum of correlations
+  highly_correlated <- ifelse(row_sum1 > row_sum2, most_correlated_vars[1],
+                              most_correlated_vars[2])
+  df_balanced1_select1 <- df_numeric %>%
+    select(-all_of(highly_correlated))
+
+  print(paste("Removed variable:", highly_correlated))
+}
 
 #### 4-1-2 balanced dataset 2 ####
 #-------------------------------------------------------------------------------
 
 df_balanced2_select1 <- df_balanced2
-
-# Check for collinearity using correlation matrix
-numeric_columns <- df_balanced1 %>% select(where(is.numeric))
-
-# Calculate the correlation matrix
-cor_matrix <- cor(numeric_columns, use = "complete.obs")
-
-# Find highly correlated pairs (absolute correlation > 0.8)
-high_cor_pairs <- which(abs(cor_matrix) > 0.8 &
-                          lower.tri(cor_matrix), arr.ind = TRUE)
-
-# Display highly correlated pairs
-if (length(high_cor_pairs) > 0) {
-  high_cor_pairs_df <- data.frame(
-    Var1 = rownames(cor_matrix)[high_cor_pairs[, 1]],
-    Var2 = colnames(cor_matrix)[high_cor_pairs[, 2]],
-    Correlation = cor_matrix[high_cor_pairs]
-  )
-  print(high_cor_pairs_df)
-} else {
-  print("No highly correlated pairs found.")
-}
 
 #-------------------------------------------------------------------------------
 ### 4-2 Select Attributes - Method 2 - Project Step 4
