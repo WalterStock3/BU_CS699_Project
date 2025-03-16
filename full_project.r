@@ -298,6 +298,98 @@ print(confusion_matrix)
 accuracy <- sum(diag(confusion_matrix)) / sum(confusion_matrix)
 print(paste("Accuracy:", accuracy))
 
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#         Actual
+#Predicted   0   1
+#        0 923  24
+#        1 286  63
+
+# TPR No
+true_positive0 <- confusion_matrix[1, 1]
+false_negative0 <- confusion_matrix[2, 1]
+tpr0 <- true_positive0 / (true_positive0 + false_negative0)
+print(paste("Class No True Positive Rate (TPR):", tpr0))
+
+# TPR Yes
+true_positive1 <- confusion_matrix[2, 2]
+false_negative1 <- confusion_matrix[1, 2]
+tpr1 <- true_positive1 / (true_positive1 + false_negative1)
+print(paste("Class Yes True Positive Rate (TPR):", tpr1))
+
+# Weighted Average TPR
+weighted_average_tpr <- (tpr1 + tpr0) / 2
+print(paste("Weighted Average True Positive Rate (TPR):", weighted_average_tpr))
+
+# FPR No
+false_positive0 <- confusion_matrix[1, 2]
+true_negative0 <- confusion_matrix[2, 2]
+fpr0 <- false_positive0 / (false_positive0 + true_negative0)
+print(paste("Class No False Positive Rate (FPR):", fpr0))
+
+# FPR Yes
+false_positive1 <- confusion_matrix[2, 1]
+true_negative1 <- confusion_matrix[1, 1]
+fpr1 <- false_positive1 / (false_positive1 + true_negative1)
+print(paste("Class Yes False Positive Rate (FPR):", fpr1))
+
+# Weighted Average FPR
+weighted_average_fpr <- (fpr1 + fpr0) / 2
+print(paste("Weighted Average False Positive Rate (FPR):",
+            weighted_average_fpr))
+
+# Precision No
+precision0 <- true_positive0 / (true_positive0 + false_positive0)
+print(paste("Class No Precision:", precision0))
+
+# Precision Yes
+precision1 <- true_positive1 / (true_positive1 + false_positive1)
+print(paste("Class Yes Precision:", precision1))
+
+# Weighted Average Precision
+weighted_average_precision <- (precision1 + precision0) / 2
+print(paste("Weighted Average Precision:", weighted_average_precision))
+
+# Recall No
+recall0 <- true_positive0 / (true_positive0 + false_negative0)
+print(paste("Class No Recall:", recall0))
+
+# Recall Yes
+recall1 <- true_positive1 / (true_positive1 + false_negative1)
+print(paste("Class Yes Recall:", recall1))
+
+# Weighted Average Recall
+weighted_average_recall <- (recall1 + recall0) / 2
+print(paste("Weighted Average Recall:", weighted_average_recall))
+
+# F-measure No
+f_measure0 <- (2 * precision0 * recall0) / (precision0 + recall0)
+print(paste("Class No F-measure:", f_measure0))
+
+# F-measure Yes
+f_measure1 <- (2 * precision1 * recall1) / (precision1 + recall1)
+print(paste("Class Yes F-measure:", f_measure1))
+
+# Weighted Average F-measure
+weighted_average_f_measure <- (f_measure1 + f_measure0) / 2
+print(paste("Weighted Average F-measure:", weighted_average_f_measure))
+
+# ROC
+roc <- roc(test$Class, test_predictions)
+roc_auc <- auc(roc)
+print(paste("ROC AUC:", roc_auc))
+
+# MCC
+mcc <- (true_positive0 * true_positive1 - false_positive0 * false_negative1) /
+  sqrt((true_positive0 + false_positive0) * (true_positive0 + false_negative1) *
+         (true_positive1 + false_negative0) *
+         (true_positive1 + false_negative1))
+print(paste("Matthews Correlation Coefficient (MCC):", mcc))
+
+# Kappa
+kappa <- (accuracy - sum(rowSums(confusion_matrix) / sum(confusion_matrix)) /
+            (1 - sum(rowSums(confusion_matrix) / sum(confusion_matrix))))
+print(paste("Kappa:", kappa))
+
 #-------------------------------------------------------------------------------
 ### 5-2 Balanced Training Dataset - Model 2 K-Nearest Neighbors - Project Step 5
 #-------------------------------------------------------------------------------
