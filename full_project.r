@@ -130,9 +130,9 @@ test <- testing(split)
 
 print(paste("training dataset - dim:", dim(train)[1], ",", dim(train)[2]))
 print(paste("testing dataset - dim:", dim(test)[1], ",", dim(test)[2]))
-print(paste("train dataset - class distribution:",
+print(paste("training dataset - class distribution:",
             table(train$Class)[1], ",", table(train$Class)[2]))
-print(paste("test dataset - class distribution:",
+print(paste("testing dataset - class distribution:",
             table(test$Class)[1], ",", table(test$Class)[2]))
 
 ################################################################################
@@ -147,10 +147,10 @@ print(paste("test dataset - class distribution:",
 df_balanced1 <- downSample(x = train[, -which(names(train) %in% "Class")],
                            y = train$Class)
 
-print(paste("balanced1 dataset - dim:", dim(df_balanced1)[1],
+print(paste("training balanced 1 dataset - dim:", dim(df_balanced1)[1],
             ",", dim(df_balanced1)[2]))
 
-print(paste("balanced1 dataset - class distribution:",
+print(paste("training balanced 1 dataset - class distribution:",
             table(df_balanced1$Class)[1], ",",
             table(df_balanced1$Class)[2]))
 
@@ -177,7 +177,7 @@ df_balanced2 <- train
 ### 4-1 Select Attributes - Method 1 - Project Step 4
 #-------------------------------------------------------------------------------
 
-#### 4-1-1 balanced dataset 1 ####
+#### 4-1-1 Select Attributes - Method 1 - balanced dataset 1
 #-------------------------------------------------------------------------------
 
 # Collinearity
@@ -210,10 +210,12 @@ repeat {
               "at", most_correlated_correlation))
 
   # Sum the correlations to decide which one to remove
-  row_to_sum1 <- correlation_matrix_full[most_correlated_vars[1], ]
+  row_to_sum1 <- abs(correlation_matrix_full[most_correlated_vars[1],
+                                             , drop = FALSE])
   row_sum1 <- sum(row_to_sum1, na.rm = TRUE)
 
-  row_to_sum2 <- correlation_matrix_full[most_correlated_vars[2], ]
+  row_to_sum2 <- abs(correlation_matrix_full[most_correlated_vars[2],
+                                             , drop = FALSE])
   row_sum2 <- sum(row_to_sum2, na.rm = TRUE)
 
   # Remove the variable with the highest sum of correlations
@@ -225,7 +227,7 @@ repeat {
   print(paste("Removed variable:", highly_correlated))
 }
 
-#### 4-1-2 balanced dataset 2 ####
+#### 4-1-2 Select Attributes - Method 1 - balanced dataset 2
 #-------------------------------------------------------------------------------
 
 df_balanced2_select1 <- df_balanced2
@@ -234,17 +236,25 @@ df_balanced2_select1 <- df_balanced2
 ### 4-2 Select Attributes - Method 2 - Project Step 4
 #-------------------------------------------------------------------------------
 
-#### 4-2-1 balanced dataset 1 ####
+#### 4-2-1 Select Attributes - Method 2 - balanced dataset 1
+#-------------------------------------------------------------------------------
+
 df_balanced1_select2 <- df_balanced1
 
+#### 4-2-2 Select Attributes - Method 2 - balanced dataset 2
+#-------------------------------------------------------------------------------
 df_balanced2_select2 <- df_balanced2
 
 #-------------------------------------------------------------------------------
 ### 4-3 Select Attributes - Method 3 - Project Step 4
 #-------------------------------------------------------------------------------
 
+#### 4-3-1 Select Attributes - Method 3 - balanced dataset 1
+#-------------------------------------------------------------------------------
 df_balanced1_select3 <- df_balanced1
 
+#### 4-3-2 Select Attributes - Method 3 - balanced dataset 2
+#-------------------------------------------------------------------------------
 df_balanced2_select3 <- df_balanced2
 
 ################################################################################
