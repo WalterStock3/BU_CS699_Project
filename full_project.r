@@ -1,4 +1,10 @@
-# Project Goal (Lecture 1): Generate a model to predict the likelihood of a
+# ToDo
+# 1. Complete balanced dataset 2 possibly with SMOTE
+# 2. Update variables to be factor where appropriate after preprocessing
+# 3. Check for duplicate variable - thought I saw one.
+# 4. Figure out how to deal with the binary variable in the dataset.
+
+#Project Goal (Lecture 1): Generate a model to predict the likelihood of a
 # person having difficulty living independently.
 
 # Dataset (Lecture 1): Part of the 2023 American Community Survey modified by
@@ -50,6 +56,9 @@ data_dict_vals <- data_dict_df %>%
 
 ### Remove columns with no info - iterative - purposefully including here before
 #   row removal
+#    * STATE - State Code - all same - MA
+#    * REGION - Region Code - all same
+#    * DIVISION - Division Code - all same
 #    * ADJINC - Adjustment factor for income and earnings dollar amounts
 #    * RACNH - Native Hawaiian and Other Pacific Islander - all 0
 #    * RT - Record Type - all are P for person records
@@ -305,16 +314,70 @@ print(paste("Accuracy:", accuracy))
 #        1 286  63
 
 # TPR No
-true_positive0 <- confusion_matrix[1, 1]
-false_negative0 <- confusion_matrix[2, 1]
-tpr0 <- true_positive0 / (true_positive0 + false_negative0)
+tp0 <- confusion_matrix[1, 1]
+fp0 <- confusion_matrix[1, 2]
+tn0 <- confusion_matrix[2, 2]
+fn0 <- confusion_matrix[2, 1]
+tpr0 <- tp0 / (tp0 + fn0)
 print(paste("Class No True Positive Rate (TPR):", tpr0))
 
 # TPR Yes
-true_positive1 <- confusion_matrix[2, 2]
-false_negative1 <- confusion_matrix[1, 2]
-tpr1 <- true_positive1 / (true_positive1 + false_negative1)
+tp1 <- confusion_matrix[2, 2]
+fp1 <- confusion_matrix[2, 1]
+tn1 <- confusion_matrix[1, 1]
+fn1 <- confusion_matrix[1, 2]
+tpr1 <- tp1 / (tp1 + fn1)
 print(paste("Class Yes True Positive Rate (TPR):", tpr1))
+
+calculate_measures <- function(tp_0, fp_0, tn_0, fn_0, tp_1, fp_1, tn_1, fn_1) {
+  tpr_0 <- tp_0 / (tp_0 + fn_0)
+  fpr_0 <- fp_0 / (fp_0 + tn_0)
+  tnr_0 <- tn_0 / (fp_0 + tn_0)
+  fnr_0 <- fn_0 / (fn_0 + tp_0)
+  precision_0 <- tp_0 / (tp_0 + fp_0)
+  recall_0 <- tpr_0
+  f_measure_0 <- (2 * precision_0 * recall_0) / (precision_0 + recall_0)
+  mcc_0 <- (tp_0 * tn_0 - fp_0 * fn_0) /
+    (sqrt(tp_0 + fp_0) * sqrt(tp_0 + fn_0) *
+       sqrt(tn_0 + fp_0) * sqrt(tn_0 + fn_0))
+  total_0 <- (tp_0 + fn_0 + fp_0 + tn_0)
+  p_o_0 <- (tp_0 + tn_0) / total_0
+  p_e1_0 <- ((tp_0 + fn_0) / total_0) * ((tp_0 + fp_0) / total_0)
+  p_e2_0 <- ((fp_0 + tn_0) / total_0) * ((fn_0 + tn_0) / total_0)
+  p_e_0 <- p_e1_0 + p_e2_0
+  k_0 <- (p_o_0 - p_e_0) / (1 - p_e_0) # Kappa statistic
+
+  tpr_1 <- tp_1 / (tp_1 + fn_1)
+  fpr_1 <- fp_1 / (fp_1 + tn_1)
+  tnr_1 <- tn_1 / (fp_1 + tn_1)
+  fnr_1 <- fn_1 / (fn_1 + tp_1)
+  precision_1 <- tp_1 / (tp_1 + fp_1)
+  recall_1 <- tpr_1
+  f_measure_1 <- (2 * precision_1 * recall_1) / (precision_1 + recall_1)
+  mcc_1 <- (tp_1 * tn_1 - fp_1 * fn_1) /
+    (sqrt(tp_1 + fp_1) * sqrt(tp_1 + fn_1) *
+       sqrt(tn_1 + fp_1) * sqrt(tn_1 + fn_1))
+  total_1 <- (tp_1 + fn_1 + fp_1 + tn_1)
+  p_o_1 <- (tp_1 + tn_1) / total_1
+  p_e1_1 <- ((tp_1 + fn_1) / total_1) * ((tp_1 + fp_1) / total_1)
+  p_e2_1 <- ((fp_1 + tn_1) / total_1) * ((fn_1 + tn_1) / total_1)
+  p_e_1 <- p_e1_1 + p_e2_1
+  k_1 <- (p_o_1 - p_e_1) / (1 - p_e_1) # Kappa statistic
+
+  measures <- c("TPR_0", "FPR_0", "TNR_0", "FNR_0",
+                "Precision_0", "Recall_0", "F-measure_0", "MCC_0", "Kappa_0",
+                "TPR_1", "FPR_1", "TNR_1", "FNR_1",
+                "Precision_1", "Recall_1", "F-measure_1", "MCC_1", "Kappa_1")
+  values <- c(tpr_0, fpr_0, tnr_0, fnr_0,
+              precision_0, recall_0, f_measure_0, mcc_0, k_0,
+              tpr_1, fpr_1, tnr_1, fnr_1,
+              precision_1, recall_1, f_measure_1, mcc_1, k_1)
+  measure_df <- data.frame(measures, values)
+  return(measure_df)
+}
+
+performance_measures <- calculate_measures(tp0, fp0, tn0, fn0)
+performance_measures
 
 # Weighted Average TPR
 weighted_average_tpr <- (tpr1 + tpr0) / 2
@@ -374,9 +437,9 @@ weighted_average_f_measure <- (f_measure1 + f_measure0) / 2
 print(paste("Weighted Average F-measure:", weighted_average_f_measure))
 
 # ROC
-roc <- roc(test$Class, test_predictions)
-roc_auc <- auc(roc)
-print(paste("ROC AUC:", roc_auc))
+#roc <- roc(test$Class, test_predictions)
+#roc_auc <- auc(roc)
+#print(paste("ROC AUC:", roc_auc))
 
 # MCC
 mcc <- (true_positive0 * true_positive1 - false_positive0 * false_negative1) /
@@ -389,6 +452,13 @@ print(paste("Matthews Correlation Coefficient (MCC):", mcc))
 kappa <- (accuracy - sum(rowSums(confusion_matrix) / sum(confusion_matrix)) /
             (1 - sum(rowSums(confusion_matrix) / sum(confusion_matrix))))
 print(paste("Kappa:", kappa))
+
+#-------------------------------------------------------------------------------
+### 5-1-2 Balanced Training Dataset - Model 1-2 Naive Bayes - Project Step 5
+#-------------------------------------------------------------------------------
+
+model_nb <- naiveBayes(Class ~ ., data = df_balanced1_select1)
+
 
 #-------------------------------------------------------------------------------
 ### 5-2 Balanced Training Dataset - Model 2 K-Nearest Neighbors - Project Step 5
