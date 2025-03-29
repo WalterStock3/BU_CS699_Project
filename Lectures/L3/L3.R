@@ -103,6 +103,7 @@ calculate_measures <- function(tp, fp, tn, fn){
   recall = tpr
   f_measure <- (2 * precision * recall) / (precision + recall)
   mcc <- (tp*tn - fp*fn)/(sqrt(tp+fp)*sqrt(tp+fn)*sqrt(tn+fp)*sqrt(tn+fn))
+  # kappa statistic
   total = (tp + fn + fp + tn)
   p_o = (tp + tn) / total
   p_e1 = ((tp + fn) / total) * ((tp + fp) / total)
