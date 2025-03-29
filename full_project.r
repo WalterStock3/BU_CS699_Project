@@ -166,7 +166,7 @@ print(paste("training balanced 1 dataset - class distribution:",
             table(df_balanced1$Class)[2]))
 
 #-------------------------------------------------------------------------------
-### 3 Create Balanced Training Dataset - Method 2 - Project Step 3
+### 3.2 Create Balanced Training Dataset - Method 2 - Project Step 3
 #-------------------------------------------------------------------------------
 
 #TODO: Complete balanced dataet 2 possibly with SMOTE
@@ -307,27 +307,26 @@ print(confusion_matrix)
 accuracy <- sum(diag(confusion_matrix)) / sum(confusion_matrix)
 print(paste("Accuracy:", accuracy))
 
-#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #         Actual
 #Predicted   0   1
 #        0 923  24
 #        1 286  63
 
 # TPR No
-tp0 <- confusion_matrix[1, 1]
-fp0 <- confusion_matrix[1, 2]
-tn0 <- confusion_matrix[2, 2]
-fn0 <- confusion_matrix[2, 1]
-tpr0 <- tp0 / (tp0 + fn0)
-print(paste("Class No True Positive Rate (TPR):", tpr0))
+tp_0 <- confusion_matrix[1, 1]
+fp_0 <- confusion_matrix[1, 2]
+tn_0 <- confusion_matrix[2, 2]
+fn_0 <- confusion_matrix[2, 1]
+tpr_0 <- tp_0 / (tp_0 + fn_0)
+print(paste("Class No True Positive Rate (TPR):", tpr_0))
 
 # TPR Yes
-tp1 <- confusion_matrix[2, 2]
-fp1 <- confusion_matrix[2, 1]
-tn1 <- confusion_matrix[1, 1]
-fn1 <- confusion_matrix[1, 2]
-tpr1 <- tp1 / (tp1 + fn1)
-print(paste("Class Yes True Positive Rate (TPR):", tpr1))
+tp_1 <- confusion_matrix[2, 2]
+fp_1 <- confusion_matrix[2, 1]
+tn_1 <- confusion_matrix[1, 1]
+fn_1 <- confusion_matrix[1, 2]
+tpr_1 <- tp_1 / (tp_1 + fn_1)
+print(paste("Class Yes True Positive Rate (TPR):", tpr_1))
 
 calculate_measures <- function(tp_0, fp_0, tn_0, fn_0, tp_1, fp_1, tn_1, fn_1) {
   tpr_0 <- tp_0 / (tp_0 + fn_0)
@@ -340,6 +339,7 @@ calculate_measures <- function(tp_0, fp_0, tn_0, fn_0, tp_1, fp_1, tn_1, fn_1) {
   mcc_0 <- (tp_0 * tn_0 - fp_0 * fn_0) /
     (sqrt(tp_0 + fp_0) * sqrt(tp_0 + fn_0) *
        sqrt(tn_0 + fp_0) * sqrt(tn_0 + fn_0))
+  # Kappa statistic - starting
   total_0 <- (tp_0 + fn_0 + fp_0 + tn_0)
   p_o_0 <- (tp_0 + tn_0) / total_0
   p_e1_0 <- ((tp_0 + fn_0) / total_0) * ((tp_0 + fp_0) / total_0)
@@ -376,64 +376,65 @@ calculate_measures <- function(tp_0, fp_0, tn_0, fn_0, tp_1, fp_1, tn_1, fn_1) {
   return(measure_df)
 }
 
-performance_measures <- calculate_measures(tp0, fp0, tn0, fn0)
+performance_measures <- calculate_measures(tp_0, fp_0, tn_0, fn_0,
+                                           tp_1, fp_1, tn_1, fn_1)
 performance_measures
 
 # Weighted Average TPR
-weighted_average_tpr <- (tpr1 + tpr0) / 2
+weighted_average_tpr <- (tpr_1 + tpr_0) / 2
 print(paste("Weighted Average True Positive Rate (TPR):", weighted_average_tpr))
 
 # FPR No
-false_positive0 <- confusion_matrix[1, 2]
-true_negative0 <- confusion_matrix[2, 2]
-fpr0 <- false_positive0 / (false_positive0 + true_negative0)
-print(paste("Class No False Positive Rate (FPR):", fpr0))
+fp_0 <- confusion_matrix[1, 2]
+tn_0 <- confusion_matrix[2, 2]
+fpr_0 <- fp_0 / (fp_0 + tn_0)
+print(paste("Class No False Positive Rate (FPR):", fpr_0))
 
 # FPR Yes
-false_positive1 <- confusion_matrix[2, 1]
-true_negative1 <- confusion_matrix[1, 1]
-fpr1 <- false_positive1 / (false_positive1 + true_negative1)
-print(paste("Class Yes False Positive Rate (FPR):", fpr1))
+fp_1 <- confusion_matrix[2, 1]
+tn_1 <- confusion_matrix[1, 1]
+fpr_1 <- fp_1 / (fp_1 + tn_1)
+print(paste("Class Yes False Positive Rate (FPR):", fpr_1))
 
 # Weighted Average FPR
-weighted_average_fpr <- (fpr1 + fpr0) / 2
+weighted_average_fpr <- (fpr_1 + fpr_0) / 2
 print(paste("Weighted Average False Positive Rate (FPR):",
             weighted_average_fpr))
 
 # Precision No
-precision0 <- true_positive0 / (true_positive0 + false_positive0)
-print(paste("Class No Precision:", precision0))
+precision_0 <- tp_0 / (tp_0 + fp_0)
+print(paste("Class No Precision:", precision_0))
 
 # Precision Yes
-precision1 <- true_positive1 / (true_positive1 + false_positive1)
-print(paste("Class Yes Precision:", precision1))
+precision_1 <- tp_1 / (tp_1 + fp_1)
+print(paste("Class Yes Precision:", precision_1))
 
 # Weighted Average Precision
-weighted_average_precision <- (precision1 + precision0) / 2
+weighted_average_precision <- (precision_1 + precision_0) / 2
 print(paste("Weighted Average Precision:", weighted_average_precision))
 
 # Recall No
-recall0 <- true_positive0 / (true_positive0 + false_negative0)
-print(paste("Class No Recall:", recall0))
+recall_0 <- tp_0 / (tp_0 + fn_0)
+print(paste("Class No Recall:", recall_0))
 
 # Recall Yes
-recall1 <- true_positive1 / (true_positive1 + false_negative1)
-print(paste("Class Yes Recall:", recall1))
+recall_1 <- tp_1 / (tp_1 + fn_1)
+print(paste("Class Yes Recall:", recall_1))
 
 # Weighted Average Recall
-weighted_average_recall <- (recall1 + recall0) / 2
+weighted_average_recall <- (recall_1 + recall_0) / 2
 print(paste("Weighted Average Recall:", weighted_average_recall))
 
 # F-measure No
-f_measure0 <- (2 * precision0 * recall0) / (precision0 + recall0)
-print(paste("Class No F-measure:", f_measure0))
+f_measure_0 <- (2 * precision_0 * recall_0) / (precision_0 + recall_0)
+print(paste("Class No F-measure:", f_measure_0))
 
 # F-measure Yes
-f_measure1 <- (2 * precision1 * recall1) / (precision1 + recall1)
-print(paste("Class Yes F-measure:", f_measure1))
+f_measure_1 <- (2 * precision_1 * recall_1) / (precision_1 + recall_1)
+print(paste("Class Yes F-measure:", f_measure_1))
 
 # Weighted Average F-measure
-weighted_average_f_measure <- (f_measure1 + f_measure0) / 2
+weighted_average_f_measure <- (f_measure_1 + f_measure_0) / 2
 print(paste("Weighted Average F-measure:", weighted_average_f_measure))
 
 # ROC
@@ -442,16 +443,14 @@ print(paste("Weighted Average F-measure:", weighted_average_f_measure))
 #print(paste("ROC AUC:", roc_auc))
 
 # MCC
-mcc <- (true_positive0 * true_positive1 - false_positive0 * false_negative1) /
-  sqrt((true_positive0 + false_positive0) * (true_positive0 + false_negative1) *
-         (true_positive1 + false_negative0) *
-         (true_positive1 + false_negative1))
-print(paste("Matthews Correlation Coefficient (MCC):", mcc))
+#mcc <- (tp_0 * tp_1 - fp_0 * fn_1) /
+#  sqrt((tp_0 + fp_0) * (tp_0 + fn_1) * (tp_1 + fn_0) * (tp_1 + fn_1))
+#print(paste("Matthews Correlation Coefficient (MCC):", mcc))
 
 # Kappa
-kappa <- (accuracy - sum(rowSums(confusion_matrix) / sum(confusion_matrix)) /
-            (1 - sum(rowSums(confusion_matrix) / sum(confusion_matrix))))
-print(paste("Kappa:", kappa))
+#kappa <- (accuracy - sum(rowSums(confusion_matrix) / sum(confusion_matrix)) /
+#            (1 - sum(rowSums(confusion_matrix) / sum(confusion_matrix))))
+#print(paste("Kappa:", kappa))
 
 #-------------------------------------------------------------------------------
 ### 5-1-2 Balanced Training Dataset - Model 1-2 Naive Bayes - Project Step 5
