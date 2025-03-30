@@ -54,6 +54,43 @@ data_dict_vals <- data_dict_df %>%
   filter(Record_Type_Name_or_Val == "VAL") %>%
   select(Code = Record_Name, Value = Value_All, Description = Value_Description)
 
+# Create a dataframe with each column name and its corresponding class
+df_columns_info <- data.frame(
+  Column_Name = names(df),
+  Column_Class = sapply(df, class)
+)
+
+# Join df_columns_info with data_dict_names to add the Name column
+data_dict_names_unique <- data_dict_names %>%
+  distinct(Code, .keep_all = TRUE)
+
+df_columns_info <- df_columns_info %>%
+  left_join(data_dict_names_unique, by = c("Column_Name" = "Code"))
+
+df <- df %>%
+    mutate(!!paste0(names(df)[1], "2") := .data[[names(df)[1]]])
+
+df <- df %>%
+  mutate(!!paste0(names(df)[1],
+                  "_",
+                  df_columns_info$Name[match(names(df)[1],
+                                             df_columns_info$Column_Name)]) :=
+           .data[[names(df)[1]]])
+
+df <- df %>%
+  mutate(!!paste0(names(df)[1],
+                  "_",
+                  df_columns_info$Name[match(names(df)[1],
+                                             df_columns_info$Column_Name)]) :=
+           data_dict_vals$Description[match(paste0(names(df)[1],
+                                                   "_",
+                                                   .data[[names(df)[1]]]),
+                                            paste0(data_dict_vals$Code,
+                                                   "_",
+                                                   data_dict_vals$Value))])
+
+#paste0(Column_Name, " - ", df_columns_info$Name[match(Column_Name, df_columns_info$Column_Name)])
+
 ### Remove columns with no info - iterative - purposefully including here before
 #   row removal
 #    * STATE - State Code - all same - MA
