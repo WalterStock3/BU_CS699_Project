@@ -98,7 +98,7 @@ df <- df %>%
 #    * DIVISION - Division Code - all same
 #    * ADJINC - Adjustment factor for income and earnings dollar amounts
 #    * RACNH - Native Hawaiian and Other Pacific Islander - all 0
-#    * RT - Record Type - all are P for person records
+#    * RT - Record Type - all are P for person recordswww.ch
 #    * SERIALNO - Serial Number
 #    * SPORDER - Person Number - Spouse Order
 
