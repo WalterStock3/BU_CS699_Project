@@ -67,29 +67,19 @@ data_dict_names_unique <- data_dict_names %>%
 df_columns_info <- df_columns_info %>%
   left_join(data_dict_names_unique, by = c("Column_Name" = "Code"))
 
-df <- df %>%
-    mutate(!!paste0(names(df)[1], "2") := .data[[names(df)[1]]])
-
-df <- df %>%
-  mutate(!!paste0(names(df)[1],
-                  "_",
-                  df_columns_info$Name[match(names(df)[1],
-                                             df_columns_info$Column_Name)]) :=
-           .data[[names(df)[1]]])
-
-df <- df %>%
-  mutate(!!paste0(names(df)[1],
-                  "_",
-                  df_columns_info$Name[match(names(df)[1],
-                                             df_columns_info$Column_Name)]) :=
-           data_dict_vals$Description[match(paste0(names(df)[1],
-                                                   "_",
-                                                   .data[[names(df)[1]]]),
-                                            paste0(data_dict_vals$Code,
-                                                   "_",
-                                                   data_dict_vals$Value))])
-
-#paste0(Column_Name, " - ", df_columns_info$Name[match(Column_Name, df_columns_info$Column_Name)])
+for (col_name in names(df)) {
+  df <- df %>%
+    mutate(!!paste0(col_name,
+                    "_",
+                    df_columns_info$Name[match(col_name,
+                                               df_columns_info$Column_Name)]) :=
+             data_dict_vals$Description[match(paste0(col_name,
+                                                     "_",
+                                                     .data[[col_name]]),
+                                              paste0(data_dict_vals$Code,
+                                                     "_",
+                                                     data_dict_vals$Value))])
+}
 
 ### Remove columns with no info - iterative - purposefully including here before
 #   row removal
