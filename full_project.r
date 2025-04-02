@@ -1,10 +1,4 @@
-# ToDo
-# 1. Complete balanced dataset 2 possibly with SMOTE
-# 2. Update variables to be factor where appropriate after preprocessing
-# 3. Check for duplicate variable - thought I saw one.
-# 4. Figure out how to deal with the binary variable in the dataset.
-
-#Project Goal (Lecture 1): Generate a model to predict the likelihood of a
+# Project Goal (Lecture 1): Generate a model to predict the likelihood of a
 # person having difficulty living independently.
 
 # Dataset (Lecture 1): Part of the 2023 American Community Survey modified by
@@ -16,11 +10,12 @@
 # Load necessary libraries
 library(tidyverse)
 library(ggplot2)
-library(gridExtra)
+#library(gridExtra)
 library(caret)
 library(rsample)
-library(ROSE)
+#library(ROSE)
 
+# Inputs that can be tuned
 in_limit_missing_col_percent <- 0.01
 in_limit_missing_row_percent <- 0.01
 in_select1_cor_threshold <- 0.75
@@ -29,17 +24,13 @@ in_select1_cor_threshold <- 0.75
 ## 1 Preprocessing - Project Step 1
 ################################################################################
 
+# Load the dataset
 loc <- "~/Source/BU_CS699_Project/CS699_Provided_Artifacts/"
 data_file <- "project_data.csv"
 df <- read.csv(paste(loc, data_file, sep = ""))
 
-# 4318  117
-print(paste("df - dim:", dim(df)[1], ",", dim(df)[2]))
+print(paste("df - dim:", dim(df)[1], ",", dim(df)[2])) # 4318  117
 print(paste("df - total missing values:", sum(is.na(df)))) # 141635
-
-# Update df Class to be a binary factor variable.
-df$Class <- ifelse(df$Class == "Yes", 1, 0)
-df$Class <- as.factor(df$Class)
 
 # Load the PUMS data dictionary
 data_dict_loc <- "~/Source/BU_CS699_Project/CS699_Added_Artifacts/"
@@ -57,19 +48,21 @@ data_dict_vals <- data_dict_df %>%
 # Create a dataframe with each column name and its corresponding class
 df_columns_info <- data.frame(
   Column_Name = names(df),
-  Column_Class = sapply(df, class)
+  Orig_Column_Class = sapply(df, class)
 )
 
-# Join df_columns_info with data_dict_names to add the Name column
+# Remove 7 duplicates - RT, SERIALNO, STATE, REGION, DIVISION,PUMA, ADJINC
 data_dict_names_unique <- data_dict_names %>%
   distinct(Code, .keep_all = TRUE)
 
+# Join df_columns_info with data_dict_names to add the Name column
 df_columns_info <- df_columns_info %>%
   left_join(data_dict_names_unique, by = c("Column_Name" = "Code"))
 
+# Add columns to df with detailed name and values for easier analysis
 for (col_name in names(df)) {
   df <- df %>%
-    mutate(!!paste0(col_name,
+    mutate(!!paste0("DETAILED-", col_name,
                     "_",
                     df_columns_info$Name[match(col_name,
                                                df_columns_info$Column_Name)]) :=
@@ -81,6 +74,14 @@ for (col_name in names(df)) {
                                                      data_dict_vals$Value))])
 }
 
+print(paste("df - dim:", dim(df)[1], ",", dim(df)[2])) # 4318  117 -> 234
+print(paste("df - total missing values (excluding DETAILED-* columns):",
+            sum(is.na(df %>% select(-starts_with("DETAILED-")))))) # 141635
+
+# Update df Class to be a binary factor variable.
+df$Class <- ifelse(df$Class == "Yes", 1, 0)
+df$Class <- as.factor(df$Class)
+
 ### Remove columns with no info - iterative - purposefully including here before
 #   row removal
 #    * STATE - State Code - all same - MA
@@ -88,16 +89,318 @@ for (col_name in names(df)) {
 #    * DIVISION - Division Code - all same
 #    * ADJINC - Adjustment factor for income and earnings dollar amounts
 #    * RACNH - Native Hawaiian and Other Pacific Islander - all 0
-#    * RT - Record Type - all are P for person recordswww.ch
-#    * SERIALNO - Serial Number
-#    * SPORDER - Person Number - Spouse Order
+#    * RT - Record Type - all are P for person records
 
-df_processing <- df %>% select(-c("STATE", "REGION", "DIVISION",
-                                  "ADJINC", "RACNH", "RT",
-                                  "SERIALNO", "SPORDER"))
+df <- df %>%
+  select(-matches("^(STATE|REGION|DIVISION|ADJINC|RACNH|RT)"),
+         -matches("^DETAILED-(STATE|REGION|DIVISION|ADJINC|RACNH|RT)"))
 
-print(paste("df_processing - post specific column removal dim:",
-            dim(df_processing)[1], ",", dim(df_processing)[2]))
+print(paste("df_processing - note - all records remain pre-split (4318): ",
+            dim(df)[1], ",", dim(df)[2])) # 4318 220
+
+### Column Info - removed, numeric, integer, character, factor, logical, date
+#   Store column variables for reference
+df_columns_info <- df_columns_info %>%
+  mutate(Variable_Type = "TBD")
+
+# Flagging removed columns
+df_columns_info <- df_columns_info %>%
+  mutate(Variable_Type = ifelse(Column_Name %in% names(df), "TBD",
+                                "Removed"))
+
+df_columns_info <- df_columns_info %>%
+  mutate(Variable_Type = case_when(
+    Column_Name == "SERIALNO" ~ "Character",
+    Column_Name == "SPORDER" ~ "Integer",
+    Column_Name == "PUMA" ~ "Integer",
+    Column_Name == "PWGTP" ~ "Integer",
+    Column_Name == "CIT" ~ "Factor",
+    Column_Name == "CITWP" ~ "Integer",
+    Column_Name == "COW" ~ "Factor",
+    Column_Name == "ENG" ~ "Factor",
+    Column_Name == "FER" ~ "Logical",
+    Column_Name == "GCL" ~ "Logical",
+    Column_Name == "GCM" ~ "Factor_Levels",
+    Column_Name == "HIMRKS" ~ "Factor",
+    Column_Name == "HINS1" ~ "Logical",
+    Column_Name == "HINS2" ~ "Logical",
+    Column_Name == "HINS3" ~ "Logical",
+    Column_Name == "HINS4" ~ "Logical",
+    Column_Name == "HINS5" ~ "Logical",
+    Column_Name == "HINS6" ~ "Logical",
+    Column_Name == "HINS7" ~ "Logical",
+    Column_Name == "INTP" ~ "Integer",
+    Column_Name == "JWMNP" ~ "Integer",
+    Column_Name == "JWRIP" ~ "Factor_Levels",
+    Column_Name == "JWTRNS" ~ "Factor",
+    Column_Name == "LANX" ~ "Factor",
+    Column_Name == "MAR" ~ "Factor",
+    Column_Name == "MARHD" ~ "Logical",
+    Column_Name == "MARHM" ~ "Logical",
+    Column_Name == "MARHT" ~ "Factor_Levels",
+    Column_Name == "MARHW" ~ "Logical",
+    Column_Name == "MARHYP" ~ "Integer",
+    Column_Name == "MIG" ~ "Factor",
+    Column_Name == "MIL" ~ "Factor",
+    Column_Name == "MLPA" ~ "Logical",
+    Column_Name == "MLPB" ~ "Logical",
+    Column_Name == "MLPCD" ~ "Logical",
+    Column_Name == "MLPE" ~ "Logical",
+    Column_Name == "MLPFG" ~ "Logical",
+    Column_Name == "MLPH" ~ "Logical",
+    Column_Name == "MLPIK" ~ "Logical",
+    Column_Name == "MLPJ" ~ "Logical",
+    Column_Name == "NWAB" ~ "Factor",
+    Column_Name == "NWAV" ~ "Factor",
+    Column_Name == "NWLA" ~ "Factor",
+    Column_Name == "NWLK" ~ "Factor",
+    Column_Name == "NWRE" ~ "Factor",
+    Column_Name == "OIP" ~ "Integer",
+    Column_Name == "PAP" ~ "Integer",
+    Column_Name == "RETP" ~ "Integer",
+    Column_Name == "SCH" ~ "Factor",
+    Column_Name == "SCHG" ~ "Factor",
+    Column_Name == "SCHL" ~ "Factor",
+    Column_Name == "SEMP" ~ "Factor",
+    Column_Name == "SEX" ~ "Logical",
+    Column_Name == "SSIP" ~ "Integer",
+    Column_Name == "SSP" ~ "Integer",
+    Column_Name == "WAGP" ~ "Integer",
+    Column_Name == "WKHP" ~ "Integer",
+    Column_Name == "WKWN" ~ "Integer",
+    Column_Name == "WRK" ~ "Logical",
+    Column_Name == "YOEP" ~ "Integer",
+    Column_Name == "ANC" ~ "Factor",
+    Column_Name == "ANC1P" ~ "Factor",
+    Column_Name == "ANC2P" ~ "Factor",
+    Column_Name == "DECADE" ~ "Factor_Levels",
+    Column_Name == "DRIVESP" ~ "Factor_Levels",
+    Column_Name == "ESP" ~ "Factor",
+    Column_Name == "ESR" ~ "Factor",
+    Column_Name == "FOD1P" ~ "Factor",
+    Column_Name == "FOD2P" ~ "Factor",
+    Column_Name == "HICOV" ~ "Factor",
+    Column_Name == "HISP" ~ "Factor",
+    Column_Name == "INDP" ~ "Factor",
+    Column_Name == "JWAP" ~ "Factor_Levels",
+    Column_Name == "JWDP" ~ "Factor_Levels",
+    Column_Name == "LANP" ~ "Factor",
+    Column_Name == "MIGPUMA" ~ "Integer",
+    Column_Name == "MIGSP" ~ "Factor",
+    Column_Name == "MSP" ~ "Factor",
+    Column_Name == "NATIVITY" ~ "Factor",
+    Column_Name == "NOP" ~ "Factor",
+    Column_Name == "OC" ~ "Logical",
+    Column_Name == "OCCP" ~ "Factor",
+    Column_Name == "POAC" ~ "Factor",
+    Column_Name == "PERNP" ~ "Integer",
+    Column_Name == "PINCP" ~ "Integer",
+    Column_Name == "POBP" ~ "Factor",
+    Column_Name == "POVPIP" ~ "Factor",
+    Column_Name == "POWPUMA" ~ "Integer",
+    Column_Name == "POWSP" ~ "Integer",
+    Column_Name == "PRIVCOV" ~ "Factor",
+    Column_Name == "PUBCOV" ~ "Factor",
+    Column_Name == "QTRBIR" ~ "Factor",
+    Column_Name == "RAC1P" ~ "Factor",
+    Column_Name == "RAC2P" ~ "Factor",
+    Column_Name == "RAC3P" ~ "Factor",
+    Column_Name == "RACAIAN" ~ "Logical",
+    Column_Name == "RACASN" ~ "Logical",
+    Column_Name == "RACBL" ~ "Logical",
+    Column_Name == "RACNH" ~ "Logical",
+    Column_Name == "RACNUM" ~ "Integer",
+    Column_Name == "RACPI" ~ "Logical",
+    Column_Name == "RACSOR" ~ "Logical",
+    Column_Name == "RACWHT" ~ "Logical",
+    Column_Name == "RC" ~ "Logical",
+    Column_Name == "SCIENGP" ~ "Logical",
+    Column_Name == "SCIENGRLP" ~ "Logical",
+    Column_Name == "SFN" ~ "Factor",
+    Column_Name == "SFR" ~ "Factor",
+    Column_Name == "VPS" ~ "Factor",
+    Column_Name == "WAOB" ~ "Factor",
+    TRUE ~ Variable_Type
+  ))
+
+df_columns_info <- df_columns_info %>%
+  mutate(Evaluate_Positive = case_when(
+    Column_Name == "CIT" ~ 1,
+    Column_Name == "CITWP" ~ 1,
+    Column_Name == "COW" ~ 1,
+    Column_Name == "ENG" ~ 1,
+    Column_Name == "FER" ~ 1,
+    Column_Name == "GCL" ~ 1,
+    Column_Name == "GCM" ~ 1,
+    Column_Name == "HIMRKS" ~ 1,
+    Column_Name == "HINS1" ~ 1,
+    Column_Name == "HINS2" ~ 1,
+    Column_Name == "HINS3" ~ 1,
+    Column_Name == "HINS4" ~ 1,
+    Column_Name == "HINS5" ~ 1,
+    Column_Name == "HINS6" ~ 1,
+    Column_Name == "HINS7" ~ 1,
+    Column_Name == "INTP" ~ 1,
+    Column_Name == "JWMNP" ~ 1,
+    Column_Name == "JWRIP" ~ 1,
+    Column_Name == "JWTRNS" ~ 1,
+    Column_Name == "LANX" ~ 1,
+    Column_Name == "MAR" ~ 1,
+    Column_Name == "MARHD" ~ 1,
+    Column_Name == "MARHM" ~ 1,
+    Column_Name == "MARHT" ~ 1,
+    Column_Name == "MARHW" ~ 1,
+    Column_Name == "MARHYP" ~ 1,
+    Column_Name == "MIG" ~ 1,
+    Column_Name == "MIL" ~ 1,
+    Column_Name == "MLPA" ~ 1,
+    Column_Name == "MLPB" ~ 1,
+    Column_Name == "MLPCD" ~ 1,
+    Column_Name == "MLPE" ~ 1,
+    Column_Name == "MLPFG" ~ 1,
+    Column_Name == "MLPH" ~ 1,
+    Column_Name == "MLPIK" ~ 1,
+    Column_Name == "MLPJ" ~ 1,
+    Column_Name == "NWAB" ~ 1,
+    Column_Name == "NWAV" ~ 1,
+    Column_Name == "NWLA" ~ 1,
+    Column_Name == "NWLK" ~ 1,
+    Column_Name == "NWRE" ~ 1,
+    Column_Name == "OIP" ~ 1,
+    Column_Name == "PAP" ~ 2,
+    Column_Name == "RETP" ~ 2,
+    Column_Name == "SCH" ~ 1,
+    Column_Name == "SCHG" ~ 1,
+    Column_Name == "SCHL" ~ 1,
+    Column_Name == "SEMP" ~ 1,
+    Column_Name == "SEX" ~ 1,
+    Column_Name == "SSIP" ~ 1,
+    Column_Name == "SSP" ~ 1,
+    Column_Name == "WAGP" ~ 2,
+    Column_Name == "WKHP" ~ 2,
+    Column_Name == "WKWN" ~ 2,
+    Column_Name == "WRK" ~ 1,
+    Column_Name == "YOEP" ~ 1,
+    Column_Name == "ANC" ~ 1,
+    Column_Name == "ANC1P" ~ 1,
+    Column_Name == "ANC2P" ~ 1,
+    Column_Name == "DECADE" ~ 1,
+    Column_Name == "DRIVESP" ~ 1,
+    Column_Name == "ESP" ~ 1,
+    Column_Name == "ESR" ~ 1,
+    Column_Name == "FOD1P" ~ 1,
+    Column_Name == "FOD2P" ~ 1,
+    Column_Name == "HICOV" ~ 1,
+    Column_Name == "HISP" ~ 1,
+    Column_Name == "INDP" ~ 1,
+    Column_Name == "JWAP" ~ 1,
+    Column_Name == "JWDP" ~ 1,
+    Column_Name == "LANP" ~ 1,
+    Column_Name == "MIGPUMA" ~ 1,
+    Column_Name == "MIGSP" ~ 1,
+    Column_Name == "MSP" ~ 1,
+    Column_Name == "NATIVITY" ~ 1,
+    Column_Name == "NOP" ~ 1,
+    Column_Name == "OC" ~ 1,
+    Column_Name == "OCCP" ~ 1,
+    Column_Name == "POAC" ~ 1,
+    Column_Name == "PERNP" ~ 2,
+    Column_Name == "PINCP" ~ 2,
+    Column_Name == "POBP" ~ 1,
+    Column_Name == "POVPIP" ~ 1,
+    Column_Name == "POWPUMA" ~ 1,
+    Column_Name == "POWSP" ~ 1,
+    Column_Name == "PRIVCOV" ~ 1,
+    Column_Name == "PUBCOV" ~ 1,
+    Column_Name == "QTRBIR" ~ 1,
+    Column_Name == "RAC1P" ~ 1,
+    Column_Name == "RAC2P" ~ 1,
+    Column_Name == "RAC3P" ~ 1,
+    Column_Name == "RACAIAN" ~ 1,
+    Column_Name == "RACASN" ~ 1,
+    Column_Name == "RACBL" ~ 1,
+    Column_Name == "RACNH" ~ 1,
+    Column_Name == "RACNUM" ~ 1,
+    Column_Name == "RACPI" ~ 1,
+    Column_Name == "RACSOR" ~ 1,
+    Column_Name == "RACWHT" ~ 1,
+    Column_Name == "RC" ~ 1,
+    Column_Name == "SCIENGP" ~ 1,
+    Column_Name == "SCIENGRLP" ~ 1,
+    Column_Name == "SFN" ~ 1,
+    Column_Name == "SFR" ~ 1,
+    Column_Name == "VPS" ~ 1,
+    Column_Name == "WAOB" ~ 1,
+    TRUE ~ 0
+  ))
+
+df_processed <- df
+
+################################################################################
+## Split - Project Step 2
+################################################################################
+
+set.seed(123)
+
+split <- initial_split(df_processed, prop = 0.7, strata = "Class")
+train <- training(split)
+test <- testing(split)
+
+print(paste("training dataset - dim:", dim(train)[1], ",", dim(train)[2]))
+print(paste("testing dataset - dim:", dim(test)[1], ",", dim(test)[2]))
+print(paste("training dataset - class distribution:",
+            table(train$Class)[1], ",", table(train$Class)[2]))
+print(paste("testing dataset - class distribution:",
+            table(test$Class)[1], ",", table(test$Class)[2]))
+
+################################################################################
+## 3 Create Balanced Training Dataset - Project Step 3
+################################################################################
+
+#-------------------------------------------------------------------------------
+### 3.1 Create Balanced Training Dataset - Method 1 - Down Sample - Proj Step 3
+#-------------------------------------------------------------------------------
+
+# Simply undersampling
+df_balanced1 <- downSample(x = train[, -which(names(train) %in% "Class")],
+                           y = train$Class)
+
+print(paste("training balanced 1 dataset - dim:", dim(df_balanced1)[1],
+            ",", dim(df_balanced1)[2]))
+
+print(paste("training balanced 1 dataset - class distribution:",
+            table(df_balanced1$Class)[1], ",",
+            table(df_balanced1$Class)[2]))
+
+#-------------------------------------------------------------------------------
+### 3.1 Create Balanced Training Dataset - Method 1 - Up Sample - Proj Step 3
+#-------------------------------------------------------------------------------
+
+df_balanced2 <- train
+
+################################################################################
+## 4 Select Attributes - Project Step 4
+################################################################################
+
+#    Data Reduction - Dimension Reduction - Lecture 2 - Data Reduction Slides
+#    * Remove irrelevant attributes
+#    * Remove duplicate attributes
+#    * Remove zero-variance attributes
+#    * Remove attributes to avoid collinearity
+#    * Feature selection
+
+#-------------------------------------------------------------------------------
+### 4-1 Select Attributes - Method 1 - Project Step 4
+#-------------------------------------------------------------------------------
+
+#### 4-1-1 Select Attributes - Method 1 - balanced dataset 1
+#-------------------------------------------------------------------------------
+
+# Use Chi-square test to check for independence between categorical variables
+#   and the target variable.
+
+# Use Correlation to check for independence between numeric variables
+#   and the target variable.
 
 # Columns
 print(paste("df_processing - missing column percent limit:",
@@ -154,69 +457,6 @@ boxplots <- lapply(names(integer_columns), function(col) {
 boxplots <- boxplots[order(names(integer_columns))]
 grid.arrange(grobs = boxplots, ncol = 10)
 
-df_processed <- df_processing_filt_rows
-
-################################################################################
-## Split - Project Step 2
-################################################################################
-
-set.seed(123)
-
-split <- initial_split(df_processed, prop = 0.7, strata = "Class")
-train <- training(split)
-test <- testing(split)
-
-print(paste("training dataset - dim:", dim(train)[1], ",", dim(train)[2]))
-print(paste("testing dataset - dim:", dim(test)[1], ",", dim(test)[2]))
-print(paste("training dataset - class distribution:",
-            table(train$Class)[1], ",", table(train$Class)[2]))
-print(paste("testing dataset - class distribution:",
-            table(test$Class)[1], ",", table(test$Class)[2]))
-
-################################################################################
-## 3 Create Balanced Training Dataset - Project Step 3
-################################################################################
-
-#-------------------------------------------------------------------------------
-### 3.1 Create Balanced Training Dataset - Method 1 - Project Step 3
-#-------------------------------------------------------------------------------
-
-# Simply undersampling
-df_balanced1 <- downSample(x = train[, -which(names(train) %in% "Class")],
-                           y = train$Class)
-
-print(paste("training balanced 1 dataset - dim:", dim(df_balanced1)[1],
-            ",", dim(df_balanced1)[2]))
-
-print(paste("training balanced 1 dataset - class distribution:",
-            table(df_balanced1$Class)[1], ",",
-            table(df_balanced1$Class)[2]))
-
-#-------------------------------------------------------------------------------
-### 3.2 Create Balanced Training Dataset - Method 2 - Project Step 3
-#-------------------------------------------------------------------------------
-
-#TODO: Complete balanced dataet 2 possibly with SMOTE
-
-df_balanced2 <- train
-
-################################################################################
-## 4 Select Attributes - Project Step 4
-################################################################################
-
-#    Data Reduction - Dimension Reduction - Lecture 2 - Data Reduction Slides
-#    * Remove irrelevant attributes
-#    * Remove duplicate attributes
-#    * Remove zero-variance attributes
-#    * Remove attributes to avoid collinearity
-#    * Feature selection
-
-#-------------------------------------------------------------------------------
-### 4-1 Select Attributes - Method 1 - Project Step 4
-#-------------------------------------------------------------------------------
-
-#### 4-1-1 Select Attributes - Method 1 - balanced dataset 1
-#-------------------------------------------------------------------------------
 
 # Collinearity
 
