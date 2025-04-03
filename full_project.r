@@ -171,7 +171,10 @@ factor_columns <- df_columns_info %>%
   pull(Column_Name)
 
 df <- df %>%
-  mutate(across(all_of(factor_columns), as.factor))
+  mutate(across(all_of(factor_columns), as.factor)) %>%
+  mutate(across(matches(paste0("^DETAILED-", 
+                               paste(factor_columns, collapse = "|"))),
+                as.factor))
 
 # Update columns in df to logical based on Variable_Type in df_columns_info
 logical_columns <- df_columns_info %>%
@@ -299,7 +302,7 @@ print(paste("df_processing - total missing values:",
 df_processing_filt_rows <- df_processing_filt_rows %>%
   select(-calc_missing_values_row_count, -calc_missing_values_row_percent)
 
-df_balanced1_select1 <- df_processing_filt_rows
+df_select1_balanced1 <- df_processing_filt_rows
 
 #### 4-1-2 Select Attributes - Method 1 - Missing Removal - balanced dataset 2
 #-------------------------------------------------------------------------------
@@ -348,6 +351,40 @@ df_select1_balanced2 <- df_processing_filt_rows
 #### 4-2-1 Select Attributes - Method 2 - balanced dataset 1
 #-------------------------------------------------------------------------------
 
+##### Replace NAs in factor variables with Missing
+df_select2_balanced1 <- df_balanced1 %>%
+  mutate(across(where(is.factor),
+                ~ replace_na(factor(.x,
+                                    levels = c(levels(.x),
+                                               "Missing")),
+                             "Missing")))
+
+##### Will use Fisher test over Chi-square to handle sparse data.
+factor_columns <- df_select2_balanced1 %>%
+  select(where(is.factor)) %>%
+  select(starts_with("DETAILED-")) %>%
+  names()
+
+#factor_columns <- c("CIT", "COW")
+
+fisher_results <-
+  lapply(factor_columns,
+         function(col) {
+                        table_data <- table(df_select2_balanced1[[col]],
+                                            df_select2_balanced1$Class)
+                        fisher_test <- fisher.test(table_data, workspace = 2e9)
+                        list(column = col, p_value = fisher_test$p.value
+                        )})
+
+print(fisher_results)
+
+# Convert results to a data frame for easier interpretation
+fisher_results_df <- do.call(rbind, lapply(fisher_results, as.data.frame))
+fisher_results_df <- as.data.frame(fisher_results_df)
+names(fisher_results_df) <- c("Column", "P_Value")
+
+# Print the results
+print(fisher_results_df)
 
 ##### Chi-Square Test
 table1 <- table(df_balanced1$CIT, df_balanced1$Class)
