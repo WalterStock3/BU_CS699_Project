@@ -10,7 +10,7 @@
 # Load necessary libraries
 library(tidyverse)
 library(ggplot2)
-#library(gridExtra)
+library(gridExtra)
 library(caret)
 library(rsample)
 library(ROSE)
@@ -139,23 +139,23 @@ df_columns_info <- df_columns_info %>%
 
 df_columns_info <- df_columns_info %>%
   mutate(Evaluate_Positive = case_when(
-    Column_Name %in% c("CIT", "CITWP", "COW", "ENG", "FER", "GCL", "GCM", 
-                       "HIMRKS", "HINS1", "HINS2", "HINS3", "HINS4", "HINS5", 
-                       "HINS6", "HINS7", "INTP", "JWMNP", "JWRIP", "JWTRNS", 
-                       "LANX", "MAR", "MARHD", "MARHM", "MARHT", "MARHW", 
-                       "MARHYP", "MIG", "MIL", "MLPA", "MLPB", "MLPCD", 
-                       "MLPE", "MLPFG", "MLPH", "MLPIK", "MLPJ", "NWAB", 
-                       "NWAV", "NWLA", "NWLK", "NWRE", "OIP", "SCH", "SCHG", 
-                       "SCHL", "SEMP", "SEX", "SSIP", "SSP", "WRK", "YOEP", 
-                       "ANC", "ANC1P", "ANC2P", "DECADE", "DRIVESP", "ESP", 
-                       "ESR", "FOD1P", "FOD2P", "HICOV", "HISP", "INDP", 
-                       "JWAP", "JWDP", "LANP", "MIGPUMA", "MIGSP", "MSP", 
-                       "NATIVITY", "NOP", "OC", "OCCP", "POAC", "POBP", 
-                       "POVPIP", "POWPUMA", "POWSP", "PRIVCOV", "PUBCOV", 
-                       "QTRBIR", "RAC1P", "RAC2P", "RAC3P", "RACAIAN", 
-                       "RACASN", "RACBL", "RACNH", "RACNUM", "RACPI", 
-                       "RACSOR", "RACWHT", "RC", "SCIENGP", "SCIENGRLP", 
-                       "SFN", "SFR", "VPS", "WAOB") 
+    Column_Name %in% c("CIT", "CITWP", "COW", "ENG", "FER", "GCL", "GCM",
+                       "HIMRKS", "HINS1", "HINS2", "HINS3", "HINS4", "HINS5",
+                       "HINS6", "HINS7", "INTP", "JWMNP", "JWRIP", "JWTRNS",
+                       "LANX", "MAR", "MARHD", "MARHM", "MARHT", "MARHW",
+                       "MARHYP", "MIG", "MIL", "MLPA", "MLPB", "MLPCD",
+                       "MLPE", "MLPFG", "MLPH", "MLPIK", "MLPJ", "NWAB",
+                       "NWAV", "NWLA", "NWLK", "NWRE", "OIP", "SCH", "SCHG",
+                       "SCHL", "SEMP", "SEX", "SSIP", "SSP", "WRK", "YOEP",
+                       "ANC", "ANC1P", "ANC2P", "DECADE", "DRIVESP", "ESP",
+                       "ESR", "FOD1P", "FOD2P", "HICOV", "HISP", "INDP",
+                       "JWAP", "JWDP", "LANP", "MIGPUMA", "MIGSP", "MSP",
+                       "NATIVITY", "NOP", "OC", "OCCP", "POAC", "POBP",
+                       "POVPIP", "POWPUMA", "POWSP", "PRIVCOV", "PUBCOV",
+                       "QTRBIR", "RAC1P", "RAC2P", "RAC3P", "RACAIAN",
+                       "RACASN", "RACBL", "RACNH", "RACNUM", "RACPI",
+                       "RACSOR", "RACWHT", "RC", "SCIENGP", "SCIENGRLP",
+                       "SFN", "SFR", "VPS", "WAOB")
     ~ "Medium",
     Column_Name %in% c("PAP", "RETP", "WAGP", "WKHP", "WKWN", "PERNP", "PINCP")
     ~ "High",
