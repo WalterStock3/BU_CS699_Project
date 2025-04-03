@@ -1,3 +1,7 @@
+## TODO:
+# 1. Fix section 4-1 to not include the detailed columns in the missing
+#    values calculation.
+
 # Project Goal (Lecture 1): Generate a model to predict the likelihood of a
 # person having difficulty living independently.
 
@@ -5,7 +9,7 @@
 # the class professor for this project.
 
 # Target Variable: The Class variable represents difficulty living independently
-# and is binary (Yes/No).
+# and is binary (Yes(1)/No(0)).
 
 # Load necessary libraries
 library(tidyverse)
@@ -88,15 +92,14 @@ df$Class <- as.factor(df$Class)
 #    * REGION - Region Code - all same
 #    * DIVISION - Division Code - all same
 #    * ADJINC - Adjustment factor for income and earnings dollar amounts
-#    * RACNH - Native Hawaiian and Other Pacific Islander - all 0
 #    * RT - Record Type - all are P for person records
 
 df <- df %>%
-  select(-matches("^(STATE|REGION|DIVISION|ADJINC|RACNH|RT)"),
-         -matches("^DETAILED-(STATE|REGION|DIVISION|ADJINC|RACNH|RT)"))
+  select(-matches("^(STATE|REGION|DIVISION|ADJINC|RT)"),
+         -matches("^DETAILED-(STATE|REGION|DIVISION|ADJINC|RT)"))
 
 print(paste("df_processing - note - all records remain pre-split (4318): ",
-            dim(df)[1], ",", dim(df)[2])) # 4318 220
+            dim(df)[1], ",", dim(df)[2])) # 4318 224
 
 ### Column Info - removed, numeric, integer, character, factor, logical, date
 #   Store column variables for reference
@@ -113,21 +116,21 @@ df_columns_info <- df_columns_info %>%
     Column_Name %in% c("SERIALNO") ~ "Character",
     Column_Name %in% c("SPORDER", "PUMA", "PWGTP", "CITWP", "INTP", "JWMNP",
                        "MARHYP", "OIP", "PAP", "RETP", "SSIP", "SSP", "WAGP",
-                       "WKHP", "WKWN", "YOEP", "MIGPUMA", "RACNUM", "PERNP",
-                       "PINCP", "POWPUMA", "POWSP")
+                       "WKHP", "WKWN", "YOEP", "MIGPUMA", "MIGSP", "RACNUM",
+                       "PERNP", "PINCP", "POWPUMA", "POWSP")
     ~ "Integer",
     Column_Name %in% c("CIT", "COW", "ENG", "HIMRKS", "JWTRNS", "LANX", "MAR",
                        "MIG", "MIL", "NWAB", "NWAV", "NWLA", "NWLK", "NWRE",
                        "SCH", "SCHG", "SCHL", "SEMP", "ANC", "ANC1P", "ANC2P",
                        "ESP", "ESR", "FOD1P", "FOD2P", "HICOV", "HISP", "INDP",
-                       "LANP", "MSP", "NATIVITY", "NOP", "OCCP", "POAC", "POBP",
+                       "LANP", "MSP", "NATIVITY", "NOP", "OCCP", "PAOC", "POBP",
                        "POVPIP", "PRIVCOV", "PUBCOV", "QTRBIR", "RAC1P",
                        "RAC2P", "RAC3P", "SFN", "SFR", "VPS", "WAOB")
     ~ "Factor",
     Column_Name %in% c("FER", "GCL", "HINS1", "HINS2", "HINS3", "HINS4",
                        "HINS5", "HINS6", "HINS7", "MARHD", "MARHM", "MARHW",
                        "MLPA", "MLPB", "MLPCD", "MLPE", "MLPFG", "MLPH",
-                       "MLPIK", "MLPJ", "RACAIAN", "RACASN", "RACBL", "RACNH",
+                       "MLPIK", "MLPJ", "RACAIAN", "RACASN", "RACBLK", "RACNH",
                        "RACPI", "RACSOR", "RACWHT", "RC", "SCIENGP",
                        "SCIENGRLP", "SEX", "WRK", "OC")
     ~ "Logical",
@@ -150,10 +153,10 @@ df_columns_info <- df_columns_info %>%
                        "ANC", "ANC1P", "ANC2P", "DECADE", "DRIVESP", "ESP",
                        "ESR", "FOD1P", "FOD2P", "HICOV", "HISP", "INDP",
                        "JWAP", "JWDP", "LANP", "MIGPUMA", "MIGSP", "MSP",
-                       "NATIVITY", "NOP", "OC", "OCCP", "POAC", "POBP",
+                       "NATIVITY", "NOP", "OC", "OCCP", "PAOC", "POBP",
                        "POVPIP", "POWPUMA", "POWSP", "PRIVCOV", "PUBCOV",
                        "QTRBIR", "RAC1P", "RAC2P", "RAC3P", "RACAIAN",
-                       "RACASN", "RACBL", "RACNH", "RACNUM", "RACPI",
+                       "RACASN", "RACBLK", "RACNH", "RACNUM", "RACPI",
                        "RACSOR", "RACWHT", "RC", "SCIENGP", "SCIENGRLP",
                        "SFN", "SFR", "VPS", "WAOB")
     ~ "Medium",
@@ -227,7 +230,7 @@ print(paste("training balanced 1 dataset - class distribution:",
             table(df_balanced1$Class)[2]))
 
 #-------------------------------------------------------------------------------
-### 3.1 Create Balanced Training Dataset - Method 1 - Up Sample - Proj Step 3
+### 3.2 Create Balanced Training Dataset - Method 2 - Up Sample - Proj Step 3
 #-------------------------------------------------------------------------------
 
 # Upsampling
@@ -345,6 +348,8 @@ df_select1_balanced2 <- df_processing_filt_rows
 #### 4-2-1 Select Attributes - Method 2 - balanced dataset 1
 #-------------------------------------------------------------------------------
 
+
+##### Chi-Square Test
 table1 <- table(df_balanced1$CIT, df_balanced1$Class)
 
 # Perform Chi-square test for independence between CIT and Class
