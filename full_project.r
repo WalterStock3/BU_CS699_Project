@@ -13,7 +13,7 @@ library(ggplot2)
 #library(gridExtra)
 library(caret)
 library(rsample)
-#library(ROSE)
+library(ROSE)
 
 # Inputs that can be tuned
 in_limit_missing_col_percent <- 0.01
@@ -155,10 +155,36 @@ df_columns_info <- df_columns_info %>%
                        "QTRBIR", "RAC1P", "RAC2P", "RAC3P", "RACAIAN", 
                        "RACASN", "RACBL", "RACNH", "RACNUM", "RACPI", 
                        "RACSOR", "RACWHT", "RC", "SCIENGP", "SCIENGRLP", 
-                       "SFN", "SFR", "VPS", "WAOB") ~ 1,
-    Column_Name %in% c("PAP", "RETP", "WAGP", "WKHP", "WKWN", "PERNP", "PINCP") ~ 2,
-    TRUE ~ 0
+                       "SFN", "SFR", "VPS", "WAOB") 
+    ~ "Medium",
+    Column_Name %in% c("PAP", "RETP", "WAGP", "WKHP", "WKWN", "PERNP", "PINCP")
+    ~ "High",
+    TRUE ~ "Low"
   ))
+
+# Update columns in df to factor based on Variable_Type in df_columns_info
+factor_columns <- df_columns_info %>%
+  filter(Variable_Type == "Factor") %>%
+  pull(Column_Name)
+
+df <- df %>%
+  mutate(across(all_of(factor_columns), as.factor))
+
+# Update columns in df to logical based on Variable_Type in df_columns_info
+logical_columns <- df_columns_info %>%
+  filter(Variable_Type == "Logical") %>%
+  pull(Column_Name)
+
+df <- df %>%
+  mutate(across(all_of(logical_columns), as.logical))
+
+# Update columns in df to Levels based on Variable_Type in df_columns_info
+factor_levels_columns <- df_columns_info %>%
+  filter(Variable_Type == "Factor_Levels") %>%
+  pull(Column_Name)
+
+df <- df %>%
+  mutate(across(all_of(factor_levels_columns), ~ factor(.x, ordered = TRUE)))
 
 df_processed <- df
 
@@ -166,9 +192,9 @@ df_processed <- df
 ## Split - Project Step 2
 ################################################################################
 
-set.seed(123)
+set.seed(1)
 
-split <- initial_split(df_processed, prop = 0.7, strata = "Class")
+split <- initial_split(df, prop = 0.7, strata = "Class")
 train <- training(split)
 test <- testing(split)
 
@@ -183,11 +209,13 @@ print(paste("testing dataset - class distribution:",
 ## 3 Create Balanced Training Dataset - Project Step 3
 ################################################################################
 
+# Not using SMOTE because we have a large number of categorical variables.
+
 #-------------------------------------------------------------------------------
 ### 3.1 Create Balanced Training Dataset - Method 1 - Down Sample - Proj Step 3
 #-------------------------------------------------------------------------------
 
-# Simply undersampling
+# Undersampling
 df_balanced1 <- downSample(x = train[, -which(names(train) %in% "Class")],
                            y = train$Class)
 
@@ -202,12 +230,23 @@ print(paste("training balanced 1 dataset - class distribution:",
 ### 3.1 Create Balanced Training Dataset - Method 1 - Up Sample - Proj Step 3
 #-------------------------------------------------------------------------------
 
-df_balanced2 <- train
+# Upsampling
+df_balanced2 <- upSample(x = train[, -which(names(train) %in% "Class")],
+                         y = train$Class)
+
+print(paste("training balanced 2 dataset - dim:", dim(df_balanced2)[1],
+            ",", dim(df_balanced2)[2]))
+
+print(paste("training balanced 2 dataset - class distribution:",
+            table(df_balanced2$Class)[1], ",",
+            table(df_balanced2$Class)[2]))
 
 ################################################################################
 ## 4 Select Attributes - Project Step 4
 ################################################################################
-
+#
+#    Chapter 4 - Dimension Reduction
+#
 #    Data Reduction - Dimension Reduction - Lecture 2 - Data Reduction Slides
 #    * Remove irrelevant attributes
 #    * Remove duplicate attributes
@@ -216,26 +255,20 @@ df_balanced2 <- train
 #    * Feature selection
 
 #-------------------------------------------------------------------------------
-### 4-1 Select Attributes - Method 1 - Project Step 4
+### 4-1 Select Attributes - Method 1 - Missing Value Removal - Project Step 4
 #-------------------------------------------------------------------------------
 
-#### 4-1-1 Select Attributes - Method 1 - balanced dataset 1
+#### 4-1-1 Select Attributes - Method 1 - Missing Removal - balanced dataset 1
 #-------------------------------------------------------------------------------
-
-# Use Chi-square test to check for independence between categorical variables
-#   and the target variable.
-
-# Use Correlation to check for independence between numeric variables
-#   and the target variable.
 
 # Columns
 print(paste("df_processing - missing column percent limit:",
             in_limit_missing_col_percent))
 
-missing_values_col_count <- sapply(df_processing, function(x) sum(is.na(x)))
-missing_values_col_percent <- (missing_values_col_count / nrow(df_processing))
+missing_values_col_count <- sapply(df_balanced1, function(x) sum(is.na(x)))
+missing_values_col_percent <- (missing_values_col_count / nrow(df_balanced1))
 
-df_processing_filt_columns <- df_processing %>%
+df_processing_filt_columns <- df_balanced1 %>%
   select(which(missing_values_col_percent <= in_limit_missing_col_percent))
 
 print(paste("df_processing - post_column_filt - dim:",
@@ -263,8 +296,72 @@ print(paste("df_processing - total missing values:",
 df_processing_filt_rows <- df_processing_filt_rows %>%
   select(-calc_missing_values_row_count, -calc_missing_values_row_percent)
 
-# Retrieve the class of all columns in the dataset
-column_classes <- sapply(df_processing_filt_rows, class)
+df_balanced1_select1 <- df_processing_filt_rows
+
+#### 4-1-2 Select Attributes - Method 1 - Missing Removal - balanced dataset 2
+#-------------------------------------------------------------------------------
+
+# Columns
+print(paste("df_processing - missing column percent limit:",
+            in_limit_missing_col_percent))
+
+missing_values_col_count <- sapply(df_balanced2, function(x) sum(is.na(x)))
+missing_values_col_percent <- (missing_values_col_count / nrow(df_balanced2))
+
+df_processing_filt_columns <- df_balanced2 %>%
+  select(which(missing_values_col_percent <= in_limit_missing_col_percent))
+
+print(paste("df_processing - post_column_filt - dim:",
+            dim(df_processing_filt_columns)[1], ",",
+            dim(df_processing_filt_columns)[2]))
+
+# Rows
+print(paste("df_processing - missing row values percent limit:",
+            in_limit_missing_row_percent))
+
+df_processing_filt_rows <- df_processing_filt_columns %>%
+  mutate(calc_missing_values_row_count = rowSums(is.na(.))) %>%
+  mutate(calc_missing_values_row_percent = (calc_missing_values_row_count /
+                                              ncol(df_processing_filt_columns)))
+
+df_processing_filt_rows <- df_processing_filt_rows %>%
+  filter(calc_missing_values_row_percent <= in_limit_missing_row_percent)
+
+print(paste("df_processing - post_row_filt - dim:",
+            dim(df_processing_filt_rows)[1], ",",
+            dim(df_processing_filt_rows)[2]))
+print(paste("df_processing - total missing values:",
+            sum(is.na(df_processing_filt_rows))))
+
+df_processing_filt_rows <- df_processing_filt_rows %>%
+  select(-calc_missing_values_row_count, -calc_missing_values_row_percent)
+
+df_select1_balanced2 <- df_processing_filt_rows
+
+#-------------------------------------------------------------------------------
+### 4-2 Select Attributes - Method 2 - Chi-Sq and Correlation - Project Step 4
+#-------------------------------------------------------------------------------
+
+#### 4-2-1 Select Attributes - Method 2 - balanced dataset 1
+#-------------------------------------------------------------------------------
+
+table1 <- table(df_balanced1$CIT, df_balanced1$Class)
+
+# Perform Chi-square test for independence between CIT and Class
+chi_sq_test <- chisq.test(table(df_balanced1$CIT, df_balanced1$Class))
+
+# Print the results of the Chi-square test
+print(chi_sq_test)
+
+df_select2_balanced1 <- df_balanced1
+
+
+
+# Use Chi-square test to check for independence between categorical variables
+#   and the target variable.
+
+# Use Correlation to check for independence between numeric variables
+#   and the target variable.
 
 ### Outliers
 # Create boxplots for each numeric variable in the dataset
@@ -334,35 +431,21 @@ repeat {
   print(paste("Removed variable:", highly_correlated))
 }
 
-#### 4-1-2 Select Attributes - Method 1 - balanced dataset 2
-#-------------------------------------------------------------------------------
-
-df_balanced2_select1 <- df_balanced2
-
-#-------------------------------------------------------------------------------
-### 4-2 Select Attributes - Method 2 - Project Step 4
-#-------------------------------------------------------------------------------
-
-#### 4-2-1 Select Attributes - Method 2 - balanced dataset 1
-#-------------------------------------------------------------------------------
-
-df_balanced1_select2 <- df_balanced1
-
 #### 4-2-2 Select Attributes - Method 2 - balanced dataset 2
 #-------------------------------------------------------------------------------
-df_balanced2_select2 <- df_balanced2
+df_select2_balanced2 <- df_balanced2
 
 #-------------------------------------------------------------------------------
-### 4-3 Select Attributes - Method 3 - Project Step 4
+### 4-3 Select Attributes - Method 3 - Manual - Project Step 4
 #-------------------------------------------------------------------------------
 
 #### 4-3-1 Select Attributes - Method 3 - balanced dataset 1
 #-------------------------------------------------------------------------------
-df_balanced1_select3 <- df_balanced1
+df_select3_balanced1 <- df_balanced1
 
 #### 4-3-2 Select Attributes - Method 3 - balanced dataset 2
 #-------------------------------------------------------------------------------
-df_balanced2_select3 <- df_balanced2
+df_select3_balanced2 <- df_balanced2
 
 ################################################################################
 ## 5 Models - Project Step 5
