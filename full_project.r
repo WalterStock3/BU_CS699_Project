@@ -351,56 +351,82 @@ df_select1_balanced2 <- df_processing_filt_rows
 #### 4-2-1 Select Attributes - Method 2 - balanced dataset 1
 #-------------------------------------------------------------------------------
 
+##### 4-2-1-1 Factor Variables #####
+
 ##### Replace NAs in factor variables with Missing
-df_select2_balanced1 <- df_balanced1 %>%
+df_select2_balanced1 <- df_balanced1
+
+factor_columns <- df_select2_balanced1 %>%
+  select(where(is.factor)) %>%
+  select(starts_with("DETAILED-")) %>%
+  names()
+
+df_select2_balanced1_factors <- df_select2_balanced1 %>%
   mutate(across(where(is.factor),
                 ~ replace_na(factor(.x,
                                     levels = c(levels(.x),
                                                "Missing")),
                              "Missing")))
 
+# Export df_select2_balanced1 to CSV
+write.csv(df_select2_balanced1, file = "df_select2_balanced1.csv", row.names = FALSE)
+
 ##### Will use Fisher test over Chi-square to handle sparse data.
-factor_columns <- df_select2_balanced1 %>%
-  select(where(is.factor)) %>%
-  select(starts_with("DETAILED-")) %>%
-  names()
+
 
 #factor_columns <- c("CIT", "COW")
 
-fisher_results <-
-  lapply(factor_columns,
-         function(col) {
-                        table_data <- table(df_select2_balanced1[[col]],
-                                            df_select2_balanced1$Class)
-                        fisher_test <- fisher.test(table_data, workspace = 2e9)
-                        list(column = col, p_value = fisher_test$p.value
-                        )})
+fisher_results <- list()
 
-print(fisher_results)
+# MIGPUMA and RAC3P error with x must have at leaset rows or columns
+# Error processing column: SCHL - LDSTP too small,
+#   MIGPUMA and RAC3P - x must have 2 rows and 2 columns
+for (col in factor_columns) {
+  tryCatch({
+    table_data <- table(df_select2_balanced1[[col]], df_select2_balanced1$Class)
+    fisher_test <- fisher.test(table_data,
+                               workspace = 2e9)#, simulate.p.value = TRUE)
+    fisher_results[[col]] <- list(column = col, p_value = fisher_test$p.value)
+  }, error = function(e) {
+    message(paste("Error processing column:", col, "-", e$message))
+    fisher_results[[col]] <- list(column = col, p_value = NA)
+  })
+}
 
 # Convert results to a data frame for easier interpretation
 fisher_results_df <- do.call(rbind, lapply(fisher_results, as.data.frame))
 fisher_results_df <- as.data.frame(fisher_results_df)
 names(fisher_results_df) <- c("Column", "P_Value")
 
-# Print the results
-print(fisher_results_df)
+# Create a bar plot for Fisher scores
+fisher_results_df <- fisher_results_df %>%
+  mutate(P_Value = as.numeric(as.character(P_Value))) %>%
+  arrange(P_Value)
 
-##### Chi-Square Test
-table1 <- table(df_balanced1$CIT, df_balanced1$Class)
+ggplot(fisher_results_df, aes(x = reorder(substr(Column, 10, 50), -P_Value),
+                y = -log10(P_Value))) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  geom_hline(yintercept = -log10(0.001), color = "red", linetype = "dashed") +
+  coord_flip() +
+  labs(title = "Fisher Score for Each Variable",
+     x = "Variable (Truncated)",
+     y = "-log10(P-Value)") +
+  theme_minimal() +
+  scale_y_continuous(limits = c(0, 50))
 
-# Perform Chi-square test for independence between CIT and Class
-chi_sq_test <- chisq.test(table(df_balanced1$CIT, df_balanced1$Class))
+# Display the Fisher results ordered by -log10(P_Value) from largest to smallest
+fisher_results_df %>%
+  arrange(desc(-log10(P_Value))) %>%
+  head(10) %>%
+  print()
 
-# Print the results of the Chi-square test
-print(chi_sq_test)
+# Create a contingency table for Class and the specified column
+table_class_indp <- table(df_select2_balanced1$Class,
+                          df_select2_balanced1$
+  `DETAILED-INDP_Industry recode for 2023 and later based on 2022 IND codes`)
 
-df_select2_balanced1 <- df_balanced1
-
-
-
-# Use Chi-square test to check for independence between categorical variables
-#   and the target variable.
+  # Display the table
+  print(table_class_indp)
 
 # Use Correlation to check for independence between numeric variables
 #   and the target variable.
@@ -484,6 +510,8 @@ df_select2_balanced2 <- df_balanced2
 #### 4-3-1 Select Attributes - Method 3 - balanced dataset 1
 #-------------------------------------------------------------------------------
 df_select3_balanced1 <- df_balanced1
+
+# SCHL does have good info.
 
 #### 4-3-2 Select Attributes - Method 3 - balanced dataset 2
 #-------------------------------------------------------------------------------
