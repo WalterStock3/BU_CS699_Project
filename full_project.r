@@ -68,7 +68,7 @@ df_columns_info <- df_columns_info %>%
                        "SCH", "SCHG", "SCHL", "SEMP", "ANC", "ANC1P", "ANC2P",
                        "ESP", "ESR", "FOD1P", "FOD2P", "HICOV", "HISP", "INDP",
                        "LANP", "MSP", "NATIVITY", "NOP", "OCCP", "PAOC", "POBP",
-                       "POVPIP", "PRIVCOV", "PUBCOV", "QTRBIR", "RAC1P",
+                       "PRIVCOV", "PUBCOV", "QTRBIR", "RAC1P",
                        "RAC2P", "RAC3P", "SFN", "SFR", "VPS", "WAOB")
     ~ "Factor",
     Column_Name %in% c("FER", "GCL", "GCR", "HINS1", "HINS2", "HINS3", "HINS4",
