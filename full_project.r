@@ -61,11 +61,11 @@ df_columns_info <- df_columns_info %>%
     Column_Name %in% c("SPORDER", "PUMA", "PWGTP", "CITWP", "INTP", "JWMNP",
                        "MARHYP", "OIP", "PAP", "RETP", "SSIP", "SSP", "WAGP",
                        "WKHP", "WKWN", "YOEP", "MIGPUMA", "MIGSP", "RACNUM",
-                       "PERNP", "PINCP", "POWPUMA", "POWSP", "POVPIP")
+                       "PERNP", "PINCP", "POWPUMA", "POWSP", "POVPIP",  "SEMP")
     ~ "Integer",
     Column_Name %in% c("CIT", "COW", "ENG", "HIMRKS", "JWTRNS", "LANX", "MAR",
                        "MIG", "MIL", "NWAB", "NWAV", "NWLA", "NWLK", "NWRE",
-                       "SCH", "SCHG", "SCHL", "SEMP", "ANC", "ANC1P", "ANC2P",
+                       "SCH", "SCHG", "SCHL", "ANC", "ANC1P", "ANC2P",
                        "ESP", "ESR", "FOD1P", "FOD2P", "HICOV", "HISP", "INDP",
                        "LANP", "MSP", "NATIVITY", "NOP", "OCCP", "PAOC", "POBP",
                        "PRIVCOV", "PUBCOV", "QTRBIR", "RAC1P",
@@ -97,7 +97,7 @@ data_dict_vals <- data_dict_df %>%
   filter(Record_Type_Name_or_Val == "VAL") %>%
   select(Code = Record_Name, Value = Value_All,
          Description = Value_Description) %>%
-  mutate(Value = sub("^0+", "", Value))
+  mutate(Value = ifelse(Value == "0", "0", sub("^0+", "", Value)))
 
 # Remove 7 duplicates - RT, SERIALNO, STATE, REGION, DIVISION,PUMA, ADJINC (521)
 data_dict_names_unique <- data_dict_names %>%
