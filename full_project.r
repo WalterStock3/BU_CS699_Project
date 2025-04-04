@@ -98,7 +98,7 @@ df <- df %>%
   select(-matches("^(STATE|REGION|DIVISION|ADJINC|RT)"),
          -matches("^DETAILED-(STATE|REGION|DIVISION|ADJINC|RT)"))
 
-print(paste("df_processing - note - all records remain pre-split (4318): ",
+print(paste("df_processing - note - all records remain (4318): ",
             dim(df)[1], ",", dim(df)[2])) # 4318 224
 
 ### Column Info - removed, numeric, integer, character, factor, logical, date
@@ -117,11 +117,11 @@ df_columns_info <- df_columns_info %>%
     Column_Name %in% c("SPORDER", "PUMA", "PWGTP", "CITWP", "INTP", "JWMNP",
                        "MARHYP", "OIP", "PAP", "RETP", "SSIP", "SSP", "WAGP",
                        "WKHP", "WKWN", "YOEP", "MIGPUMA", "MIGSP", "RACNUM",
-                       "PERNP", "PINCP", "POWPUMA", "POWSP")
+                       "PERNP", "PINCP", "POWPUMA", "POWSP", "SCHL")
     ~ "Integer",
     Column_Name %in% c("CIT", "COW", "ENG", "HIMRKS", "JWTRNS", "LANX", "MAR",
                        "MIG", "MIL", "NWAB", "NWAV", "NWLA", "NWLK", "NWRE",
-                       "SCH", "SCHG", "SCHL", "SEMP", "ANC", "ANC1P", "ANC2P",
+                       "SCH", "SCHG", "SEMP", "ANC", "ANC1P", "ANC2P",
                        "ESP", "ESR", "FOD1P", "FOD2P", "HICOV", "HISP", "INDP",
                        "LANP", "MSP", "NATIVITY", "NOP", "OCCP", "PAOC", "POBP",
                        "POVPIP", "PRIVCOV", "PUBCOV", "QTRBIR", "RAC1P",
