@@ -117,11 +117,11 @@ df_columns_info <- df_columns_info %>%
     Column_Name %in% c("SPORDER", "PUMA", "PWGTP", "CITWP", "INTP", "JWMNP",
                        "MARHYP", "OIP", "PAP", "RETP", "SSIP", "SSP", "WAGP",
                        "WKHP", "WKWN", "YOEP", "MIGPUMA", "MIGSP", "RACNUM",
-                       "PERNP", "PINCP", "POWPUMA", "POWSP", "SCHL")
+                       "PERNP", "PINCP", "POWPUMA", "POWSP")
     ~ "Integer",
     Column_Name %in% c("CIT", "COW", "ENG", "HIMRKS", "JWTRNS", "LANX", "MAR",
                        "MIG", "MIL", "NWAB", "NWAV", "NWLA", "NWLK", "NWRE",
-                       "SCH", "SCHG", "SEMP", "ANC", "ANC1P", "ANC2P",
+                       "SCH", "SCHG", "SCHL", "SEMP", "ANC", "ANC1P", "ANC2P",
                        "ESP", "ESR", "FOD1P", "FOD2P", "HICOV", "HISP", "INDP",
                        "LANP", "MSP", "NATIVITY", "NOP", "OCCP", "PAOC", "POBP",
                        "POVPIP", "PRIVCOV", "PUBCOV", "QTRBIR", "RAC1P",
@@ -356,12 +356,17 @@ df_select1_balanced2 <- df_processing_filt_rows
 ##### Replace NAs in factor variables with Missing
 df_select2_balanced1 <- df_balanced1
 
-factor_columns <- df_select2_balanced1 %>%
-  select(where(is.factor)) %>%
-  select(starts_with("DETAILED-")) %>%
-  names()
-
 df_select2_balanced1_factors <- df_select2_balanced1 %>%
+  select(where(is.factor))
+
+factor_columns <- df_select2_balanced1 %>%
+  select(where(is.factor))
+  
+  #%>%
+  #select(starts_with("DETAILED-")) %>%
+  #names()
+
+df_select2_balanced1 <- df_select2_balanced1 %>%
   mutate(across(where(is.factor),
                 ~ replace_na(factor(.x,
                                     levels = c(levels(.x),
