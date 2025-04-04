@@ -36,56 +36,6 @@ df <- read.csv(paste(loc, data_file, sep = ""))
 print(paste("df - dim:", dim(df)[1], ",", dim(df)[2])) # 4318  117
 print(paste("df - total missing values:", sum(is.na(df)))) # 141635
 
-# Load the PUMS data dictionary
-data_dict_loc <- "~/Source/BU_CS699_Project/CS699_Added_Artifacts/"
-data_dict_file <- "PUMS_Data_Dictionary_2023.csv"
-data_dict_df <- read.csv(paste(data_dict_loc, data_dict_file, sep = ""))
-
-data_dict_names <- data_dict_df %>%
-  filter(Record_Type_Name_or_Val == "NAME") %>%
-  select(Code = Record_Name, Name = Value_All, Description = Value_Description)
-
-data_dict_vals <- data_dict_df %>%
-  filter(Record_Type_Name_or_Val == "VAL") %>%
-  select(Code = Record_Name, Value = Value_All, Description = Value_Description)
-
-# Create a dataframe with each column name and its corresponding class
-df_columns_info <- data.frame(
-  Column_Name = names(df),
-  Orig_Column_Class = sapply(df, class)
-)
-
-# Remove 7 duplicates - RT, SERIALNO, STATE, REGION, DIVISION,PUMA, ADJINC
-data_dict_names_unique <- data_dict_names %>%
-  distinct(Code, .keep_all = TRUE)
-
-# Join df_columns_info with data_dict_names to add the Name column
-df_columns_info <- df_columns_info %>%
-  left_join(data_dict_names_unique, by = c("Column_Name" = "Code"))
-
-# Add columns to df with detailed name and values for easier analysis
-for (col_name in names(df)) {
-  df <- df %>%
-    mutate(!!paste0("DETAILED-", col_name,
-                    "_",
-                    df_columns_info$Name[match(col_name,
-                                               df_columns_info$Column_Name)]) :=
-             data_dict_vals$Description[match(paste0(col_name,
-                                                     "_",
-                                                     .data[[col_name]]),
-                                              paste0(data_dict_vals$Code,
-                                                     "_",
-                                                     data_dict_vals$Value))])
-}
-
-print(paste("df - dim:", dim(df)[1], ",", dim(df)[2])) # 4318  117 -> 234
-print(paste("df - total missing values (excluding DETAILED-* columns):",
-            sum(is.na(df %>% select(-starts_with("DETAILED-")))))) # 141635
-
-# Update df Class to be a binary factor variable.
-df$Class <- ifelse(df$Class == "Yes", 1, 0)
-df$Class <- as.factor(df$Class)
-
 ### Remove columns with no info - iterative - purposefully including here before
 #   row removal
 #    * STATE - State Code - all same - MA
@@ -98,19 +48,13 @@ df <- df %>%
   select(-matches("^(STATE|REGION|DIVISION|ADJINC|RT)"),
          -matches("^DETAILED-(STATE|REGION|DIVISION|ADJINC|RT)"))
 
-print(paste("df_processing - note - all records remain (4318): ",
-            dim(df)[1], ",", dim(df)[2])) # 4318 224
+# Create a dataframe with each column name and its corresponding class (112)
+df_columns_info <- data.frame(
+  Column_Name = names(df),
+  Orig_Column_Class = sapply(df, class)
+)
 
-### Column Info - removed, numeric, integer, character, factor, logical, date
-#   Store column variables for reference
-df_columns_info <- df_columns_info %>%
-  mutate(Variable_Type = "TBD")
-
-# Flagging removed columns
-df_columns_info <- df_columns_info %>%
-  mutate(Variable_Type = ifelse(Column_Name %in% names(df), "TBD",
-                                "Removed"))
-
+### Column Info - numeric, integer, character, factor, logical, date
 df_columns_info <- df_columns_info %>%
   mutate(Variable_Type = case_when(
     Column_Name %in% c("SERIALNO") ~ "Character",
@@ -127,7 +71,7 @@ df_columns_info <- df_columns_info %>%
                        "POVPIP", "PRIVCOV", "PUBCOV", "QTRBIR", "RAC1P",
                        "RAC2P", "RAC3P", "SFN", "SFR", "VPS", "WAOB")
     ~ "Factor",
-    Column_Name %in% c("FER", "GCL", "HINS1", "HINS2", "HINS3", "HINS4",
+    Column_Name %in% c("FER", "GCL", "GCR", "HINS1", "HINS2", "HINS3", "HINS4",
                        "HINS5", "HINS6", "HINS7", "MARHD", "MARHM", "MARHW",
                        "MLPA", "MLPB", "MLPCD", "MLPE", "MLPFG", "MLPH",
                        "MLPIK", "MLPJ", "RACAIAN", "RACASN", "RACBLK", "RACNH",
@@ -137,8 +81,91 @@ df_columns_info <- df_columns_info %>%
     Column_Name %in% c("GCM", "JWRIP", "MARHT", "DECADE", "DRIVESP", "JWAP",
                        "JWDP")
     ~ "Factor_Levels",
-    TRUE ~ Variable_Type
+    TRUE ~ "Other"
   ))
+
+# Load the PUMS data dictionary
+data_dict_loc <- "~/Source/BU_CS699_Project/CS699_Added_Artifacts/"
+data_dict_file <- "PUMS_Data_Dictionary_2023.csv"
+data_dict_df <- read.csv(paste(data_dict_loc, data_dict_file, sep = ""))
+
+data_dict_names <- data_dict_df %>%
+  filter(Record_Type_Name_or_Val == "NAME") %>%
+  select(Code = Record_Name, Name = Value_All, Description = Value_Description)
+
+data_dict_vals <- data_dict_df %>%
+  filter(Record_Type_Name_or_Val == "VAL") %>%
+  select(Code = Record_Name, Value = Value_All, Description = Value_Description)
+
+# Remove 7 duplicates - RT, SERIALNO, STATE, REGION, DIVISION,PUMA, ADJINC (521)
+data_dict_names_unique <- data_dict_names %>%
+  distinct(Code, .keep_all = TRUE)
+
+# Join df_columns_info with data_dict_names to add the Name column (117)
+df_columns_info <- df_columns_info %>%
+  left_join(data_dict_names_unique, by = c("Column_Name" = "Code"))
+
+# Process one record at a time and print columns with missing values
+no_match_columns <- c()  # Initialize to store column names with "No Match"
+
+column_counter <- 1
+for (col_name in names(df)) {
+
+  if (col_name == "Class") {
+    next
+  }
+
+  detailed_col_name <-
+    paste0("DETAILED-", col_name, "_",
+           df_columns_info$Name[match(col_name, df_columns_info$Column_Name)])
+
+  variable_type <-
+    df_columns_info$Variable_Type[match(col_name, df_columns_info$Column_Name)]
+
+  print(paste0(column_counter, " Column: '", col_name,
+               "'' Detailed name: '", detailed_col_name,
+               "' Variable Type: ", variable_type))
+
+  column_counter <- column_counter + 1
+
+  if (variable_type == "Factor") {
+    # Get the description for each value in the column
+    value_descriptions <- sapply(df[[col_name]], function(value) {
+      if (!is.na(value)) {
+        description <- data_dict_vals %>%
+          filter(Code == col_name & Value == as.character(value)) %>%
+          pull(Description)
+      } else {
+        description <- NA
+      }
+      if (length(description) == 0) {
+        print(paste("No description found for column:", col_name, "value:", value))
+        return(NA)  # If no description is found, return NA
+      }
+      return(description)
+    })
+
+    # Add the descriptions to the DETAILED- column
+    df[[detailed_col_name]] <- value_descriptions
+  }
+
+}
+
+
+print(paste("df - dim:", dim(df)[1], ",", dim(df)[2])) # 4318  117 -> 234
+print(paste("df - total missing values (excluding DETAILED-* columns):",
+            sum(is.na(df %>% select(-starts_with("DETAILED-")))))) # 141635
+
+# Update df Class to be a binary factor variable.
+df$Class <- ifelse(df$Class == "Yes", 1, 0)
+df$Class <- as.factor(df$Class)
+
+print(paste("df_processing - note - all records remain (4318): ",
+            dim(df)[1], ",", dim(df)[2])) # 4318 224
+
+
+
+
 
 df_columns_info <- df_columns_info %>%
   mutate(Evaluate_Positive = case_when(
@@ -351,22 +378,14 @@ df_select1_balanced2 <- df_processing_filt_rows
 #### 4-2-1 Select Attributes - Method 2 - balanced dataset 1
 #-------------------------------------------------------------------------------
 
-##### 4-2-1-1 Factor Variables #####
-
-##### Replace NAs in factor variables with Missing
 df_select2_balanced1 <- df_balanced1
 
+##### 4-2-1-1 Factor Variables #####
 df_select2_balanced1_factors <- df_select2_balanced1 %>%
   select(where(is.factor))
 
-factor_columns <- df_select2_balanced1 %>%
-  select(where(is.factor))
-  
-  #%>%
-  #select(starts_with("DETAILED-")) %>%
-  #names()
-
-df_select2_balanced1 <- df_select2_balanced1 %>%
+##### Replace NAs in factor variables with Missing
+df_select2_bal1_factr_miss <- df_select2_balanced1_factors %>%
   mutate(across(where(is.factor),
                 ~ replace_na(factor(.x,
                                     levels = c(levels(.x),
@@ -374,24 +393,35 @@ df_select2_balanced1 <- df_select2_balanced1 %>%
                              "Missing")))
 
 # Export df_select2_balanced1 to CSV
-write.csv(df_select2_balanced1, file = "df_select2_balanced1.csv", row.names = FALSE)
+write.csv(df_select2_balanced1, file = "df_select2_balanced1.csv",
+          row.names = FALSE)
 
 ##### Will use Fisher test over Chi-square to handle sparse data.
 
-
 #factor_columns <- c("CIT", "COW")
+
+# Some columns have too many levels to be used in Fisher test.
+# SCHL - LDSTP too small - 2e9
+# ANC1P - LDSTP too small - 1e9
+# POVPIP - Takes too long to compute
+fisher_not_possible <- c("SCHL", "ANC1P", "POVPIP", "DETAILED-SCHL",
+                         "DETAILED-ANC1P", "DETAILED-POVPIP", "Class")
 
 fisher_results <- list()
 
-# MIGPUMA and RAC3P error with x must have at leaset rows or columns
-# Error processing column: SCHL - LDSTP too small,
-#   MIGPUMA and RAC3P - x must have 2 rows and 2 columns
-for (col in factor_columns) {
+for (col in names(df_select2_bal1_factr_miss)) {
+  print(paste(Sys.time(), "- Processing column:", col))
+  if (any(startsWith(col, fisher_not_possible))) {
+    print(paste("Skipping column:", col))
+    next
+  }
   tryCatch({
-    table_data <- table(df_select2_balanced1[[col]], df_select2_balanced1$Class)
-    fisher_test <- fisher.test(table_data,
-                               workspace = 2e9)#, simulate.p.value = TRUE)
+    table_data <- table(df_select2_bal1_factr_miss[[col]],
+                        df_select2_balanced1$Class)
+    fisher_test <- fisher.test(table_data, workspace = 1e7)
     fisher_results[[col]] <- list(column = col, p_value = fisher_test$p.value)
+    print(paste(Sys.time(),
+                "- Fisher test column:", col, "p-value:", fisher_test$p.value))
   }, error = function(e) {
     message(paste("Error processing column:", col, "-", e$message))
     fisher_results[[col]] <- list(column = col, p_value = NA)
@@ -409,13 +439,13 @@ fisher_results_df <- fisher_results_df %>%
   arrange(P_Value)
 
 ggplot(fisher_results_df, aes(x = reorder(substr(Column, 10, 50), -P_Value),
-                y = -log10(P_Value))) +
+                              y = -log10(P_Value))) +
   geom_bar(stat = "identity", fill = "steelblue") +
   geom_hline(yintercept = -log10(0.001), color = "red", linetype = "dashed") +
   coord_flip() +
   labs(title = "Fisher Score for Each Variable",
-     x = "Variable (Truncated)",
-     y = "-log10(P-Value)") +
+       x = "Variable (Truncated)",
+       y = "-log10(P-Value)") +
   theme_minimal() +
   scale_y_continuous(limits = c(0, 50))
 
@@ -425,16 +455,11 @@ fisher_results_df %>%
   head(10) %>%
   print()
 
-# Create a contingency table for Class and the specified column
-table_class_indp <- table(df_select2_balanced1$Class,
-                          df_select2_balanced1$
-  `DETAILED-INDP_Industry recode for 2023 and later based on 2022 IND codes`)
-
-  # Display the table
-  print(table_class_indp)
-
 # Use Correlation to check for independence between numeric variables
 #   and the target variable.
+
+df_select2_balanced1_factors <- df_select2_balanced1 %>%
+  select(where(is.factor))
 
 ### Outliers
 # Create boxplots for each numeric variable in the dataset
@@ -453,10 +478,16 @@ boxplots <- lapply(names(integer_columns), function(col) {
 boxplots <- boxplots[order(names(integer_columns))]
 grid.arrange(grobs = boxplots, ncol = 10)
 
+##### 4-2-1-2 Integer Variables #####
 
 # Collinearity
 
+df_select2_balanced1_integers <- df_select2_balanced1 %>%
+  select(where(is.integer))
+
 df_balanced1_select1 <- df_balanced1
+
+
 
 repeat {
   df_numeric <- df_balanced1_select1 %>%
