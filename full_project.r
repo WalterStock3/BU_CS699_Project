@@ -61,7 +61,7 @@ df_columns_info <- df_columns_info %>%
     Column_Name %in% c("SPORDER", "PUMA", "PWGTP", "CITWP", "INTP", "JWMNP",
                        "MARHYP", "OIP", "PAP", "RETP", "SSIP", "SSP", "WAGP",
                        "WKHP", "WKWN", "YOEP", "MIGPUMA", "MIGSP", "RACNUM",
-                       "PERNP", "PINCP", "POWPUMA", "POWSP")
+                       "PERNP", "PINCP", "POWPUMA", "POWSP", "POVPIP")
     ~ "Integer",
     Column_Name %in% c("CIT", "COW", "ENG", "HIMRKS", "JWTRNS", "LANX", "MAR",
                        "MIG", "MIL", "NWAB", "NWAV", "NWLA", "NWLK", "NWRE",
@@ -95,7 +95,9 @@ data_dict_names <- data_dict_df %>%
 
 data_dict_vals <- data_dict_df %>%
   filter(Record_Type_Name_or_Val == "VAL") %>%
-  select(Code = Record_Name, Value = Value_All, Description = Value_Description)
+  select(Code = Record_Name, Value = Value_All,
+         Description = Value_Description) %>%
+  mutate(Value = sub("^0+", "", Value))
 
 # Remove 7 duplicates - RT, SERIALNO, STATE, REGION, DIVISION,PUMA, ADJINC (521)
 data_dict_names_unique <- data_dict_names %>%
@@ -139,7 +141,8 @@ for (col_name in names(df)) {
         description <- NA
       }
       if (length(description) == 0) {
-        print(paste("No description found for column:", col_name, "value:", value))
+        print(paste("No description found for column:",
+                    col_name, "value:", value))
         return(NA)  # If no description is found, return NA
       }
       return(description)
