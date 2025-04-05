@@ -34,9 +34,9 @@ print(paste("df - total missing values:", sum(is.na(df)))) # 141635
 
 ### Remove columns with no info - iterative - purposefully including here before
 #   row removal
-#    * STATE - State Code - all same - MA
-#    * REGION - Region Code - all same
-#    * DIVISION - Division Code - all same
+#    * STATE - State code - all same - MA
+#    * REGION - Region code - all same
+#    * DIVISION - Division code - all same
 #    * ADJINC - Adjustment factor for income and earnings dollar amounts
 #    * RT - Record Type - all are P for person records
 
@@ -46,62 +46,64 @@ df <- df %>%
 
 # Create a dataframe with each column name and its corresponding class (112)
 df_columns_info <- data.frame(
-  Column_Name = names(df),
-  Orig_Column_Class = sapply(df, class)
+  column_name = names(df),
+  orig_column_class = sapply(df, class)
 )
 
 ### Column Info - numeric, integer, character, factor, logical, date
 df_columns_info <- df_columns_info %>%
-  mutate(Variable_Type = case_when(
-    Column_Name %in% c("SERIALNO") ~ "Character",
-    Column_Name %in% c("SPORDER", "PUMA", "PWGTP", "CITWP", "INTP", "JWMNP",
+  mutate(variable_type = case_when(
+    column_name %in% c("SERIALNO") ~ "character",
+    column_name %in% c("SPORDER", "PUMA", "PWGTP", "CITWP", "INTP", "JWMNP",
                        "MARHYP", "OIP", "PAP", "RETP", "SSIP", "SSP", "WAGP",
                        "WKHP", "WKWN", "YOEP", "MIGPUMA", "MIGSP", "RACNUM",
                        "PERNP", "PINCP", "POWPUMA", "POWSP", "POVPIP",  "SEMP")
-    ~ "Integer",
-    Column_Name %in% c("CIT", "COW", "ENG", "HIMRKS", "JWTRNS", "LANX", "MAR",
+    ~ "integer",
+    column_name %in% c("CIT", "COW", "ENG", "HIMRKS", "JWTRNS", "LANX", "MAR",
                        "MIG", "MIL", "NWAB", "NWAV", "NWLA", "NWLK", "NWRE",
                        "SCH", "SCHG", "SCHL", "ANC", "ANC1P", "ANC2P",
                        "ESP", "ESR", "FOD1P", "FOD2P", "HICOV", "HISP", "INDP",
                        "LANP", "MSP", "NATIVITY", "NOP", "OCCP", "PAOC", "POBP",
                        "PRIVCOV", "PUBCOV", "QTRBIR", "RAC1P",
                        "RAC2P", "RAC3P", "SFN", "SFR", "VPS", "WAOB")
-    ~ "Factor",
-    Column_Name %in% c("FER", "GCL", "GCR", "HINS1", "HINS2", "HINS3", "HINS4",
+    ~ "factor",
+    column_name %in% c("FER", "GCL", "GCR", "HINS1", "HINS2", "HINS3", "HINS4",
                        "HINS5", "HINS6", "HINS7", "MARHD", "MARHM", "MARHW",
                        "MLPA", "MLPB", "MLPCD", "MLPE", "MLPFG", "MLPH",
                        "MLPIK", "MLPJ", "RACAIAN", "RACASN", "RACBLK", "RACNH",
                        "RACPI", "RACSOR", "RACWHT", "RC", "SCIENGP",
                        "SCIENGRLP", "SEX", "WRK", "OC")
-    ~ "Logical",
-    Column_Name %in% c("GCM", "JWRIP", "MARHT", "DECADE", "DRIVESP", "JWAP",
+    ~ "logical",
+    column_name %in% c("GCM", "JWRIP", "MARHT", "DECADE", "DRIVESP", "JWAP",
                        "JWDP")
-    ~ "Factor_Levels",
-    TRUE ~ "Other"
+    ~ "factor_levels",
+    TRUE ~ "other"
   ))
 
 # Load the PUMS data dictionary
 data_dict_loc <- "~/Source/BU_CS699_Project/CS699_Added_Artifacts/"
 data_dict_file <- "PUMS_Data_Dictionary_2023.csv"
 data_dict_df <- read.csv(paste(data_dict_loc, data_dict_file, sep = ""))
+# For readability and best practice - update column names to be lower case
+colnames(data_dict_df) <- tolower(colnames(data_dict_df))
 
 data_dict_names <- data_dict_df %>%
-  filter(Record_Type_Name_or_Val == "NAME") %>%
-  select(Code = Record_Name, Name = Value_All, Description = Value_Description)
+  filter(record_type_name_or_val == "NAME") %>%
+  select(code = record_name, name = value_all, description = value_description)
 
 data_dict_vals <- data_dict_df %>%
-  filter(Record_Type_Name_or_Val == "VAL") %>%
-  select(Code = Record_Name, Value = Value_All,
-         Description = Value_Description) %>%
-  mutate(Value = ifelse(Value == "0", "0", sub("^0+", "", Value)))
+  filter(record_type_name_or_val == "VAL") %>%
+  select(code = record_name, value = value_all,
+         description = value_description) %>%
+  mutate(value = ifelse(value == "0", "0", sub("^0+", "", value)))
 
 # Remove 7 duplicates - RT, SERIALNO, STATE, REGION, DIVISION,PUMA, ADJINC (521)
 data_dict_names_unique <- data_dict_names %>%
-  distinct(Code, .keep_all = TRUE)
+  distinct(code, .keep_all = TRUE)
 
 # Join df_columns_info with data_dict_names to add the Name column (117)
 df_columns_info <- df_columns_info %>%
-  left_join(data_dict_names_unique, by = c("Column_Name" = "Code"))
+  left_join(data_dict_names_unique, by = c("column_name" = "code"))
 
 write.csv(df_columns_info, file = "df_columns_info.csv",
           row.names = FALSE)
@@ -111,7 +113,6 @@ no_match_columns <- c()  # Initialize to store column names with "No Match"
 
 column_counter <- 1
 for (col_name in names(df)) {
-
   if (col_name == "Class" ||
         col_name == "SERIALNO") {
     next
@@ -119,10 +120,10 @@ for (col_name in names(df)) {
 
   detailed_col_name <-
     paste0("DETAILED-", col_name, "_",
-           df_columns_info$Name[match(col_name, df_columns_info$Column_Name)])
+           df_columns_info$name[match(col_name, df_columns_info$column_name)])
 
   variable_type <-
-    df_columns_info$Variable_Type[match(col_name, df_columns_info$Column_Name)]
+    df_columns_info$variable_type[match(col_name, df_columns_info$column_name)]
 
   print(paste0(column_counter, " Column: '", col_name,
                "'' Detailed name: '", detailed_col_name,
@@ -130,30 +131,31 @@ for (col_name in names(df)) {
 
   column_counter <- column_counter + 1
 
-  if (variable_type == "Factor" ||
-        variable_type == "Logical" ||
-        variable_type == "Factor_Levels") {
+  if (variable_type == "factor" ||
+        variable_type == "logical" ||
+        variable_type == "factor_levels") {
     # Get the description for each value in the column
-    value_descriptions <- sapply(df[[col_name]], function(value) {
-      if (!is.na(value)) {
-        description <- data_dict_vals %>%
-          filter(Code == col_name & Value == as.character(value)) %>%
-          pull(Description)
+    value_descriptions <- sapply(df[[col_name]], function(col_value) {
+      if (!is.na(col_value)) {
+        #print(paste("Column:", col_name, "Value:", col_value))
+        value_description <- data_dict_vals %>%
+          filter(code == col_name & value == as.character(col_value)) %>%
+          pull(description)
       } else {
-        description <- NA
+        value_description <- NA
       }
-      if (length(description) == 0) {
+      if (length(value_description) == 0) {
         print(paste("No description found for column:",
-                    col_name, "value:", value))
+                    col_name, "value:", col_value))
         return(NA)  # If no description is found, return NA
       }
-      return(description)
+      return(value_description)
     })
 
     # Add the descriptions to the DETAILED- column
     df[[detailed_col_name]] <- value_descriptions
   }
-  if (variable_type == "Integer") {
+  if (variable_type == "integer") {
     df[[detailed_col_name]] <- df[[col_name]]
   }
 }
@@ -171,7 +173,7 @@ print(paste("df_processing - note - all records remain (4318): ",
 
 df_columns_info <- df_columns_info %>%
   mutate(Evaluate_Positive = case_when(
-    Column_Name %in% c("CIT", "CITWP", "COW", "ENG", "FER", "GCL", "GCM",
+    column_name %in% c("CIT", "CITWP", "COW", "ENG", "FER", "GCL", "GCM",
                        "HIMRKS", "HINS1", "HINS2", "HINS3", "HINS4", "HINS5",
                        "HINS6", "HINS7", "INTP", "JWMNP", "JWRIP", "JWTRNS",
                        "LANX", "MAR", "MARHD", "MARHM", "MARHT", "MARHW",
@@ -189,47 +191,60 @@ df_columns_info <- df_columns_info %>%
                        "RACSOR", "RACWHT", "RC", "SCIENGP", "SCIENGRLP",
                        "SFN", "SFR", "VPS", "WAOB")
     ~ "Medium",
-    Column_Name %in% c("PAP", "RETP", "WAGP", "WKHP", "WKWN", "PERNP", "PINCP")
+    column_name %in% c("PAP", "RETP", "WAGP", "WKHP", "WKWN", "PERNP", "PINCP")
     ~ "High",
     TRUE ~ "Low"
   ))
 
-# Update columns in df to factor based on Variable_Type in df_columns_info
+# Update columns in df to factor based on variable_type in df_columns_info
 factor_columns <- df_columns_info %>%
-  filter(Variable_Type == "Factor") %>%
-  pull(Column_Name)
+  filter(variable_type == "factor") %>%
+  pull(column_name)
 
 df <- df %>%
   mutate(across(all_of(factor_columns), as.factor)) %>%
   mutate(across(matches(paste0("^DETAILED-", 
-                               paste(factor_columns, collapse = "|"))),
-                as.factor))
+                               paste(factor_columns, collapse = "|"), "_"))),
+         as.factor())
 
-# Update columns in df to logical based on Variable_Type in df_columns_info
+# Update columns in df to logical based on variable_type in df_columns_info
 logical_columns <- df_columns_info %>%
-  filter(Variable_Type == "Logical") %>%
-  pull(Column_Name)
+  filter(variable_type == "logical") %>%
+  pull(column_name)
 
 df <- df %>%
-  mutate(across(all_of(logical_columns), as.logical))
+  mutate(across(all_of(logical_columns), as.logical)) %>%
+  mutate(across(matches(paste0("^DETAILED-", 
+                               paste(logical_columns, collapse = "|"))),
+                as.logical))
 
-# Update columns in df to Levels based on Variable_Type in df_columns_info
+# Update columns in df to Levels based on variable_type in df_columns_info
 factor_levels_columns <- df_columns_info %>%
-  filter(Variable_Type == "Factor_Levels") %>%
-  pull(Column_Name)
+  filter(variable_type == "factor_levels") %>%
+  pull(column_name)
 
 df <- df %>%
-  mutate(across(all_of(factor_levels_columns), ~ factor(.x, ordered = TRUE)))
+  mutate(across(all_of(factor_levels_columns), ~ factor(.x,
+                                                        ordered = TRUE))) %>%
+  mutate(across(matches(paste0("^DETAILED-", 
+                               paste(factor_levels_columns, collapse = "|"))),
+                as.factor)
 
-# Update columns in df to integer based on Variable_Type in df_columns_info
+# Update columns in df to integer based on variable_type in df_columns_info
 integer_columns <- df_columns_info %>%
-  filter(Variable_Type == "Integer") %>%
-  pull(Column_Name)
+  filter(variable_type == "integer") %>%
+  pull(column_name)
 
 df <- df %>%
   mutate(across(all_of(integer_columns), as.integer))
 
-df_processed <- df
+df_preprocessed <- df
+
+# Export df_preprocessed as a CSV file
+write.csv(df_preprocessed, file = "df_preprocessed.csv", row.names = FALSE)
+
+# Export df_preprocessed as an R data file
+save(df_preprocessed, file = "df_preprocessed.RData")
 
 ################################################################################
 #---- 2 ******* Split - Project Step 2 -----------------------------------------
@@ -237,9 +252,9 @@ df_processed <- df
 
 set.seed(1)
 
-split <- initial_split(df, prop = 0.7, strata = "Class")
-train <- training(split)
-test <- testing(split)
+split <- initial_split(df_preprocessed, prop = 0.7, strata = "Class")
+df_train <- training(split)
+df_test <- testing(split)
 
 print(paste("training dataset - dim:", dim(train)[1], ",", dim(train)[2]))
 print(paste("testing dataset - dim:", dim(test)[1], ",", dim(test)[2]))
@@ -298,7 +313,7 @@ print(paste("training balanced 2 dataset - class distribution:",
 #    * Feature selection
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#---- 4-1 *****    Select Attributes - Method 1 - Missing Value Removal --------
+#---- 4-1 *****    Select Attributes - Method 1 - Missing value Removal --------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #---- 4-1-1 ***       Select - Method 1 - Missing Removal - balanced 1 ---------
@@ -403,17 +418,17 @@ df_select2_balanced1 <- df_balanced1
 df_select2_balanced1_factors <- df_select2_balanced1 %>%
   select(matches(paste0("^DETAILED-(",
                         paste(df_columns_info %>%
-                                filter(Variable_Type %in%
-                                         c("Logical")) %>%
-                                pull(Column_Name), 
+                                filter(variable_type %in%
+                                         c("logical")) %>%
+                                pull(column_name), 
                               collapse = "|"), ")_")))
 
 df_select2_balanced1_logical <- df_select2_balanced1 %>%
   select(matches(paste0("^DETAILED-(",
                         paste(df_columns_info %>%
-                                filter(Variable_Type %in%
-                                         c("Logical")) %>%
-                                pull(Column_Name), 
+                                filter(variable_type %in%
+                                         c("logical")) %>%
+                                pull(column_name), 
                               collapse = "|"), ")_")))
 
 ##### Replace NAs in factor variables with Missing
@@ -458,29 +473,29 @@ for (col in names(df_select2_bal1_factr_miss)) {
 }
 
 # Convert results to a data frame for easier interpretation
-fisher_results_df <- do.call(rbind, lapply(fisher_results, as.data.frame))
-fisher_results_df <- as.data.frame(fisher_results_df)
-names(fisher_results_df) <- c("Column", "P_Value")
+df_fisher_results <- do.call(rbind, lapply(fisher_results, as.data.frame))
+df_fisher_results_df <- as.data.frame(fisher_results_df)
+names(fisher_results_df) <- c("Column", "P_value")
 
 # Create a bar plot for Fisher scores
 fisher_results_df <- fisher_results_df %>%
-  mutate(P_Value = as.numeric(as.character(P_Value))) %>%
-  arrange(P_Value)
+  mutate(P_value = as.numeric(as.character(P_value))) %>%
+  arrange(P_value)
 
-ggplot(fisher_results_df, aes(x = reorder(substr(Column, 10, 60), -P_Value), 
-                              y = -log10(P_Value))) +
+ggplot(fisher_results_df, aes(x = reorder(substr(Column, 10, 60), -P_value), 
+                              y = -log10(P_value))) +
   geom_bar(stat = "identity", fill = "steelblue") +
   geom_hline(yintercept = -log10(0.01), color = "red", linetype = "dashed") +
   coord_flip() +
   labs(title = "Fisher Scores for Categorical and Logical Variables 
       with Missing Included",
        x = "",
-       y = "-log10(P-Value)") +
+       y = "-log10(P-value)") +
   theme_minimal()
 
-# Display the Fisher results ordered by -log10(P_Value) from largest to smallest
+# Display the Fisher results ordered by -log10(P_value) from largest to smallest
 fisher_results_df %>%
-  arrange(desc(-log10(P_Value))) %>%
+  arrange(desc(-log10(P_value))) %>%
   head(10) %>%
   print()
 
