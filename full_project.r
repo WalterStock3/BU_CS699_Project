@@ -1,3 +1,4 @@
+#---- 0 ******* Project Step 0 -----------------------------------------------
 ## TODO:
 #  - Complete a graph for Fisher Scores for Logical - 4-2-1-1
 #  - Complete a grpah for Factor wihout processing Missing.
@@ -20,7 +21,7 @@ library(rsample)
 library(ROSE)
 
 ################################################################################
-#---- 1 Preprocessing - Project Step 1 -----------------------------------------
+#---- 1 ******* Preprocessing - Project Step 1 ---------------------------------
 ################################################################################
 
 # Load the dataset
@@ -231,7 +232,7 @@ df <- df %>%
 df_processed <- df
 
 ################################################################################
-## Split - Project Step 2
+#---- 2 ******* Split Project Step 2 -------------------------------------------
 ################################################################################
 
 set.seed(1)
@@ -248,14 +249,14 @@ print(paste("testing dataset - class distribution:",
             table(test$Class)[1], ",", table(test$Class)[2]))
 
 ################################################################################
-## 3 Create Balanced Training Dataset - Project Step 3
+#---- 3 ******* Create Balanced Training Dataset - Project Step 3 --------------
 ################################################################################
 
 # Not using SMOTE because we have a large number of categorical variables.
 
-#-------------------------------------------------------------------------------
-### 3.1 Create Balanced Training Dataset - Method 1 - Down Sample - Proj Step 3
-#-------------------------------------------------------------------------------
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#---- 3.1 ***** Create Balanced Training Dataset - Method 1 - Down Sample ------
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Undersampling
 df_balanced1 <- downSample(x = train[, -which(names(train) %in% "Class")],
@@ -268,9 +269,9 @@ print(paste("training balanced 1 dataset - class distribution:",
             table(df_balanced1$Class)[1], ",",
             table(df_balanced1$Class)[2]))
 
-#-------------------------------------------------------------------------------
-### 3.2 Create Balanced Training Dataset - Method 2 - Up Sample - Proj Step 3
-#-------------------------------------------------------------------------------
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#---- 3.2 ***** Create Balanced Training Dataset - Method 2 - Up Sample --------
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Upsampling
 df_balanced2 <- upSample(x = train[, -which(names(train) %in% "Class")],
@@ -284,7 +285,7 @@ print(paste("training balanced 2 dataset - class distribution:",
             table(df_balanced2$Class)[2]))
 
 ################################################################################
-## 4 Select Attributes - Project Step 4
+#---- 4 ******* Select Attributes - Project Step 4 -----------------------------
 ################################################################################
 #
 #    Chapter 4 - Dimension Reduction
@@ -296,12 +297,12 @@ print(paste("training balanced 2 dataset - class distribution:",
 #    * Remove attributes to avoid collinearity
 #    * Feature selection
 
-#-------------------------------------------------------------------------------
-### 4-1 Select Attributes - Method 1 - Missing Value Removal - Project Step 4
-#-------------------------------------------------------------------------------
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#---- 4-1 ***** Select Attributes - Method 1 - Missing Value Removal -----------
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#### 4-1-1 Select Attributes - Method 1 - Missing Removal - balanced dataset 1
-#-------------------------------------------------------------------------------
+#---- 4-1-1 *** Select - Method 1 - Missing Removal - balanced 1 ---------
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Inputs that can be tuned
 in_limit_missing_col_percent <- 0.01
@@ -345,8 +346,8 @@ df_processing_filt_rows <- df_processing_filt_rows %>%
 
 df_select1_balanced1 <- df_processing_filt_rows
 
-#### 4-1-2 Select Attributes - Method 1 - Missing Removal - balanced dataset 2
-#-------------------------------------------------------------------------------
+#---- 4-1-2 *** Select - Method 1 - Missing Removal - balanced 2 ---------
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Columns
 print(paste("df_processing - missing column percent limit:",
@@ -385,16 +386,16 @@ df_processing_filt_rows <- df_processing_filt_rows %>%
 
 df_select1_balanced2 <- df_processing_filt_rows
 
-#-------------------------------------------------------------------------------
-### 4-2 Select Attributes - Method 2 - Chi-Sq and Correlation - Project Step 4
-#-------------------------------------------------------------------------------
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#---- 4-2 ***** Select - Method 2 - Chi-Sq and Correlation ---------------------
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#### 4-2-1 Select Attributes - Method 2 - balanced dataset 1
-#-------------------------------------------------------------------------------
+#---- 4-2-1 *** Select - Method 2 - balanced dataset 1 -------------------
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 df_select2_balanced1 <- df_balanced1
 
-##### 4-2-1-1 Factor and Logical Variables #####
+#---- 4-2-1-1 * Factor and Logical Variables ----------------------
 
 #df_select2_balanced1_factors <- df_select2_balanced1 %>%
 #  select(where(is.factor))
@@ -506,7 +507,7 @@ boxplots <- lapply(names(integer_columns), function(col) {
 boxplots <- boxplots[order(names(integer_columns))]
 grid.arrange(grobs = boxplots, ncol = 10)
 
-##### 4-2-1-2 Integer Variables #####
+#---- 4-2-1-2 * Integer Variables ---------------------------------
 
 # Collinearity
 
@@ -514,8 +515,6 @@ df_select2_balanced1_integers <- df_select2_balanced1 %>%
   select(where(is.integer))
 
 df_balanced1_select1 <- df_balanced1
-
-
 
 repeat {
   df_numeric <- df_balanced1_select1 %>%
@@ -563,26 +562,26 @@ repeat {
   print(paste("Removed variable:", highly_correlated))
 }
 
-#### 4-2-2 Select Attributes - Method 2 - balanced dataset 2
-#-------------------------------------------------------------------------------
+#---- 4-2-2 *** Select - Method 2 - balanced dataset 2 --------------------
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 df_select2_balanced2 <- df_balanced2
 
-#-------------------------------------------------------------------------------
-### 4-3 Select Attributes - Method 3 - Manual - Project Step 4
-#-------------------------------------------------------------------------------
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#---- 4-3 ***** Select - Method 3 - Manual ---------------------------------
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#### 4-3-1 Select Attributes - Method 3 - balanced dataset 1
-#-------------------------------------------------------------------------------
+#---- 4-3-1 *** Select - Method 3 - balanced dataset 1 -------------------
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 df_select3_balanced1 <- df_balanced1
 
 # SCHL does have good info.
 
-#### 4-3-2 Select Attributes - Method 3 - balanced dataset 2
-#-------------------------------------------------------------------------------
+#---- 4-3-2 *** Select - Method 3 balanced dataset 2 ---------------------
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 df_select3_balanced2 <- df_balanced2
 
 ################################################################################
-## 5 Models - Project Step 5
+#---- 5 ******* Models - Project Step 5 ----------------------------------------
 ################################################################################
 
 ## Models - Project Step 5
@@ -593,9 +592,9 @@ df_select3_balanced2 <- df_balanced2
 # * K-nearest neighbors,
 # * Neural networks.
 
-#-------------------------------------------------------------------------------
-### 5-1 Balanced Training Dataset - Model 1 Logistic Regression - Project Step 5
-#-------------------------------------------------------------------------------
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#---- 5-1 ***** Model 1 Logistic Regression ------------------------------------
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Logistic Regression Model
 logistic_model <- glm(Class ~ ., data = df_balanced1_select1, family = binomial)
@@ -762,29 +761,28 @@ print(paste("Weighted Average F-measure:", weighted_average_f_measure))
 #            (1 - sum(rowSums(confusion_matrix) / sum(confusion_matrix))))
 #print(paste("Kappa:", kappa))
 
-#-------------------------------------------------------------------------------
-### 5-1-2 Balanced Training Dataset - Model 1-2 Naive Bayes - Project Step 5
-#-------------------------------------------------------------------------------
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#---- 5-1-2 *** Balanced Training Dataset - Model 1-2 Naive Bayes --------
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 model_nb <- naiveBayes(Class ~ ., data = df_balanced1_select1)
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#---- 5-2 Balanced Training Dataset - Model 2 K-Nearest Neighbors -----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#-------------------------------------------------------------------------------
-### 5-2 Balanced Training Dataset - Model 2 K-Nearest Neighbors - Project Step 5
-#-------------------------------------------------------------------------------
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#---- 5-3 Balanced Training Dataset - Model 3 Decision Tree -----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#-------------------------------------------------------------------------------
-### 5-3 Balanced Training Dataset - Model 3 Decision Tree - Project Step 5
-#-------------------------------------------------------------------------------
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#---- 5-4 Balanced Training Dataset - Model 4 Random Forest -----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#-------------------------------------------------------------------------------
-### 5-4 Balanced Training Dataset - Model 4 Random Forest - Project Step 5
-#-------------------------------------------------------------------------------
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#---- 5-5 Balanced Training Dataset - Model 5 Support Vect Machine -----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#-------------------------------------------------------------------------------
-### 5-5 Balanced Training Dataset - Model 5 Support Vect Machine - Proj Step 5
-#-------------------------------------------------------------------------------
-
-#-------------------------------------------------------------------------------
-### 5-6 Balanced Training Dataset - Model 6 Gradient Booston - Project Step 5
-#-------------------------------------------------------------------------------
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#---- 5-6 Balanced Training Dataset - Model 6 Gradient Booston -----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
