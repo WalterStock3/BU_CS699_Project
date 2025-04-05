@@ -1,6 +1,6 @@
 ## TODO:
-# 1. Fix section 4-1 to not include the detailed columns in the missing
-#    values calculation.
+#  - Complete a graph for Fisher Scores for Logical - 4-2-1-1
+#  - Complete a grpah for Factor wihout processing Missing.
 
 # Project Goal (Lecture 1): Generate a model to predict the likelihood of a
 # person having difficulty living independently.
@@ -19,13 +19,8 @@ library(caret)
 library(rsample)
 library(ROSE)
 
-# Inputs that can be tuned
-in_limit_missing_col_percent <- 0.01
-in_limit_missing_row_percent <- 0.01
-in_select1_cor_threshold <- 0.75
-
 ################################################################################
-## 1 Preprocessing - Project Step 1
+#---- 1 Preprocessing - Project Step 1 -----------------------------------------
 ################################################################################
 
 # Load the dataset
@@ -107,13 +102,17 @@ data_dict_names_unique <- data_dict_names %>%
 df_columns_info <- df_columns_info %>%
   left_join(data_dict_names_unique, by = c("Column_Name" = "Code"))
 
+write.csv(df_columns_info, file = "df_columns_info.csv",
+          row.names = FALSE)
+
 # Process one record at a time and print columns with missing values
 no_match_columns <- c()  # Initialize to store column names with "No Match"
 
 column_counter <- 1
 for (col_name in names(df)) {
 
-  if (col_name == "Class") {
+  if (col_name == "Class" ||
+        col_name == "SERIALNO") {
     next
   }
 
@@ -130,7 +129,9 @@ for (col_name in names(df)) {
 
   column_counter <- column_counter + 1
 
-  if (variable_type == "Factor") {
+  if (variable_type == "Factor" ||
+        variable_type == "Logical" ||
+        variable_type == "Factor_Levels") {
     # Get the description for each value in the column
     value_descriptions <- sapply(df[[col_name]], function(value) {
       if (!is.na(value)) {
@@ -151,11 +152,12 @@ for (col_name in names(df)) {
     # Add the descriptions to the DETAILED- column
     df[[detailed_col_name]] <- value_descriptions
   }
-
+  if (variable_type == "Integer") {
+    df[[detailed_col_name]] <- df[[col_name]]
+  }
 }
 
-
-print(paste("df - dim:", dim(df)[1], ",", dim(df)[2])) # 4318  117 -> 234
+print(paste("df - dim:", dim(df)[1], ",", dim(df)[2])) # 4318  112 -> 222
 print(paste("df - total missing values (excluding DETAILED-* columns):",
             sum(is.na(df %>% select(-starts_with("DETAILED-")))))) # 141635
 
@@ -164,11 +166,7 @@ df$Class <- ifelse(df$Class == "Yes", 1, 0)
 df$Class <- as.factor(df$Class)
 
 print(paste("df_processing - note - all records remain (4318): ",
-            dim(df)[1], ",", dim(df)[2])) # 4318 224
-
-
-
-
+            dim(df)[1], ",", dim(df)[2])) # 4318 222
 
 df_columns_info <- df_columns_info %>%
   mutate(Evaluate_Positive = case_when(
@@ -221,6 +219,14 @@ factor_levels_columns <- df_columns_info %>%
 
 df <- df %>%
   mutate(across(all_of(factor_levels_columns), ~ factor(.x, ordered = TRUE)))
+
+# Update columns in df to integer based on Variable_Type in df_columns_info
+integer_columns <- df_columns_info %>%
+  filter(Variable_Type == "Integer") %>%
+  pull(Column_Name)
+
+df <- df %>%
+  mutate(across(all_of(integer_columns), as.integer))
 
 df_processed <- df
 
@@ -296,6 +302,11 @@ print(paste("training balanced 2 dataset - class distribution:",
 
 #### 4-1-1 Select Attributes - Method 1 - Missing Removal - balanced dataset 1
 #-------------------------------------------------------------------------------
+
+# Inputs that can be tuned
+in_limit_missing_col_percent <- 0.01
+in_limit_missing_row_percent <- 0.01
+in_select1_cor_threshold <- 0.75
 
 # Columns
 print(paste("df_processing - missing column percent limit:",
@@ -383,9 +394,26 @@ df_select1_balanced2 <- df_processing_filt_rows
 
 df_select2_balanced1 <- df_balanced1
 
-##### 4-2-1-1 Factor Variables #####
+##### 4-2-1-1 Factor and Logical Variables #####
+
+#df_select2_balanced1_factors <- df_select2_balanced1 %>%
+#  select(where(is.factor))
+
 df_select2_balanced1_factors <- df_select2_balanced1 %>%
-  select(where(is.factor))
+  select(matches(paste0("^DETAILED-(",
+                        paste(df_columns_info %>%
+                                filter(Variable_Type %in%
+                                         c("Logical")) %>%
+                                pull(Column_Name), 
+                              collapse = "|"), ")_")))
+
+df_select2_balanced1_logical <- df_select2_balanced1 %>%
+  select(matches(paste0("^DETAILED-(",
+                        paste(df_columns_info %>%
+                                filter(Variable_Type %in%
+                                         c("Logical")) %>%
+                                pull(Column_Name), 
+                              collapse = "|"), ")_")))
 
 ##### Replace NAs in factor variables with Missing
 df_select2_bal1_factr_miss <- df_select2_balanced1_factors %>%
@@ -401,14 +429,11 @@ write.csv(df_select2_balanced1, file = "df_select2_balanced1.csv",
 
 ##### Will use Fisher test over Chi-square to handle sparse data.
 
-#factor_columns <- c("CIT", "COW")
-
 # Some columns have too many levels to be used in Fisher test.
 # SCHL - LDSTP too small - 2e9
 # ANC1P - LDSTP too small - 1e9
-# POVPIP - Takes too long to compute
-fisher_not_possible <- c("SCHL", "ANC1P", "POVPIP", "DETAILED-SCHL",
-                         "DETAILED-ANC1P", "DETAILED-POVPIP", "Class")
+fisher_not_possible <- c("SCHL", "ANC1P", "DETAILED-SCHL",
+                         "DETAILED-ANC1P", "Class")
 
 fisher_results <- list()
 
@@ -421,7 +446,7 @@ for (col in names(df_select2_bal1_factr_miss)) {
   tryCatch({
     table_data <- table(df_select2_bal1_factr_miss[[col]],
                         df_select2_balanced1$Class)
-    fisher_test <- fisher.test(table_data, workspace = 1e7)
+    fisher_test <- fisher.test(table_data, workspace = 1e9)
     fisher_results[[col]] <- list(column = col, p_value = fisher_test$p.value)
     print(paste(Sys.time(),
                 "- Fisher test column:", col, "p-value:", fisher_test$p.value))
@@ -441,16 +466,16 @@ fisher_results_df <- fisher_results_df %>%
   mutate(P_Value = as.numeric(as.character(P_Value))) %>%
   arrange(P_Value)
 
-ggplot(fisher_results_df, aes(x = reorder(substr(Column, 10, 50), -P_Value),
+ggplot(fisher_results_df, aes(x = reorder(substr(Column, 10, 60), -P_Value), 
                               y = -log10(P_Value))) +
   geom_bar(stat = "identity", fill = "steelblue") +
-  geom_hline(yintercept = -log10(0.001), color = "red", linetype = "dashed") +
+  geom_hline(yintercept = -log10(0.01), color = "red", linetype = "dashed") +
   coord_flip() +
-  labs(title = "Fisher Score for Each Variable",
-       x = "Variable (Truncated)",
+  labs(title = "Fisher Scores for Categorical and Logical Variables 
+      with Missing Included",
+       x = "",
        y = "-log10(P-Value)") +
-  theme_minimal() +
-  scale_y_continuous(limits = c(0, 50))
+  theme_minimal()
 
 # Display the Fisher results ordered by -log10(P_Value) from largest to smallest
 fisher_results_df %>%
