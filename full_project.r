@@ -280,12 +280,12 @@ print(paste("testing dataset - class distribution:",
 # Not using SMOTE because we have a large number of categorical variables.
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#---- 3.1 *****    Balance - Method 1 - Down Sample ----------------------------
+#---- 3.1 *****    Balance - Method 1 - Down Sample -- df_balanced1 ------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Undersampling
-df_balanced1 <- downSample(x = train[, -which(names(train) %in% "Class")],
-                           y = train$Class)
+df_balanced1 <- downSample(x = df_train[, -which(names(df_train) %in% "Class")],
+                           y = df_train$Class)
 
 print(paste("training balanced 1 dataset - dim:", dim(df_balanced1)[1],
             ",", dim(df_balanced1)[2]))
@@ -294,13 +294,15 @@ print(paste("training balanced 1 dataset - class distribution:",
             table(df_balanced1$Class)[1], ",",
             table(df_balanced1$Class)[2]))
 
+save(df_balanced1, file = "df_balanced1.RData")
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#---- 3.2 *****    Balance - Method 2 - Up Sample ------------------------------
+#---- 3.2 *****    Balance - Method 2 - Up Sample -- df_balanced2 --------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Upsampling
-df_balanced2 <- upSample(x = train[, -which(names(train) %in% "Class")],
-                         y = train$Class)
+df_balanced2 <- upSample(x = df_train[, -which(names(df_train) %in% "Class")],
+                         y = df_train$Class)
 
 print(paste("training balanced 2 dataset - dim:", dim(df_balanced2)[1],
             ",", dim(df_balanced2)[2]))
@@ -309,8 +311,10 @@ print(paste("training balanced 2 dataset - class distribution:",
             table(df_balanced2$Class)[1], ",",
             table(df_balanced2$Class)[2]))
 
+save(df_balanced2, file = "df_balanced2.RData")
+
 ################################################################################
-#---- 4 ******* Select - Project Step 4 ----------------------------------------
+#---- 4 ******* Select - Project Step 4 -- df_select#_balanced# ----------------
 ################################################################################
 #
 #    Chapter 4 - Dimension Reduction
@@ -321,12 +325,11 @@ print(paste("training balanced 2 dataset - class distribution:",
 #    * Remove zero-variance attributes
 #    * Remove attributes to avoid collinearity
 #    * Feature selection
-
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#---- 4-1 *****    Select Attributes - Method 1 - Missing value Removal --------
+#---- 4-1 *****    Select - 1 - Missing Removal -- df_select1_balanced# --------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#---- 4-1-1 ***       Select - Method 1 - Missing Removal - balanced 1 ---------
+#---- 4-1-1 ***       Select - 1 - Missing Removal -- df_select1_balanced1 -----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Inputs that can be tuned
@@ -371,7 +374,9 @@ df_processing_filt_rows <- df_processing_filt_rows %>%
 
 df_select1_balanced1 <- df_processing_filt_rows
 
-#---- 4-1-2 ***       Select - Method 1 - Missing Removal - balanced 2 ---------
+save(df_select1_balanced1, file = "df_select1_balanced1.RData")
+
+#---- 4-1-2 ***       Select - 1 - Missing Removal -- df_select1_balanced2 -----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Columns
@@ -411,25 +416,24 @@ df_processing_filt_rows <- df_processing_filt_rows %>%
 
 df_select1_balanced2 <- df_processing_filt_rows
 
+save(df_select1_balanced1, file = "df_select1_balanced1.RData")
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#---- 4-2 *****    Select - Method 2 - Chi-Sq and Correlation ------------------
+#---- 4-2 *****    Select - 2 - Fisher and Corr -- df_select2_balanced# --------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#---- 4-2-1 ***       Select - Method 2 - balanced dataset 1 -------------------
+#---- 4-2-1 ***       Select - 2 - Fisher and Corr -- df_select2_balanced1 -----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 df_select2_balanced1 <- df_balanced1
 
 #---- 4-2-1-1 *          Factor and Logical Variables --------------------------
 
-#df_select2_balanced1_factors <- df_select2_balanced1 %>%
-#  select(where(is.factor))
-
 df_select2_balanced1_factors <- df_select2_balanced1 %>%
   select(matches(paste0("^DETAILED-(",
                         paste(df_columns_info %>%
                                 filter(variable_type %in%
-                                         c("logical")) %>%
+                                         c("factor")) %>%
                                 pull(column_name), 
                               collapse = "|"), ")_")))
 
@@ -441,8 +445,27 @@ df_select2_balanced1_logical <- df_select2_balanced1 %>%
                                 pull(column_name), 
                               collapse = "|"), ")_")))
 
-##### Replace NAs in factor variables with Missing
+df_select2_balanced1_levels <- df_select2_balanced1 %>%
+  select(matches(paste0("^DETAILED-(",
+                        paste(df_columns_info %>%
+                                filter(variable_type %in%
+                                         c("factor_levels")) %>%
+                                pull(column_name), 
+                              collapse = "|"), ")_")))
+
+##### Replace NAs with Missing
 df_select2_bal1_factr_miss <- df_select2_balanced1_factors %>%
+  mutate(across(everything(),
+                ~ replace_na(factor(.x,
+                                    levels = c(levels(.x),
+                                               "Missing")),
+                             "Missing")))
+
+df_select2_bal1_logical_miss <- df_select2_balanced1_logical %>%
+  mutate(across(where(is.logical),
+                ~ replace_na(.x, FALSE)))
+
+df_select2_bal1_levels_miss <- df_select2_balanced1_levels %>%
   mutate(across(where(is.factor),
                 ~ replace_na(factor(.x,
                                     levels = c(levels(.x),
