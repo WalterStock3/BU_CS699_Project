@@ -44,6 +44,9 @@ df <- df %>%
   select(-matches("^(STATE|REGION|DIVISION|ADJINC|RT)"),
          -matches("^DETAILED-(STATE|REGION|DIVISION|ADJINC|RT)"))
 
+print(paste("df - dim:", dim(df)[1], ",", dim(df)[2])) # 4318  112
+print(paste("df - total missing values:", sum(is.na(df)))) # 141635
+
 # Create a dataframe with each column name and its corresponding class (112)
 df_columns_info <- data.frame(
   column_name = names(df),
@@ -89,7 +92,7 @@ colnames(data_dict_df) <- tolower(colnames(data_dict_df))
 
 data_dict_names <- data_dict_df %>%
   filter(record_type_name_or_val == "NAME") %>%
-  select(code = record_name, name = value_all, description = value_description)
+  select(code = record_name, name = value_all)
 
 data_dict_vals <- data_dict_df %>%
   filter(record_type_name_or_val == "VAL") %>%
@@ -113,8 +116,8 @@ no_match_columns <- c()  # Initialize to store column names with "No Match"
 
 column_counter <- 1
 for (col_name in names(df)) {
-  if (col_name == "Class" ||
-        col_name == "SERIALNO") {
+
+  if (col_name %in% c("Class", "SERIALNO")) {
     next
   }
 
@@ -137,7 +140,6 @@ for (col_name in names(df)) {
     # Get the description for each value in the column
     value_descriptions <- sapply(df[[col_name]], function(col_value) {
       if (!is.na(col_value)) {
-        #print(paste("Column:", col_name, "Value:", col_value))
         value_description <- data_dict_vals %>%
           filter(code == col_name & value == as.character(col_value)) %>%
           pull(description)
@@ -154,10 +156,13 @@ for (col_name in names(df)) {
 
     # Add the descriptions to the DETAILED- column
     df[[detailed_col_name]] <- value_descriptions
+
   }
+
   if (variable_type == "integer") {
     df[[detailed_col_name]] <- df[[col_name]]
   }
+
 }
 
 print(paste("df - dim:", dim(df)[1], ",", dim(df)[2])) # 4318  112 -> 222
@@ -196,29 +201,29 @@ df_columns_info <- df_columns_info %>%
     TRUE ~ "Low"
   ))
 
-# Update columns in df to factor based on variable_type in df_columns_info
+# Factor - update columns to factor based on variable_type in df_columns_info
 factor_columns <- df_columns_info %>%
-  filter(variable_type == "factor") %>%
+  filter(variable_type == "factor", column_name %in% names(df)) %>%
   pull(column_name)
 
-df <- df %>%
+df <- df %>% 
   mutate(across(all_of(factor_columns), as.factor)) %>%
-  mutate(across(matches(paste0("^DETAILED-", 
-                               paste(factor_columns, collapse = "|"), "_"))),
-         as.factor())
+  mutate(across(all_of(matches(paste0("^DETAILED-",
+                                      paste(factor_columns, collapse = "|"),
+                                      "_"))), as.factor))
 
-# Update columns in df to logical based on variable_type in df_columns_info
+# Logical - update columns to logical based on variable_type in df_columns_info
 logical_columns <- df_columns_info %>%
   filter(variable_type == "logical") %>%
   pull(column_name)
 
 df <- df %>%
   mutate(across(all_of(logical_columns), as.logical)) %>%
-  mutate(across(matches(paste0("^DETAILED-", 
-                               paste(logical_columns, collapse = "|"))),
-                as.logical))
+  mutate(across(all_of(matches(paste0("^DETAILED-",
+                                      paste(logical_columns, collapse = "|"),
+                                      "_"))), as.logical))
 
-# Update columns in df to Levels based on variable_type in df_columns_info
+# Factor_Levels - update columns based on variable_type in df_columns_info
 factor_levels_columns <- df_columns_info %>%
   filter(variable_type == "factor_levels") %>%
   pull(column_name)
@@ -226,17 +231,21 @@ factor_levels_columns <- df_columns_info %>%
 df <- df %>%
   mutate(across(all_of(factor_levels_columns), ~ factor(.x,
                                                         ordered = TRUE))) %>%
-  mutate(across(matches(paste0("^DETAILED-", 
-                               paste(factor_levels_columns, collapse = "|"))),
-                as.factor)
+  mutate(across(all_of(matches(paste0("^DETAILED-",
+                                      paste(factor_levels_columns,
+                                            collapse = "|"),
+                                      "_"))), ~ factor(.x,
+                                                       ordered = TRUE)))
 
-# Update columns in df to integer based on variable_type in df_columns_info
 integer_columns <- df_columns_info %>%
-  filter(variable_type == "integer") %>%
+  filter(variable_type == "integer", column_name %in% names(df)) %>%
   pull(column_name)
 
-df <- df %>%
-  mutate(across(all_of(integer_columns), as.integer))
+df <- df %>% 
+  mutate(across(all_of(integer_columns), as.integer)) %>%
+  mutate(across(all_of(matches(paste0("^DETAILED-",
+                                      paste(factor_columns, collapse = "|"),
+                                      "_"))), as.integer))
 
 df_preprocessed <- df
 
