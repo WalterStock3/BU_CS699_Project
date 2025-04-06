@@ -274,7 +274,7 @@ print(paste("testing dataset - class distribution:",
             table(test$Class)[1], ",", table(test$Class)[2]))
 
 ################################################################################
-#---- 3 ******* Balance - Project Step 3 ---------------------------------------
+#---- 3 ******* Balance - Project Step 3 -- df_balanced1, df_balanced2 ---------
 ################################################################################
 
 # Not using SMOTE because we have a large number of categorical variables.
