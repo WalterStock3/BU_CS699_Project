@@ -33,8 +33,13 @@ df_orig <- read.csv(paste(loc, data_file, sep = ""))
 df <- df_orig
 
 # Replace all "Invalid Number" values in the dataframe with NA
+# Identify columns containing "Invalid Number"
+columns_with_invalid <-
+  sapply(df, function(col) any(col == "Invalid Number", na.rm = TRUE))
+
+# Replace "Invalid Number" with NA only in relevant columns
 df <- df %>%
-  mutate(across(everything(), ~ na_if(.x, "Invalid Number")))
+  mutate(across(names(df)[columns_with_invalid], ~ na_if(.x, "Invalid Number")))
 
 print(paste("df - dim:", dim(df)[1], ",", dim(df)[2])) # 4318  117
 print(paste("df - total missing values:", sum(is.na(df)))) # 141635
@@ -459,7 +464,7 @@ df_select2_balanced1 <- df_balanced1
 #---- 4-2-1-1 *          Factor and Logical Variables --------------------------
 
 df_select2_balanced1_1factors <- df_select2_balanced1 %>%
-  select(matches(paste0("^DETAILED-(",
+  select(Class, matches(paste0("^DETAILED-(",
                         paste(df_columns_info %>%
                                 filter(variable_type %in%
                                          c("factor")) %>%
@@ -467,7 +472,7 @@ df_select2_balanced1_1factors <- df_select2_balanced1 %>%
                               collapse = "|"), ")_")))
 
 df_select2_balanced1_2logical <- df_select2_balanced1 %>%
-  select(matches(paste0("^DETAILED-(",
+  select(Class, matches(paste0("^DETAILED-(",
                         paste(df_columns_info %>%
                                 filter(variable_type %in%
                                          c("logical")) %>%
@@ -475,7 +480,7 @@ df_select2_balanced1_2logical <- df_select2_balanced1 %>%
                               collapse = "|"), ")_")))
 
 df_select2_balanced1_3levels <- df_select2_balanced1 %>%
-  select(matches(paste0("^DETAILED-(",
+  select(Class, matches(paste0("^DETAILED-(",
                         paste(df_columns_info %>%
                                 filter(variable_type %in%
                                          c("factor_levels")) %>%
@@ -523,7 +528,7 @@ for (col in names(df_select2_balanced1_1factors)) {
   }
   tryCatch({
     table_data <- table(df_select2_balanced1_1factors[[col]],
-                        df_select2_balanced1$Class)
+                        df_select2_balanced1_1factors$Class)
     fisher_test <- fisher.test(table_data, workspace = 1e9)
     fisher_results[[col]] <- list(column = col, p_value = fisher_test$p.value)
     print(paste(Sys.time(),
