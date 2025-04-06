@@ -28,7 +28,13 @@ library(ROSE)
 # Load the dataset
 loc <- "~/Source/BU_CS699_Project/CS699_Provided_Artifacts/"
 data_file <- "project_data.csv"
-df <- read.csv(paste(loc, data_file, sep = ""))
+df_orig <- read.csv(paste(loc, data_file, sep = ""))
+
+df <- df_orig
+
+# Replace all "Invalid Number" values in the dataframe with NA
+df <- df %>%
+  mutate(across(everything(), ~ na_if(.x, "Invalid Number")))
 
 print(paste("df - dim:", dim(df)[1], ",", dim(df)[2])) # 4318  117
 print(paste("df - total missing values:", sum(is.na(df)))) # 141635
