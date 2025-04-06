@@ -240,7 +240,7 @@ integer_columns <- df_columns_info %>%
 df <- df %>% 
   mutate(across(all_of(integer_columns), as.integer)) %>%
   mutate(across(all_of(matches(paste0("^DETAILED-",
-                                      paste(factor_columns, collapse = "|"),
+                                      paste(integer_columns, collapse = "|"),
                                       "_"))), as.integer))
 
 df_preprocessed <- df
