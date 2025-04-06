@@ -21,7 +21,7 @@ library(rsample)
 library(ROSE)
 
 ################################################################################
-#---- 1 ******* Preprocess - Project Step 1 ------------------------------------
+#---- 1 ******* Preprocess - Project Step 1 -- df_preprocessed -----------------
 ################################################################################
 
 # Load the dataset
@@ -237,6 +237,7 @@ df <- df %>%
                                       "_"))), ~ factor(.x,
                                                        ordered = TRUE)))
 
+# Integer - update columns to integer based on variable_type in df_columns_info
 integer_columns <- df_columns_info %>%
   filter(variable_type == "integer", column_name %in% names(df)) %>%
   pull(column_name)
@@ -256,7 +257,7 @@ write.csv(df_preprocessed, file = "df_preprocessed.csv", row.names = FALSE)
 save(df_preprocessed, file = "df_preprocessed.RData")
 
 ################################################################################
-#---- 2 ******* Split - Project Step 2 -----------------------------------------
+#---- 2 ******* Split - Project Step 2 -- df_train, df_test --------------------
 ################################################################################
 
 set.seed(1)
