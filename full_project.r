@@ -529,17 +529,21 @@ for (col in names(df_select2_balanced1_merged)) {
 
 # Convert results to a data frame for easier interpretation
 df_sel2_bal1_fisher_results <- 
-  do.call(rbind, lapply(df_sel2_bal1_fisher_results, as.data.frame))
+  do.call(rbind, lapply(sel2_bal1_fisher_results, as.data.frame))
 
 names(df_sel2_bal1_fisher_results) <- c("Column", "P_value")
 
+df_sel2_bal1_fisher_results$neg_log10_P_value <-
+  -log10(df_sel2_bal1_fisher_results$P_value)
+
 # Create a bar plot for Fisher scores
-fisher_results_df <- fisher_results_df %>%
+df_sel2_bal1_fisher_results_plt <- df_sel2_bal1_fisher_results %>%
   mutate(P_value = as.numeric(as.character(P_value))) %>%
   arrange(P_value)
 
-ggplot(fisher_results_df, aes(x = reorder(substr(Column, 10, 60), -P_value), 
-                              y = -log10(P_value))) +
+ggplot(df_sel2_bal1_fisher_results_plt,
+       aes(x = reorder(substr(Column, 10, 60), -P_value),
+           y = -log10(P_value))) +
   geom_bar(stat = "identity", fill = "steelblue") +
   geom_hline(yintercept = -log10(0.01), color = "red", linetype = "dashed") +
   coord_flip() +
@@ -555,28 +559,21 @@ fisher_results_df %>%
   head(10) %>%
   print()
 
+# Identify the 2 columns with the highest neg_log10_P_value
+top_cols <- df_sel2_bal1_fisher_results %>%
+  arrange(desc(neg_log10_P_value)) %>%
+  slice_head(n = 2) %>%
+  pull(Column)
+
+# Create a new dataframe with those columns
+df_select2_balanced1 <- df_select2_balanced1 %>%
+  select(all_of(top_cols))
+
 # Use Correlation to check for independence between numeric variables
 #   and the target variable.
 
 df_select2_balanced1_factors <- df_select2_balanced1 %>%
   select(where(is.factor))
-
-### Outliers
-# Create boxplots for each numeric variable in the dataset
-integer_columns <- df_processing_filt_rows %>% select(where(is.integer))
-
-# Generate boxplots dynamically for all numeric columns
-boxplots <- lapply(names(integer_columns), function(col) {
-  ggplot(integer_columns, aes(x = "", y = .data[[col]])) +
-    geom_boxplot() +
-    theme(axis.title.x = element_blank(),
-          axis.text.x = element_blank(),
-          axis.ticks.x = element_blank())
-})
-
-# Arrange boxplots in a grid
-boxplots <- boxplots[order(names(integer_columns))]
-grid.arrange(grobs = boxplots, ncol = 10)
 
 #---- 4-2-1-2 *          Integer Variables -------------------------------------
 
@@ -634,6 +631,25 @@ repeat {
 
   print(paste("Removed variable:", highly_correlated))
 }
+
+#---- 4-2-1-3            Outliers ----------------------------------------------
+# Create boxplots for each numeric variable in the dataset
+integer_columns <- df_columns_info %>%
+  filter(variable_type == "integer") %>%
+  pull(column_name)
+
+# Generate boxplots dynamically for all numeric columns
+boxplots <- lapply(integer_columns, function(col) {
+  ggplot(df_balanced1, aes(x = "", y = .data[[col]])) +
+    geom_boxplot() +
+    theme(axis.title.x = element_blank(),
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank())
+})
+
+# Arrange boxplots in a grid
+boxplots <- boxplots[order(names(integer_columns))]
+grid.arrange(grobs = boxplots, ncol = 10)
 
 #---- 4-2-2 ***       Select - Method 2 - balanced dataset 2 -------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
