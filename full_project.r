@@ -463,6 +463,8 @@ df_select2_balanced1 <- df_balanced1
 
 #---- 4-2-1-1 *          Factor and Logical Variables --------------------------
 
+in_row_limit <- 1
+
 df_select2_balanced1_1factors <- df_select2_balanced1 %>%
   select(Class, matches(paste0("^DETAILED-(",
                         paste(df_columns_info %>%
@@ -470,6 +472,8 @@ df_select2_balanced1_1factors <- df_select2_balanced1 %>%
                                          c("factor")) %>%
                                 pull(column_name), 
                               collapse = "|"), ")_")))
+
+
 
 df_select2_balanced1_2logical <- df_select2_balanced1 %>%
   select(Class, matches(paste0("^DETAILED-(",
@@ -515,6 +519,9 @@ df_select2_balanced1_6lvl_miss <- df_select2_balanced1_3levels %>%
 # Some columns have too many levels to be used in Fisher test.
 # SCHL - LDSTP too small - 2e9
 # ANC1P - LDSTP too small - 1e9
+
+
+
 fisher_not_possible <- c("SCHL", "ANC1P", "DETAILED-SCHL",
                          "DETAILED-ANC1P", "Class")
 
