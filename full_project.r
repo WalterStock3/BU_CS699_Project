@@ -260,6 +260,9 @@ save(df_preprocessed, file = "df_preprocessed.RData")
 #---- 2 ******* Split - Project Step 2 -- df_train, df_test --------------------
 ################################################################################
 
+# Optional - Load the preprocessed dataset
+# load("df_preprocessed.RData")
+
 set.seed(1)
 
 split <- initial_split(df_preprocessed, prop = 0.7, strata = "Class")
@@ -273,11 +276,23 @@ print(paste("training dataset - class distribution:",
 print(paste("testing dataset - class distribution:",
             table(test$Class)[1], ",", table(test$Class)[2]))
 
+# Save df_train and df_test to R data files
+save(df_train, file = "df_train.RData")
+save(df_test, file = "df_test.RData")
+
 ################################################################################
 #---- 3 ******* Balance - Project Step 3 -- df_balanced1, df_balanced2 ---------
 ################################################################################
 
 # Not using SMOTE because we have a large number of categorical variables.
+
+# Load the training and testing datasets
+# load("df_train.RData")
+# load("df_test.RData")
+
+# Verify the dimensions of the loaded datasets
+# print(paste("Loaded training dataset - dim:", dim(df_train)[1], ",", dim(df_train)[2]))
+# print(paste("Loaded testing dataset - dim:", dim(df_test)[1], ",", dim(df_test)[2]))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #---- 3.1 *****    Balance - Method 1 - Down Sample -- df_balanced1 ------------
@@ -325,6 +340,18 @@ save(df_balanced2, file = "df_balanced2.RData")
 #    * Remove zero-variance attributes
 #    * Remove attributes to avoid collinearity
 #    * Feature selection
+################################################################################
+
+# Load the balanced datasets
+#load("df_balanced1.RData")
+#load("df_balanced2.RData")
+
+# Verify the dimensions of the loaded datasets
+#print(paste("Loaded df_balanced1 - dim:",
+#            dim(df_balanced1)[1], ",", dim(df_balanced1)[2]))
+#print(paste("Loaded df_balanced2 - dim:",
+#            dim(df_balanced2)[1], ",", dim(df_balanced2)[2]))
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #---- 4-1 *****    Select - 1 - Missing Removal -- df_select1_balanced# --------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -462,8 +489,12 @@ df_select2_bal1_factr_miss <- df_select2_balanced1_factors %>%
                              "Missing")))
 
 df_select2_bal1_logical_miss <- df_select2_balanced1_logical %>%
-  mutate(across(where(is.logical),
-                ~ replace_na(.x, FALSE)))
+  mutate(across(where(is.logical), ~ factor(.x, levels = c(FALSE, TRUE)))) %>%
+  mutate(across(everything(),
+                ~ replace_na(factor(.x,
+                                    levels = c(levels(.x),
+                                               "Missing")),
+                             "Missing")))
 
 df_select2_bal1_levels_miss <- df_select2_balanced1_levels %>%
   mutate(across(where(is.factor),
