@@ -2,6 +2,7 @@
 ## TODO:
 #  - Complete a graph for Fisher Scores for Logical - 4-2-1-1
 #  - Complete a grpah for Factor wihout processing Missing.
+#  - There are a lot of Invalid Numbers in df - look into these.
 
 # Project Goal (Lecture 1): Generate a model to predict the likelihood of a
 # person having difficulty living independently.
@@ -108,14 +109,12 @@ data_dict_names_unique <- data_dict_names %>%
 df_columns_info <- df_columns_info %>%
   left_join(data_dict_names_unique, by = c("column_name" = "code"))
 
-write.csv(df_columns_info, file = "df_columns_info.csv",
-          row.names = FALSE)
+df_detailed <- df
 
 # Process one record at a time and print columns with missing values
 no_match_columns <- c()  # Initialize to store column names with "No Match"
-
 column_counter <- 1
-for (col_name in names(df)) {
+for (col_name in names(df_detailed)) {
 
   if (col_name %in% c("Class", "SERIALNO")) {
     next
@@ -134,11 +133,12 @@ for (col_name in names(df)) {
 
   column_counter <- column_counter + 1
 
+  # Populate the columns values
   if (variable_type == "factor" ||
         variable_type == "logical" ||
         variable_type == "factor_levels") {
     # Get the description for each value in the column
-    value_descriptions <- sapply(df[[col_name]], function(col_value) {
+    value_descriptions <- sapply(df_detailed[[col_name]], function(col_value) {
       if (!is.na(col_value)) {
         value_description <- data_dict_vals %>%
           filter(code == col_name & value == as.character(col_value)) %>%
@@ -146,24 +146,19 @@ for (col_name in names(df)) {
       } else {
         value_description <- NA
       }
-      if (length(value_description) == 0) {
-        print(paste("No description found for column:",
-                    col_name, "value:", col_value))
-        return(NA)  # If no description is found, return NA
-      }
       return(value_description)
     })
-
     # Add the descriptions to the DETAILED- column
-    df[[detailed_col_name]] <- value_descriptions
-
+    df_detailed[[detailed_col_name]] <- value_descriptions
   }
 
   if (variable_type == "integer") {
-    df[[detailed_col_name]] <- df[[col_name]]
+    df_detailed[[detailed_col_name]] <- df_detailed[[col_name]]
   }
 
 }
+
+df <- df_detailed
 
 print(paste("df - dim:", dim(df)[1], ",", dim(df)[2])) # 4318  112 -> 222
 print(paste("df - total missing values (excluding DETAILED-* columns):",
@@ -360,9 +355,8 @@ save(df_balanced2, file = "df_balanced2.RData")
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Inputs that can be tuned
-in_limit_missing_col_percent <- 0.01
+in_limit_missing_col_percent <- 0.05
 in_limit_missing_row_percent <- 0.01
-in_select1_cor_threshold <- 0.75
 
 # Columns
 print(paste("df_processing - missing column percent limit:",
@@ -396,6 +390,7 @@ print(paste("df_processing - post_row_filt - dim:",
 print(paste("df_processing - total missing values:",
             sum(is.na(df_processing_filt_rows))))
 
+# Remove the columns used for calculations
 df_processing_filt_rows <- df_processing_filt_rows %>%
   select(-calc_missing_values_row_count, -calc_missing_values_row_percent)
 
@@ -438,12 +433,13 @@ print(paste("df_processing - post_row_filt - dim:",
 print(paste("df_processing - total missing values:",
             sum(is.na(df_processing_filt_rows))))
 
+# Remove the columns used for calculations
 df_processing_filt_rows <- df_processing_filt_rows %>%
   select(-calc_missing_values_row_count, -calc_missing_values_row_percent)
 
 df_select1_balanced2 <- df_processing_filt_rows
 
-save(df_select1_balanced1, file = "df_select1_balanced1.RData")
+save(df_select1_balanced2, file = "df_select1_balanced2.RData")
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #---- 4-2 *****    Select - 2 - Fisher and Corr -- df_select2_balanced# --------
@@ -587,6 +583,8 @@ boxplots <- boxplots[order(names(integer_columns))]
 grid.arrange(grobs = boxplots, ncol = 10)
 
 #---- 4-2-1-2 *          Integer Variables -------------------------------------
+
+in_select1_cor_threshold <- 0.75
 
 # Collinearity
 
