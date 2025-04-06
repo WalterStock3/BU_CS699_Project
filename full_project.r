@@ -491,28 +491,9 @@ df_select2_balanced1_3levels <- df_select2_balanced1 %>%
                                 pull(column_name), 
                               collapse = "|"), ")_")))
 
-##### Replace NAs with Missing
-df_select2_balanced1_4fct_miss <- df_select2_balanced1_1factors %>%
-  mutate(across(everything(),
-                ~ replace_na(factor(.x,
-                                    levels = c(levels(.x),
-                                               "Missing")),
-                             "Missing")))
-
-df_select2_balanced1_5log_miss <- df_select2_balanced1_2logical %>%
-  mutate(across(where(is.logical), ~ factor(.x, levels = c(FALSE, TRUE)))) %>%
-  mutate(across(everything(),
-                ~ replace_na(factor(.x,
-                                    levels = c(levels(.x),
-                                               "Missing")),
-                             "Missing")))
-
-df_select2_balanced1_6lvl_miss <- df_select2_balanced1_3levels %>%
-  mutate(across(where(is.factor),
-                ~ replace_na(factor(.x,
-                                    levels = c(levels(.x),
-                                               "Missing")),
-                             "Missing")))
+df_select2_balanced1_merged <- cbind(df_select2_balanced1_1factors,
+                                     df_select2_balanced1_2logical,
+                                     df_select2_balanced1_3levels)
 
 ##### Will use Fisher test over Chi-square to handle sparse data.
 
@@ -520,36 +501,37 @@ df_select2_balanced1_6lvl_miss <- df_select2_balanced1_3levels %>%
 # SCHL - LDSTP too small - 2e9
 # ANC1P - LDSTP too small - 1e9
 
+fisher_not_possible <- c("SCHL", "ANC1P", "DETAILED-SCHL_",
+                         "DETAILED-ANC1P_", 
+                         "RACNH", "DETAILED-RACNH_", "Class")
 
+sel2_bal1_fisher_results <- list()
 
-fisher_not_possible <- c("SCHL", "ANC1P", "DETAILED-SCHL",
-                         "DETAILED-ANC1P", "Class")
-
-fisher_results <- list()
-
-for (col in names(df_select2_balanced1_1factors)) {
+for (col in names(df_select2_balanced1_merged)) {
   print(paste(Sys.time(), "- Processing column:", col))
   if (any(startsWith(col, fisher_not_possible))) {
     print(paste("Skipping column:", col))
     next
   }
   tryCatch({
-    table_data <- table(df_select2_balanced1_1factors[[col]],
-                        df_select2_balanced1_1factors$Class)
+    table_data <- table(df_select2_balanced1_merged[[col]],
+                        df_select2_balanced1_merged$Class)
     fisher_test <- fisher.test(table_data, workspace = 1e9)
-    fisher_results[[col]] <- list(column = col, p_value = fisher_test$p.value)
+    sel2_bal1_fisher_results[[col]] <-
+      list(column = col, p_value = fisher_test$p.value)
     print(paste(Sys.time(),
                 "- Fisher test column:", col, "p-value:", fisher_test$p.value))
   }, error = function(e) {
     message(paste("Error processing column:", col, "-", e$message))
-    fisher_results[[col]] <- list(column = col, p_value = NA)
+    sel2_bal1_fisher_results[[col]] <- list(column = col, p_value = NA)
   })
 }
 
 # Convert results to a data frame for easier interpretation
-df_fisher_results <- do.call(rbind, lapply(fisher_results, as.data.frame))
-df_fisher_results_df <- as.data.frame(fisher_results_df)
-names(fisher_results_df) <- c("Column", "P_value")
+df_sel2_bal1_fisher_results <- 
+  do.call(rbind, lapply(df_sel2_bal1_fisher_results, as.data.frame))
+
+names(df_sel2_bal1_fisher_results) <- c("Column", "P_value")
 
 # Create a bar plot for Fisher scores
 fisher_results_df <- fisher_results_df %>%
@@ -663,7 +645,30 @@ df_select2_balanced2 <- df_balanced2
 
 #---- 4-3-1 ***       Select - Method 3 - balanced dataset 1 -------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-df_select3_balanced1 <- df_balanced1
+##### Replace NAs with Missing
+df_select2_balanced1_4fct_miss <- df_select2_balanced1_1factors %>%
+  mutate(across(everything(),
+                ~ replace_na(factor(.x,
+                                    levels = c(levels(.x),
+                                               "Missing")),
+                             "Missing")))
+
+df_select2_balanced1_5log_miss <- df_select2_balanced1_2logical %>%
+  mutate(across(where(is.logical), ~ factor(.x, levels = c(FALSE, TRUE)))) %>%
+  mutate(across(everything(),
+                ~ replace_na(factor(.x,
+                                    levels = c(levels(.x),
+                                               "Missing")),
+                             "Missing")))
+
+df_select2_balanced1_6lvl_miss <- df_select2_balanced1_3levels %>%
+  mutate(across(where(is.factor),
+                ~ replace_na(factor(.x,
+                                    levels = c(levels(.x),
+                                               "Missing")),
+                             "Missing")))
+
+
 
 # SCHL does have good info.
 
