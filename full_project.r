@@ -213,10 +213,10 @@ logical_columns <- df_columns_info %>%
   pull(column_name)
 
 df <- df %>%
-  mutate(across(all_of(logical_columns), as.logical)) %>%
+  mutate(across(all_of(logical_columns), as.factor)) %>%
   mutate(across(all_of(matches(paste0("^DETAILED-",
                                       paste(logical_columns, collapse = "|"),
-                                      "_"))), as.logical))
+                                      "_"))), as.factor))
 
 # Factor_Levels - update columns based on variable_type in df_columns_info
 factor_levels_columns <- df_columns_info %>%
@@ -234,7 +234,7 @@ df <- df %>%
 
 # Integer - update columns to integer based on variable_type in df_columns_info
 integer_columns <- df_columns_info %>%
-  filter(variable_type == "integer", column_name %in% names(df)) %>%
+  filter(variable_type == "integer") %>%
   pull(column_name)
 
 df <- df %>% 
@@ -452,7 +452,7 @@ df_select2_balanced1 <- df_balanced1
 
 #---- 4-2-1-1 *          Factor and Logical Variables --------------------------
 
-df_select2_balanced1_factors <- df_select2_balanced1 %>%
+df_select2_balanced1_1factors <- df_select2_balanced1 %>%
   select(matches(paste0("^DETAILED-(",
                         paste(df_columns_info %>%
                                 filter(variable_type %in%
@@ -460,7 +460,7 @@ df_select2_balanced1_factors <- df_select2_balanced1 %>%
                                 pull(column_name), 
                               collapse = "|"), ")_")))
 
-df_select2_balanced1_logical <- df_select2_balanced1 %>%
+df_select2_balanced1_2logical <- df_select2_balanced1 %>%
   select(matches(paste0("^DETAILED-(",
                         paste(df_columns_info %>%
                                 filter(variable_type %in%
@@ -468,7 +468,7 @@ df_select2_balanced1_logical <- df_select2_balanced1 %>%
                                 pull(column_name), 
                               collapse = "|"), ")_")))
 
-df_select2_balanced1_levels <- df_select2_balanced1 %>%
+df_select2_balanced1_3levels <- df_select2_balanced1 %>%
   select(matches(paste0("^DETAILED-(",
                         paste(df_columns_info %>%
                                 filter(variable_type %in%
@@ -477,14 +477,14 @@ df_select2_balanced1_levels <- df_select2_balanced1 %>%
                               collapse = "|"), ")_")))
 
 ##### Replace NAs with Missing
-df_select2_bal1_factr_miss <- df_select2_balanced1_factors %>%
+df_select2_balanced1_4fct_miss <- df_select2_balanced1_1factors %>%
   mutate(across(everything(),
                 ~ replace_na(factor(.x,
                                     levels = c(levels(.x),
                                                "Missing")),
                              "Missing")))
 
-df_select2_bal1_logical_miss <- df_select2_balanced1_logical %>%
+df_select2_balanced1_5log_miss <- df_select2_balanced1_2logical %>%
   mutate(across(where(is.logical), ~ factor(.x, levels = c(FALSE, TRUE)))) %>%
   mutate(across(everything(),
                 ~ replace_na(factor(.x,
@@ -492,16 +492,12 @@ df_select2_bal1_logical_miss <- df_select2_balanced1_logical %>%
                                                "Missing")),
                              "Missing")))
 
-df_select2_bal1_levels_miss <- df_select2_balanced1_levels %>%
+df_select2_balanced1_6lvl_miss <- df_select2_balanced1_3levels %>%
   mutate(across(where(is.factor),
                 ~ replace_na(factor(.x,
                                     levels = c(levels(.x),
                                                "Missing")),
                              "Missing")))
-
-# Export df_select2_balanced1 to CSV
-write.csv(df_select2_balanced1, file = "df_select2_balanced1.csv",
-          row.names = FALSE)
 
 ##### Will use Fisher test over Chi-square to handle sparse data.
 
@@ -513,14 +509,14 @@ fisher_not_possible <- c("SCHL", "ANC1P", "DETAILED-SCHL",
 
 fisher_results <- list()
 
-for (col in names(df_select2_bal1_factr_miss)) {
+for (col in names(df_select2_balanced1_1factors)) {
   print(paste(Sys.time(), "- Processing column:", col))
   if (any(startsWith(col, fisher_not_possible))) {
     print(paste("Skipping column:", col))
     next
   }
   tryCatch({
-    table_data <- table(df_select2_bal1_factr_miss[[col]],
+    table_data <- table(df_select2_balanced1_1factors[[col]],
                         df_select2_balanced1$Class)
     fisher_test <- fisher.test(table_data, workspace = 1e9)
     fisher_results[[col]] <- list(column = col, p_value = fisher_test$p.value)
