@@ -820,7 +820,7 @@ test_predictions <- predict(logistic_model,
                             newdata = df_test, type = "response")
 
 # Convert probabilities to binary predictions
-test_predicted_class <- ifelse(test_predictions > 0.5, 1, 0)
+test_predicted_class <- ifelse(test_predictions > 0.2, 1, 0)
 
 # Confusion matrix
 confusion_matrix <- table(Predicted = test_predicted_class,
@@ -892,6 +892,12 @@ calculate_measures <- function(tp_0, fp_0, tn_0, fn_0, tp_1, fp_1, tn_1, fn_1) {
               tpr_1, fpr_1, tnr_1, fnr_1,
               precision_1, recall_1, f_measure_1, mcc_1, k_1)
   measure_df <- data.frame(measures, values)
+
+  weight0 <- sum(df_train$Class == 0) / nrow(df_train)
+  weight1 <- sum(df_train$Class == 1) / nrow(df_train)
+  ratio <- weight0 / weight1
+  print(paste("Ratio of Class 0 to Class 1:", ratio))
+
   return(measure_df)
 }
 
