@@ -542,17 +542,21 @@ df_sel2_bal1_fisher_plt <- df_sel2_bal1_fisher_results %>%
   mutate(P_value = as.numeric(as.character(P_value))) %>%
   arrange(P_value)
 
-ggplot(df_sel2_bal1_fisher_plt,
-       aes(x = reorder(substr(Column, 10, 60), -P_value),
-           y = -log10(P_value))) +
+plt_sel2_bal1_fisher <-
+  ggplot(df_sel2_bal1_fisher_plt,
+         aes(x = reorder(substr(Column, 10, 60), -P_value),
+             y = -log10(P_value))) +
   geom_bar(stat = "identity", fill = "steelblue") +
   geom_hline(yintercept = -log10(0.01), color = "red", linetype = "dashed") +
   coord_flip() +
   labs(title = "Fisher Scores for Categorical and Logical Variables 
-      with Missing Included",
+       with Missing Included",
        x = "",
        y = "-log10(P-value)") +
   theme_minimal()
+
+ggsave("plt_sel2_bal1_fisher.png", plot = plt_sel2_bal1_fisher,
+       width = 6, height = 5.5, dpi = 300)
 
 # Display the Fisher results ordered by -log10(P_value) from largest to smallest
 fisher_results_df %>%
