@@ -569,17 +569,18 @@ df_select2_balanced1 <- df_select2_balanced1 %>%
 
 #---- 4-2-1-2 *          Integer Variables -------------------------------------
 
-in_select1_cor_threshold <- 0.75
+df_select2_balanced1_4integers <- df_balanced1 %>%
+  select(Class, matches(paste0("^DETAILED-(",
+                               paste(df_columns_info %>%
+                                       filter(variable_type %in%
+                                                c("integer")) %>%
+                                       pull(column_name),
+                                     collapse = "|"), ")_")))
 
-# Collinearity
-
-df_select2_balanced1_integers <- df_select2_balanced1 %>%
-  select(where(is.integer))
-
-df_balanced1_select1 <- df_balanced1
+in_select1_cor_threshold <- 0.1
 
 repeat {
-  df_numeric <- df_balanced1_select1 %>%
+  df_numeric <- df_select2_balanced1_4integers %>%
     mutate(across(where(is.integer), as.numeric))
 
   # Check for collinearity using a correlation matrix
@@ -618,7 +619,7 @@ repeat {
   # Remove the variable with the highest sum of correlations
   highly_correlated <- ifelse(row_sum1 > row_sum2, most_correlated_vars[1],
                               most_correlated_vars[2])
-  df_balanced1_select1 <- df_numeric %>%
+  df_select2_balanced1_4integers <- df_numeric %>%
     select(-all_of(highly_correlated))
 
   print(paste("Removed variable:", highly_correlated))
@@ -626,13 +627,10 @@ repeat {
 
 #---- 4-2-1-3 *          Outliers ----------------------------------------------
 # Create boxplots for each numeric variable in the dataset
-integer_columns <- df_columns_info %>%
-  filter(variable_type == "integer") %>%
-  pull(column_name)
 
 # Generate boxplots dynamically for all numeric columns
-boxplots <- lapply(integer_columns, function(col) {
-  ggplot(df_balanced1, aes(x = "", y = .data[[col]])) +
+boxplots <- lapply(df_select2_balanced1_4integers, function(col) {
+  ggplot(df_select2_balanced1_4integers, aes(x = "", y = .data[[col]])) +
     geom_boxplot() +
     theme(axis.title.x = element_blank(),
           axis.text.x = element_blank(),
@@ -640,8 +638,29 @@ boxplots <- lapply(integer_columns, function(col) {
 })
 
 # Arrange boxplots in a grid
-boxplots <- boxplots[order(names(integer_columns))]
-grid.arrange(grobs = boxplots, ncol = 10)
+#boxplots <- boxplots[order(colnames(df_select2_balanced1_4integers))]
+
+plt_list <- lapply(names(df_select2_balanced1_4integers)
+                   [names(df_select2_balanced1_4integers) != "Class"],
+                   function(col_name) {
+                     ggplot(df_select2_balanced1_4integers,
+                            aes(x = "", y = .data[[col_name]])) +
+                       geom_boxplot() +
+                       labs(title = 
+                              substr(col_name, 10, regexpr("_", col_name) - 1),
+                            y = substr(col_name, regexpr("_", col_name) + 1,
+                                       regexpr("_", col_name) + 60)) +
+                       theme(plot.title = element_text(hjust = .9)) +
+                       theme_minimal() +
+                       theme(
+                             axis.title.x = element_blank(),
+                             axis.text.x  = element_blank(),
+                             axis.ticks.x = element_blank(),
+                             axis.text.y  = element_blank(),
+                             axis.ticks.y = element_blank())
+                  })
+
+grid.arrange(grobs = plt_list, ncol = 7)
 
 #---- 4-2-1-4 *          Final -------------------------------------------------
 
