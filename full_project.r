@@ -22,7 +22,7 @@ library(rsample)
 library(ROSE)
 
 ################################################################################
-#---- 1DONE ******* Preprocess - Project Step 1 ----------- df_preprocessed ----
+#---- 1-DONE ******* Preprocess - Project Step 1 ---------- df_preprocessed ----
 ################################################################################
 
 # Load the dataset
@@ -266,7 +266,7 @@ write.csv(df_preprocessed, file = "df_preprocessed.csv", row.names = FALSE)
 save(df_preprocessed, file = "df_preprocessed.RData")
 
 ################################################################################
-#---- 2DONE ******* Split - Project Step 2 -------------- df_train, df_test ----
+#---- 2-DONE ******* Split - Project Step 2 ------------- df_train, df_test ----
 ################################################################################
 
 # Optional - Load the preprocessed dataset
@@ -290,7 +290,7 @@ save(df_train, file = "df_train.RData")
 save(df_test, file = "df_test.RData")
 
 ################################################################################
-#---- 3DONE ******* Balance - Project Step 3 --- df_balanced1, df_balanced2 ----
+#---- 3-DONE ******* Balance - Project Step 3 -- df_balanced1, df_balanced2 ----
 ################################################################################
 
 # Not using SMOTE because we have a large number of categorical variables.
@@ -304,7 +304,7 @@ save(df_test, file = "df_test.RData")
 # print(paste("Loaded testing dataset - dim:", dim(df_test)[1], ",", dim(df_test)[2]))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#---- 3.1DONE *****    Balance - Method 1 - Down Sample ------ df_balanced1 ----
+#---- 3.1-DONE *****    Balance - Method 1 - Down Sample ----- df_balanced1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Undersampling
@@ -321,7 +321,7 @@ print(paste("training balanced 1 dataset - class distribution:",
 save(df_balanced1, file = "df_balanced1.RData")
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#---- 3.2DONE *****    Balance - Method 2 - Up Sample -------- df_balanced2 ----
+#---- 3.2-DONE *****    Balance - Method 2 - Up Sample ------- df_balanced2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Upsampling
@@ -362,10 +362,10 @@ save(df_balanced2, file = "df_balanced2.RData")
 #            dim(df_balanced2)[1], ",", dim(df_balanced2)[2]))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#---- 4-1 *****    Select 1 - Missing Removal -------- df_select1_balanced# ----
+#---- 4-1-DONE *****    Select 1 - Missing Removal --- df_select1_balanced# ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#---- 4-1-1 ***       Select 1 - balanced 1 ---------- df_select1_balanced1 ----
+#---- 4-1-1-DONE ***       Select 1 - balanced 1 ----- df_select1_balanced1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Inputs that can be tuned
@@ -412,7 +412,7 @@ df_select1_balanced1 <- df_processing_filt_rows
 
 save(df_select1_balanced1, file = "df_select1_balanced1.RData")
 
-#---- 4-1-2 ***       Select 1 - balanced 2 ---------- df_select1_balanced2 ----
+#---- 4-1-2-DONE ***       Select 1 - balanced 2 ----- df_select1_balanced2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Columns
