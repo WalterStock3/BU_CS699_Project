@@ -551,12 +551,14 @@ plt_sel2_bal1_fisher <-
   coord_flip() +
   labs(title = "Fisher Scores for Categorical and Logical Variables 
        with Missing Included",
+       subtitle = "Select 2 - Balanced 1",
+       caption = "Red line indicates p-value threshold of 0.01",
        x = "",
        y = "-log10(P-value)") +
   theme_minimal()
 
 ggsave("plt_sel2_bal1_fisher.png", plot = plt_sel2_bal1_fisher,
-       width = 6, height = 5.5, dpi = 300)
+       width = 10, height = 12, dpi = 300)
 
 # Display the Fisher results ordered by -log10(P_value) from largest to smallest
 fisher_results_df %>%
