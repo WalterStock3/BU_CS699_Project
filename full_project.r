@@ -22,7 +22,7 @@ library(rsample)
 library(ROSE)
 
 ################################################################################
-#---- 1-DONE ******* Preprocess - Project Step 1 ---------- df_preprocessed ----
+#---- 1 DONE ******* Preprocess - Project Step 1 ---------- df_preprocessed ----
 ################################################################################
 
 # Load the dataset
@@ -266,7 +266,7 @@ write.csv(df_preprocessed, file = "df_preprocessed.csv", row.names = FALSE)
 save(df_preprocessed, file = "df_preprocessed.RData")
 
 ################################################################################
-#---- 2-DONE ******* Split - Project Step 2 ------------- df_train, df_test ----
+#---- 2 DONE ******* Split - Project Step 2 ------------- df_train, df_test ----
 ################################################################################
 
 # Optional - Load the preprocessed dataset
@@ -290,7 +290,7 @@ save(df_train, file = "df_train.RData")
 save(df_test, file = "df_test.RData")
 
 ################################################################################
-#---- 3-DONE ******* Balance - Project Step 3 -- df_balanced1, df_balanced2 ----
+#---- 3 DONE ******* Balance - Project Step 3 -- df_balanced1, df_balanced2 ----
 ################################################################################
 
 # Not using SMOTE because we have a large number of categorical variables.
@@ -304,7 +304,7 @@ save(df_test, file = "df_test.RData")
 # print(paste("Loaded testing dataset - dim:", dim(df_test)[1], ",", dim(df_test)[2]))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#---- 3.1-DONE *****    Balance - Method 1 - Down Sample ----- df_balanced1 ----
+#---- 3.1 DONE *****    Balance - Method 1 - Down Sample ----- df_balanced1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Undersampling
@@ -321,7 +321,7 @@ print(paste("training balanced 1 dataset - class distribution:",
 save(df_balanced1, file = "df_balanced1.RData")
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#---- 3.2-DONE *****    Balance - Method 2 - Up Sample ------- df_balanced2 ----
+#---- 3.2 DONE *****    Balance - Method 2 - Up Sample ------- df_balanced2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Upsampling
@@ -338,7 +338,7 @@ print(paste("training balanced 2 dataset - class distribution:",
 save(df_balanced2, file = "df_balanced2.RData")
 
 ################################################################################
-#---- 4 ******* Select - Project Step 4 -------------- df_select#_balanced# ----
+#---- 4 PROG ******* Select - Project Step 4 --------- df_select#_balanced# ----
 ################################################################################
 #
 #    Chapter 4 - Dimension Reduction
@@ -362,10 +362,10 @@ save(df_balanced2, file = "df_balanced2.RData")
 #            dim(df_balanced2)[1], ",", dim(df_balanced2)[2]))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#---- 4-1-DONE *****    Select 1 - Missing Removal --- df_select1_balanced# ----
+#---- 4-1 DONE *****    Select 1 - Missing Removal --- df_select1_balanced# ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#---- 4-1-1-DONE ***       Select 1 - balanced 1 ----- df_select1_balanced1 ----
+#---- 4-1-1 DONE ***       Select 1 - balanced 1 ----- df_select1_balanced1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Inputs that can be tuned
@@ -412,7 +412,7 @@ df_select1_balanced1 <- df_processing_filt_rows
 
 save(df_select1_balanced1, file = "df_select1_balanced1.RData")
 
-#---- 4-1-2-DONE ***       Select 1 - balanced 2 ----- df_select1_balanced2 ----
+#---- 4-1-2 DONE ***       Select 1 - balanced 2 ----- df_select1_balanced2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Columns
@@ -456,15 +456,15 @@ df_select1_balanced2 <- df_processing_filt_rows
 save(df_select1_balanced2, file = "df_select1_balanced2.RData")
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#---- 4-2 *****    Select 2 - Fisher and Corr -------- df_select2_balanced# ----
+#---- 4-2 DONE *****    Select 2 - Fisher and Corr --- df_select2_balanced# ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#---- 4-2-1 ***       Select 2 - balanced 1 ---------- df_select2_balanced1 ----
+#---- 4-2-1 DONE ***       Select 2 - balanced 1 ----- df_select2_balanced1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 df_select2_balanced1 <- df_balanced1
 
-#---- 4-2-1-1 *          Factor and Logical Variables --------------------------
+#---- 4-2-1-1-DONE *          Factor and Logical Variables ---------------------
 
 in_row_limit <- 2
 
@@ -576,7 +576,7 @@ top_cols <- df_sel2_bal1_fisher_results %>%
 df_select2_balanced1 <- df_select2_balanced1 %>%
   select(Class, all_of(top_cols))
 
-#---- 4-2-1-2 *          Integer Variables -------------------------------------
+#---- 4-2-1-2 DONE *          Integer Variables --------------------------------
 
 df_select2_balanced1_4integers <- df_balanced1 %>%
   select(Class, matches(paste0("^DETAILED-(",
@@ -634,7 +634,7 @@ repeat {
   print(paste("Removed variable:", highly_correlated))
 }
 
-#---- 4-2-1-3 *          Outliers ----------------------------------------------
+#---- 4-2-1-3 DONE *          Outliers -----------------------------------------
 # Create boxplots for each numeric variable in the dataset
 
 # Generate boxplots dynamically for all numeric columns
@@ -666,7 +666,10 @@ plt_list <- lapply(names(df_select2_balanced1_4integers)
                              axis.ticks.y = element_blank())
                   })
 
-grid.arrange(grobs = plt_list, ncol = 7)
+plt_sel2_bal1_corr <- grid.arrange(grobs = plt_list, ncol = 7)
+
+ggsave("plt_sel2_bal1_corr.png",
+       plot = plt_sel2_bal1_corr, width = 10, height = 16, dpi = 300)
 
 # Based on boxplot distributions adding Income to Poverty Ratio and Work Hours.
 df_select2_balanced1 <- df_select2_balanced1 %>%
@@ -674,24 +677,24 @@ df_select2_balanced1 <- df_select2_balanced1 %>%
               select(starts_with("DETAILED-POVPIP"),
                      starts_with("DETAILED-WKHP")))
 
-#---- 4-2-1-4 *          Final -------------------------------------------------
+#---- 4-2-1-4 DONE *          Final --------------------------------------------
 
 save(df_select2_balanced1, file = "df_select2_balanced1.RData")
 
-#---- 4-2-2 ***       Select 2 - balanced 2 ---------- df_select2_balanced2 ----
+#---- 4-2-2 PEND ***       Select 2 - balanced 2 ----- df_select2_balanced2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 df_select2_balanced2 <- df_balanced2
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#---- 4-3 *****    Select 3 - Missing Added ---------- df_select3_balanced1 ----
+#---- 4-3 PROG *****    Select 3 - Missing Added ----- df_select3_balanced1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#---- 4-3-1 ***       Select 3 - balanced 1 ---------- df_select3_balanced1 ----
+#---- 4-3-1 PROG ***       Select 3 - balanced 1 ----- df_select3_balanced1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 df_select3_balanced1 <- df_balanced1
 
-#---- 4-3-1-1 *          Factor and Logical Variables --------------------------
+#---- 4-3-1-1 PROG *          Factor and Logical Variables ---------------------
 
 in_row_limit_with_missing <- 1
 
@@ -794,12 +797,12 @@ df_select2_balanced1 <- df_select2_balanced1 %>%
 df_select2_balanced1_factors <- df_select2_balanced1 %>%
   select(where(is.factor))
 
-#---- 4-3-2 ***       Select - Method 3 balanced dataset 2 ---------------------
+#---- 4-3-2 PEND ***       Select - 3 balanced dataset 2 -----------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 df_select3_balanced2 <- df_balanced2
 
 ################################################################################
-#---- 5 ******* Models - Project Step 5 ----------------------------------------
+#---- 5 PROG ******* Models - Project Step 5 -----------------------------------
 ################################################################################
 
 ## Models - Project Step 5
@@ -811,8 +814,8 @@ df_select3_balanced2 <- df_balanced2
 # * Neural networks.
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#---- 5-1 ***** Model 1 Logistic Regression ------------------------------------
-#---- 5-2-1 *** Model 1 Logistic Regression - s2b1 -----------------------
+#---- 5-1 PROG ***** Model 1 Logistic Regression -------------------------------
+#---- 5-1-3 PROG ***       Model 1 Logistic Regression - s2b1 ------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Logistic Regression Model
@@ -987,14 +990,10 @@ print(paste("Weighted Average F-measure:", weighted_average_f_measure))
 #print(paste("Kappa:", kappa))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#---- 5-1-2 ***       Model 1-2 Naive Bayes ------------------------------------
+#---- 5-2 PEND ***** Model 2 K-Nearest Neighbors -------------------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-model_nb <- naiveBayes(Class ~ ., data = df_balanced1_select1)
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#---- 5-2 ***** Model 2 K-Nearest Neighbors ------------------------------------
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#---- 5-2-1 PEND ***       Model 2 KNN - s1b1 ----------------------------------
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #---- 5-3 ***** Model 3 Decision Tree ------------------------------------------
