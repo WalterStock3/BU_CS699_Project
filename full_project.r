@@ -565,7 +565,7 @@ top_cols <- df_sel2_bal1_fisher_results %>%
 
 # Create a new dataframe with those columns
 df_select2_balanced1 <- df_select2_balanced1 %>%
-  select(all_of(top_cols))
+  select(Class, all_of(top_cols))
 
 #---- 4-2-1-2 *          Integer Variables -------------------------------------
 
@@ -803,32 +803,33 @@ df_select3_balanced2 <- df_balanced2
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #---- 5-1 ***** Model 1 Logistic Regression ------------------------------------
+#---- 5-2-1 *** Model 1 Logistic Regression - s2b1 -----------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Logistic Regression Model
-logistic_model <- glm(Class ~ ., data = df_balanced1_select1, family = binomial)
+df_logistic_s2b1 <- df_select2_balanced1 %>%
+  select(Class, where(is.integer))
+
+logistic_model <- glm(Class ~ ., data = df_logistic_s2b1, family = binomial)
 
 # Summary of the model
 summary(logistic_model)
 
 # Predict on the test dataset
-test_predictions <- predict(logistic_model, newdata = test, type = "response")
+test_predictions <- predict(logistic_model,
+                            newdata = df_test, type = "response")
 
 # Convert probabilities to binary predictions
 test_predicted_class <- ifelse(test_predictions > 0.5, 1, 0)
 
 # Confusion matrix
-confusion_matrix <- table(Predicted = test_predicted_class, Actual = test$Class)
+confusion_matrix <- table(Predicted = test_predicted_class,
+                          Actual = df_test$Class)
 print(confusion_matrix)
 
 # Calculate accuracy
 accuracy <- sum(diag(confusion_matrix)) / sum(confusion_matrix)
 print(paste("Accuracy:", accuracy))
-
-#         Actual
-#Predicted   0   1
-#        0 923  24
-#        1 286  63
 
 # TPR No
 tp_0 <- confusion_matrix[1, 1]
