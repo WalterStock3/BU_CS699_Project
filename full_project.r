@@ -254,6 +254,9 @@ df <- df %>%
                                       paste(integer_columns, collapse = "|"),
                                       "_"))), as.integer))
 
+df <- df %>%
+  mutate(across(names(df)[columns_with_invalid], ~ na_if(.x, "Invalid Number")))
+
 df_preprocessed <- df
 
 # Export df_preprocessed as a CSV file
