@@ -22,7 +22,7 @@ library(rsample)
 library(ROSE)
 
 ################################################################################
-#---- 1 ******* Preprocess - Project Step 1 --------------- df_preprocessed ----
+#---- 1DONE ******* Preprocess - Project Step 1 ----------- df_preprocessed ----
 ################################################################################
 
 # Load the dataset
@@ -266,7 +266,7 @@ write.csv(df_preprocessed, file = "df_preprocessed.csv", row.names = FALSE)
 save(df_preprocessed, file = "df_preprocessed.RData")
 
 ################################################################################
-#---- 2 ******* Split - Project Step 2 ------------------ df_train, df_test ----
+#---- 2DONE ******* Split - Project Step 2 -------------- df_train, df_test ----
 ################################################################################
 
 # Optional - Load the preprocessed dataset
@@ -278,19 +278,19 @@ split <- initial_split(df_preprocessed, prop = 0.7, strata = "Class")
 df_train <- training(split)
 df_test <- testing(split)
 
-print(paste("training dataset - dim:", dim(train)[1], ",", dim(train)[2]))
-print(paste("testing dataset - dim:", dim(test)[1], ",", dim(test)[2]))
+print(paste("training dataset - dim:", dim(df_train)[1], ",", dim(df_train)[2]))
+print(paste("testing dataset - dim:", dim(df_test)[1], ",", dim(df_test)[2]))
 print(paste("training dataset - class distribution:",
-            table(train$Class)[1], ",", table(train$Class)[2]))
+            table(df_train$Class)[1], ",", table(df_train$Class)[2]))
 print(paste("testing dataset - class distribution:",
-            table(test$Class)[1], ",", table(test$Class)[2]))
+            table(df_test$Class)[1], ",", table(df_test$Class)[2]))
 
 # Save df_train and df_test to R data files
 save(df_train, file = "df_train.RData")
 save(df_test, file = "df_test.RData")
 
 ################################################################################
-#---- 3 ******* Balance - Project Step 3 ------- df_balanced1, df_balanced2 ----
+#---- 3DONE ******* Balance - Project Step 3 --- df_balanced1, df_balanced2 ----
 ################################################################################
 
 # Not using SMOTE because we have a large number of categorical variables.
@@ -304,7 +304,7 @@ save(df_test, file = "df_test.RData")
 # print(paste("Loaded testing dataset - dim:", dim(df_test)[1], ",", dim(df_test)[2]))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#---- 3.1 *****    Balance - Method 1 - Down Sample ---------- df_balanced1 ----
+#---- 3.1DONE *****    Balance - Method 1 - Down Sample ------ df_balanced1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Undersampling
@@ -321,7 +321,7 @@ print(paste("training balanced 1 dataset - class distribution:",
 save(df_balanced1, file = "df_balanced1.RData")
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#---- 3.2 *****    Balance - Method 2 - Up Sample ------------ df_balanced2 ----
+#---- 3.2DONE *****    Balance - Method 2 - Up Sample -------- df_balanced2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Upsampling
