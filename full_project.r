@@ -22,7 +22,7 @@ library(rsample)
 library(ROSE)
 
 ################################################################################
-#---- 1 ******* Preprocess - Project Step 1 -- df_preprocessed -----------------
+#---- 1 ******* Preprocess - Project Step 1 --------------- df_preprocessed ----
 ################################################################################
 
 # Load the dataset
@@ -263,7 +263,7 @@ write.csv(df_preprocessed, file = "df_preprocessed.csv", row.names = FALSE)
 save(df_preprocessed, file = "df_preprocessed.RData")
 
 ################################################################################
-#---- 2 ******* Split - Project Step 2 -- df_train, df_test --------------------
+#---- 2 ******* Split - Project Step 2 ------------------ df_train, df_test ----
 ################################################################################
 
 # Optional - Load the preprocessed dataset
@@ -287,7 +287,7 @@ save(df_train, file = "df_train.RData")
 save(df_test, file = "df_test.RData")
 
 ################################################################################
-#---- 3 ******* Balance - Project Step 3 -- df_balanced1, df_balanced2 ---------
+#---- 3 ******* Balance - Project Step 3 ------- df_balanced1, df_balanced2 ----
 ################################################################################
 
 # Not using SMOTE because we have a large number of categorical variables.
@@ -301,7 +301,7 @@ save(df_test, file = "df_test.RData")
 # print(paste("Loaded testing dataset - dim:", dim(df_test)[1], ",", dim(df_test)[2]))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#---- 3.1 *****    Balance - Method 1 - Down Sample -- df_balanced1 ------------
+#---- 3.1 *****    Balance - Method 1 - Down Sample ---------- df_balanced1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Undersampling
@@ -318,7 +318,7 @@ print(paste("training balanced 1 dataset - class distribution:",
 save(df_balanced1, file = "df_balanced1.RData")
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#---- 3.2 *****    Balance - Method 2 - Up Sample -- df_balanced2 --------------
+#---- 3.2 *****    Balance - Method 2 - Up Sample ------------ df_balanced2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Upsampling
@@ -335,7 +335,7 @@ print(paste("training balanced 2 dataset - class distribution:",
 save(df_balanced2, file = "df_balanced2.RData")
 
 ################################################################################
-#---- 4 ******* Select - Project Step 4 -- df_select#_balanced# ----------------
+#---- 4 ******* Select - Project Step 4 -------------- df_select#_balanced# ----
 ################################################################################
 #
 #    Chapter 4 - Dimension Reduction
@@ -359,10 +359,10 @@ save(df_balanced2, file = "df_balanced2.RData")
 #            dim(df_balanced2)[1], ",", dim(df_balanced2)[2]))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#---- 4-1 *****    Select - 1 - Missing Removal -- df_select1_balanced# --------
+#---- 4-1 *****    Select 1 - Missing Removal -------- df_select1_balanced# ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#---- 4-1-1 ***       Select - 1 - Missing Removal -- df_select1_balanced1 -----
+#---- 4-1-1 ***       Select 1 - balanced 1 ---------- df_select1_balanced1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Inputs that can be tuned
@@ -409,7 +409,7 @@ df_select1_balanced1 <- df_processing_filt_rows
 
 save(df_select1_balanced1, file = "df_select1_balanced1.RData")
 
-#---- 4-1-2 ***       Select - 1 - Missing Removal -- df_select1_balanced2 -----
+#---- 4-1-2 ***       Select 1 - balanced 2 ---------- df_select1_balanced2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Columns
@@ -453,19 +453,19 @@ df_select1_balanced2 <- df_processing_filt_rows
 save(df_select1_balanced2, file = "df_select1_balanced2.RData")
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#---- 4-2 *****    Select - 2 - Fisher and Corr -- df_select2_balanced# --------
+#---- 4-2 *****    Select 2 - Fisher and Corr -------- df_select2_balanced# ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#---- 4-2-1 ***       Select - 2 - Fisher and Corr -- df_select2_balanced1 -----
+#---- 4-2-1 ***       Select 2 - balanced 1 ---------- df_select2_balanced1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 df_select2_balanced1 <- df_balanced1
 
 #---- 4-2-1-1 *          Factor and Logical Variables --------------------------
 
-in_row_limit <- 1
+in_row_limit <- 2
 
-df_select2_balanced1_1factors <- df_select2_balanced1 %>%
+df_select2_balanced1_1factors <- df_balanced1 %>%
   select(Class, matches(paste0("^DETAILED-(",
                         paste(df_columns_info %>%
                                 filter(variable_type %in%
@@ -473,9 +473,7 @@ df_select2_balanced1_1factors <- df_select2_balanced1 %>%
                                 pull(column_name), 
                               collapse = "|"), ")_")))
 
-
-
-df_select2_balanced1_2logical <- df_select2_balanced1 %>%
+df_select2_balanced1_2logical <- df_balanced1 %>%
   select(Class, matches(paste0("^DETAILED-(",
                         paste(df_columns_info %>%
                                 filter(variable_type %in%
@@ -483,7 +481,7 @@ df_select2_balanced1_2logical <- df_select2_balanced1 %>%
                                 pull(column_name), 
                               collapse = "|"), ")_")))
 
-df_select2_balanced1_3levels <- df_select2_balanced1 %>%
+df_select2_balanced1_3levels <- df_balanced1 %>%
   select(Class, matches(paste0("^DETAILED-(",
                         paste(df_columns_info %>%
                                 filter(variable_type %in%
@@ -537,11 +535,11 @@ df_sel2_bal1_fisher_results$neg_log10_P_value <-
   -log10(df_sel2_bal1_fisher_results$P_value)
 
 # Create a bar plot for Fisher scores
-df_sel2_bal1_fisher_results_plt <- df_sel2_bal1_fisher_results %>%
+df_sel2_bal1_fisher_plt <- df_sel2_bal1_fisher_results %>%
   mutate(P_value = as.numeric(as.character(P_value))) %>%
   arrange(P_value)
 
-ggplot(df_sel2_bal1_fisher_results_plt,
+ggplot(df_sel2_bal1_fisher_plt,
        aes(x = reorder(substr(Column, 10, 60), -P_value),
            y = -log10(P_value))) +
   geom_bar(stat = "identity", fill = "steelblue") +
@@ -559,21 +557,15 @@ fisher_results_df %>%
   head(10) %>%
   print()
 
-# Identify the 2 columns with the highest neg_log10_P_value
+# Identify the in_row_limit columns with the highest neg_log10_P_value
 top_cols <- df_sel2_bal1_fisher_results %>%
   arrange(desc(neg_log10_P_value)) %>%
-  slice_head(n = 2) %>%
+  slice_head(n = in_row_limit) %>%
   pull(Column)
 
 # Create a new dataframe with those columns
 df_select2_balanced1 <- df_select2_balanced1 %>%
   select(all_of(top_cols))
-
-# Use Correlation to check for independence between numeric variables
-#   and the target variable.
-
-df_select2_balanced1_factors <- df_select2_balanced1 %>%
-  select(where(is.factor))
 
 #---- 4-2-1-2 *          Integer Variables -------------------------------------
 
@@ -632,7 +624,7 @@ repeat {
   print(paste("Removed variable:", highly_correlated))
 }
 
-#---- 4-2-1-3            Outliers ----------------------------------------------
+#---- 4-2-1-3 *          Outliers ----------------------------------------------
 # Create boxplots for each numeric variable in the dataset
 integer_columns <- df_columns_info %>%
   filter(variable_type == "integer") %>%
@@ -651,17 +643,27 @@ boxplots <- lapply(integer_columns, function(col) {
 boxplots <- boxplots[order(names(integer_columns))]
 grid.arrange(grobs = boxplots, ncol = 10)
 
-#---- 4-2-2 ***       Select - Method 2 - balanced dataset 2 -------------------
+#---- 4-2-1-4 *          Final -------------------------------------------------
+
+save(df_select2_balanced1, file = "df_select2_balanced1.RData")
+
+#---- 4-2-2 ***       Select 2 - balanced 2 ---------- df_select2_balanced2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 df_select2_balanced2 <- df_balanced2
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#---- 4-3 ***** Select - Method 3 - Manual -------------------------------------
+#---- 4-3 *****    Select 3 - Missing Added ---------- df_select3_balanced1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#---- 4-3-1 ***       Select - Method 3 - balanced dataset 1 -------------------
+#---- 4-3-1 ***       Select 3 - balanced 1 ---------- df_select3_balanced1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-##### Replace NAs with Missing
+
+df_select3_balanced1 <- df_balanced1
+
+#---- 4-3-1-1 *          Factor and Logical Variables --------------------------
+
+in_row_limit_with_missing <- 1
+
 df_select2_balanced1_4fct_miss <- df_select2_balanced1_1factors %>%
   mutate(across(everything(),
                 ~ replace_na(factor(.x,
@@ -670,7 +672,6 @@ df_select2_balanced1_4fct_miss <- df_select2_balanced1_1factors %>%
                              "Missing")))
 
 df_select2_balanced1_5log_miss <- df_select2_balanced1_2logical %>%
-  mutate(across(where(is.logical), ~ factor(.x, levels = c(FALSE, TRUE)))) %>%
   mutate(across(everything(),
                 ~ replace_na(factor(.x,
                                     levels = c(levels(.x),
@@ -678,15 +679,89 @@ df_select2_balanced1_5log_miss <- df_select2_balanced1_2logical %>%
                              "Missing")))
 
 df_select2_balanced1_6lvl_miss <- df_select2_balanced1_3levels %>%
-  mutate(across(where(is.factor),
+  mutate(across(everything(),
                 ~ replace_na(factor(.x,
                                     levels = c(levels(.x),
                                                "Missing")),
                              "Missing")))
 
+df_select2_balanced1_merg_miss <- cbind(df_select2_balanced1_4fct_miss,
+                                        df_select2_balanced1_5log_miss,
+                                        df_select2_balanced1_6lvl_miss)
 
+##### Will use Fisher test over Chi-square to handle sparse data.
 
-# SCHL does have good info.
+# Some columns have too many levels to be used in Fisher test.
+# SCHL - LDSTP too small - 2e9
+# ANC1P - LDSTP too small - 1e9
+
+fisher_not_possible <- c("SCHL", "ANC1P", "DETAILED-SCHL_",
+                         "DETAILED-ANC1P_", 
+                         "RACNH", "DETAILED-RACNH_", "Class")
+
+sel3_bal1_fisher_results <- list()
+
+for (col in names(df_select2_balanced1_merg_miss)) {
+  print(paste(Sys.time(), "- Processing column:", col))
+  if (any(startsWith(col, fisher_not_possible))) {
+    print(paste("Skipping column:", col))
+    next
+  }
+  tryCatch({
+    table_data <- table(df_select2_balanced1_merg_miss[[col]],
+                        df_select2_balanced1_merg_miss$Class)
+    fisher_test <- fisher.test(table_data, workspace = 1e9)
+    sel3_bal1_fisher_results[[col]] <-
+      list(column = col, p_value = fisher_test$p.value)
+    print(paste(Sys.time(),
+                "- Fisher test column:", col, "p-value:", fisher_test$p.value))
+  }, error = function(e) {
+    message(paste("Error processing column:", col, "-", e$message))
+    sel3_bal1_fisher_results[[col]] <- list(column = col, p_value = NA)
+  })
+}
+
+# Convert results to a data frame for easier interpretation
+df_sel3_bal1_fisher_results <- 
+  do.call(rbind, lapply(sel3_bal1_fisher_results, as.data.frame))
+
+names(df_sel3_bal1_fisher_results) <- c("Column", "P_value")
+
+df_sel3_bal1_fisher_results$neg_log10_P_value <-
+  -log10(df_sel3_bal1_fisher_results$P_value)
+
+# Create a bar plot for Fisher scores
+df_sel3_bal1_fisher_plt <- df_sel3_bal1_fisher_results %>%
+  mutate(P_value = as.numeric(as.character(P_value))) %>%
+  arrange(P_value)
+
+ggplot(df_sel3_bal1_fisher_plt,
+       aes(x = reorder(substr(Column, 10, 60), -P_value),
+           y = -log10(P_value))) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  geom_hline(yintercept = -log10(0.01), color = "red", linetype = "dashed") +
+  coord_flip() +
+  labs(title = "Fisher Scores for Categorical and Logical Variables 
+      with Missing Included",
+       x = "",
+       y = "-log10(P-value)") +
+  theme_minimal()
+
+# Identify the 2 columns with the highest neg_log10_P_value
+top_cols <- df_sel2_bal1_fisher_results %>%
+  arrange(desc(neg_log10_P_value)) %>%
+  slice_head(n = 2) %>%
+  pull(Column)
+
+# Create a new dataframe with those columns
+df_select2_balanced1 <- df_select2_balanced1 %>%
+  select(all_of(top_cols))
+
+# Use Correlation to check for independence between numeric variables
+#   and the target variable.
+
+df_select2_balanced1_factors <- df_select2_balanced1 %>%
+  select(where(is.factor))
 
 #---- 4-3-2 ***       Select - Method 3 balanced dataset 2 ---------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
