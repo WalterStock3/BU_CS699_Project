@@ -637,9 +637,6 @@ boxplots <- lapply(df_select2_balanced1_4integers, function(col) {
           axis.ticks.x = element_blank())
 })
 
-# Arrange boxplots in a grid
-#boxplots <- boxplots[order(colnames(df_select2_balanced1_4integers))]
-
 plt_list <- lapply(names(df_select2_balanced1_4integers)
                    [names(df_select2_balanced1_4integers) != "Class"],
                    function(col_name) {
@@ -661,6 +658,12 @@ plt_list <- lapply(names(df_select2_balanced1_4integers)
                   })
 
 grid.arrange(grobs = plt_list, ncol = 7)
+
+# Based on boxplot distributions adding Income to Poverty Ratio and Work Hours.
+df_select2_balanced1 <- df_select2_balanced1 %>%
+  bind_cols(df_balanced1 %>%
+              select(starts_with("DETAILED-POVPIP"),
+                     starts_with("DETAILED-WKHP")))
 
 #---- 4-2-1-4 *          Final -------------------------------------------------
 
