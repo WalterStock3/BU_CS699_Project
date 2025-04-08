@@ -74,8 +74,17 @@ calculate_all_measures <- function(in_model, in_test_df) {
   roc_curve <- roc(df_test$Class, test_predictions)
   auc_value <- auc(roc_curve)
 
+  # Convert AUC value to double
+  auc_value_double <- as.double(auc_value)
+
+  # Add ROC values to the performance measures dataframe
+  performance_measures <- performance_measures %>%
+    add_row(measures = "ROC_0", values = auc_value_double) %>%
+    add_row(measures = "ROC_1", values = auc_value_double) %>%
+    add_row(measures = "ROC_W", values = auc_value_double)
+
   # Print the AUC value
-  print(paste("Area Under the ROC Curve (AUC):", auc_value))
+  #print(paste("Area Under the ROC Curve (AUC):", auc_value))
 
   # Plot the ROC curve
   #plot(roc_curve, main = "ROC Curve", col = "blue", lwd = 2)
@@ -98,13 +107,20 @@ calculate_measures <- function(tp_0, fp_0, tn_0, fn_0, tp_1, fp_1, tn_1, fn_1) {
     (sqrt(tp_0 + fp_0) * sqrt(tp_0 + fn_0) *
        sqrt(tn_0 + fp_0) * sqrt(tn_0 + fn_0))
   
-  # Kappa statistic - starting
+  # Kappa total records
   total_0 <- (tp_0 + fn_0 + fp_0 + tn_0)
+  #print(paste("Kappa for 0, total_0:", total_0))
+
+  # Kappa - proportion of agreement to total records
   p_o_0 <- (tp_0 + tn_0) / total_0
   p_e1_0 <- ((tp_0 + fn_0) / total_0) * ((tp_0 + fp_0) / total_0)
+  #print(paste("Kappa for 0, p_e1_0:", p_e1_0))
   p_e2_0 <- ((fp_0 + tn_0) / total_0) * ((fn_0 + tn_0) / total_0)
+  #print(paste("Kappa for 0, p_e2_0:", p_e2_0))
   p_e_0 <- p_e1_0 + p_e2_0
+  #print(paste("Kappa for 0, p_e_0:", p_e_0))
   k_0 <- (p_o_0 - p_e_0) / (1 - p_e_0) # Kappa statistic
+  #print(paste("Kappa for 0, k_0:", k_0))
 
   tpr_1 <- tp_1 / (tp_1 + fn_1)
   fpr_1 <- fp_1 / (fp_1 + tn_1)
@@ -119,17 +135,23 @@ calculate_measures <- function(tp_0, fp_0, tn_0, fn_0, tp_1, fp_1, tn_1, fn_1) {
        sqrt(tn_1 + fp_1) * sqrt(tn_1 + fn_1))
 
   total_1 <- (tp_1 + fn_1 + fp_1 + tn_1)
+  #print(paste("Kappa for 1, total_1:", total_1))
   p_o_1 <- (tp_1 + tn_1) / total_1
+  #print(paste("Kappa for 1, p_o_1:", p_o_1))
   p_e1_1 <- ((tp_1 + fn_1) / total_1) * ((tp_1 + fp_1) / total_1)
+  #print(paste("Kappa for 1, p_e1_1:", p_e1_1))
   p_e2_1 <- ((fp_1 + tn_1) / total_1) * ((fn_1 + tn_1) / total_1)
+  #print(paste("Kappa for 1, p_e2_1:", p_e2_1))
   p_e_1 <- p_e1_1 + p_e2_1
+  #print(paste("Kappa for 1, p_e_1:", p_e_1))
   k_1 <- (p_o_1 - p_e_1) / (1 - p_e_1) # Kappa statistic
+  #print(paste("Kappa for 1, k_1:", k_1))
 
   weight0 <- sum(in_test_df$Class == 0) / nrow(in_test_df)
   weight1 <- sum(in_test_df$Class == 1) / nrow(in_test_df)
  
-  print(paste("Weight for Class 0 (weight0):", weight0))
-  print(paste("Weight for Class 1 (weight1):", weight1))
+  #print(paste("Weight for Class 0 (weight0):", weight0))
+  #print(paste("Weight for Class 1 (weight1):", weight1))
 
   tpr_w <- (tpr_0 * weight0 + tpr_1 * weight1)
   fpr_w <- (fpr_0 * weight0 + fpr_1 * weight1)
