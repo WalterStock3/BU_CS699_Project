@@ -20,58 +20,68 @@ library(gridExtra)
 library(caret)
 library(rsample)
 library(ROSE)
+library(pROC)
 
 #---- 0.1 PROG *****    Functions - Performance Evaluation ---------------------
 
 calculate_all_measures <- function(in_model, in_test_df) {
-# Predict on the test dataset
-test_predictions <- predict(in_model,
-                            newdata = in_test_df, type = "response")
+  in_test_df <- df_test
+  in_model <- m_logistic_s2b1
+  # Predict on the test dataset
+  test_predictions <- predict(in_model,
+                              newdata = in_test_df, type = "response")
 
-# Convert probabilities to binary predictions
-test_predicted_class <- ifelse(test_predictions > 0.5, 1, 0)
+  # Convert probabilities to binary predictions
+  test_predicted_class <- ifelse(test_predictions > 0.5, 1, 0)
 
-# Confusion matrix
-confusion_matrix <- table(Predicted = test_predicted_class,
-                          Actual = df_test$Class)
-print(confusion_matrix)
+  # Confusion matrix
+  confusion_matrix <- table(Predicted = test_predicted_class,
+                            Actual = df_test$Class)
+  print(confusion_matrix)
 
-# Calculate accuracy
-accuracy <- sum(diag(confusion_matrix)) / sum(confusion_matrix)
-print(paste("Accuracy:", accuracy))
+  # Calculate accuracy
+  accuracy <- sum(diag(confusion_matrix)) / sum(confusion_matrix)
+  print(paste("Accuracy:", accuracy))
 
-# TPR No
-tp_0 <- confusion_matrix[1, 1]
-fp_0 <- confusion_matrix[1, 2]
-tn_0 <- confusion_matrix[2, 2]
-fn_0 <- confusion_matrix[2, 1]
-tpr_0 <- tp_0 / (tp_0 + fn_0)
-print(paste("Class No True Positive Rate (TPR):", tpr_0))
+  # TPR No
+  tp_0 <- confusion_matrix[1, 1]
+  print(paste("Class No True Positive (TP):", tp_0))
+  fp_0 <- confusion_matrix[1, 2]
+  print(paste("Class No False Positive (FP):", fp_0))
+  tn_0 <- confusion_matrix[2, 2]
+  print(paste("Class No True Negative (TN):", tn_0))
+  fn_0 <- confusion_matrix[2, 1]
+  print(paste("Class No False Negative (FN):", fn_0))
+  tpr_0 <- tp_0 / (tp_0 + fn_0)
+  print(paste("Class No True Positive Rate (TPR):", tpr_0))
 
-# TPR Yes
-tp_1 <- confusion_matrix[2, 2]
-fp_1 <- confusion_matrix[2, 1]
-tn_1 <- confusion_matrix[1, 1]
-fn_1 <- confusion_matrix[1, 2]
-tpr_1 <- tp_1 / (tp_1 + fn_1)
-print(paste("Class Yes True Positive Rate (TPR):", tpr_1))
+  # TPR Yes
+  tp_1 <- confusion_matrix[2, 2]
+  print(paste("Class Yes True Positive (TP):", tp_1))
+  fp_1 <- confusion_matrix[2, 1]
+  print(paste("Class Yes False Positive (FP):", fp_1))
+  tn_1 <- confusion_matrix[1, 1]
+  print(paste("Class Yes True Negative (TN):", tn_1))
+  fn_1 <- confusion_matrix[1, 2]
+  print(paste("Class Yes False Negative (FN):", fn_1))
+  tpr_1 <- tp_1 / (tp_1 + fn_1)
+  print(paste("Class Yes True Positive Rate (TPR):", tpr_1))
 
-performance_measures <- calculate_measures(tp_0, fp_0, tn_0, fn_0,
-                                           tp_1, fp_1, tn_1, fn_1)
-performance_measures
+  performance_measures <- calculate_measures(tp_0, fp_0, tn_0, fn_0,
+                                             tp_1, fp_1, tn_1, fn_1)
+  performance_measures
 
-# Calculate the ROC and AUC
-library(pROC)
+  roc_curve <- roc(df_test$Class, test_predictions)
+  auc_value <- auc(roc_curve)
 
-roc_curve <- roc(df_test$Class, test_predictions)
-auc_value <- auc(roc_curve)
+  # Print the AUC value
+  print(paste("Area Under the ROC Curve (AUC):", auc_value))
 
-# Print the AUC value
-print(paste("Area Under the ROC Curve (AUC):", auc_value))
+  # Plot the ROC curve
+  #plot(roc_curve, main = "ROC Curve", col = "blue", lwd = 2)
+  #abline(a = 0, b = 1, lty = 2, col = "red")
 
-# Plot the ROC curve
-plot(roc_curve, main = "ROC Curve", col = "blue", lwd = 2)
-abline(a = 0, b = 1, lty = 2, col = "red")
+  return(performance_measures)
 
 }
 
@@ -83,9 +93,11 @@ calculate_measures <- function(tp_0, fp_0, tn_0, fn_0, tp_1, fp_1, tn_1, fn_1) {
   precision_0 <- tp_0 / (tp_0 + fp_0)
   recall_0 <- tpr_0
   f_measure_0 <- (2 * precision_0 * recall_0) / (precision_0 + recall_0)
+
   mcc_0 <- (tp_0 * tn_0 - fp_0 * fn_0) /
     (sqrt(tp_0 + fp_0) * sqrt(tp_0 + fn_0) *
        sqrt(tn_0 + fp_0) * sqrt(tn_0 + fn_0))
+  
   # Kappa statistic - starting
   total_0 <- (tp_0 + fn_0 + fp_0 + tn_0)
   p_o_0 <- (tp_0 + tn_0) / total_0
@@ -101,9 +113,11 @@ calculate_measures <- function(tp_0, fp_0, tn_0, fn_0, tp_1, fp_1, tn_1, fn_1) {
   precision_1 <- tp_1 / (tp_1 + fp_1)
   recall_1 <- tpr_1
   f_measure_1 <- (2 * precision_1 * recall_1) / (precision_1 + recall_1)
+  
   mcc_1 <- (tp_1 * tn_1 - fp_1 * fn_1) /
     (sqrt(tp_1 + fp_1) * sqrt(tp_1 + fn_1) *
        sqrt(tn_1 + fp_1) * sqrt(tn_1 + fn_1))
+
   total_1 <- (tp_1 + fn_1 + fp_1 + tn_1)
   p_o_1 <- (tp_1 + tn_1) / total_1
   p_e1_1 <- ((tp_1 + fn_1) / total_1) * ((tp_1 + fp_1) / total_1)
@@ -111,20 +125,36 @@ calculate_measures <- function(tp_0, fp_0, tn_0, fn_0, tp_1, fp_1, tn_1, fn_1) {
   p_e_1 <- p_e1_1 + p_e2_1
   k_1 <- (p_o_1 - p_e_1) / (1 - p_e_1) # Kappa statistic
 
+  weight0 <- sum(in_test_df$Class == 0) / nrow(in_test_df)
+  weight1 <- sum(in_test_df$Class == 1) / nrow(in_test_df)
+ 
+  print(paste("Weight for Class 0 (weight0):", weight0))
+  print(paste("Weight for Class 1 (weight1):", weight1))
+
+  tpr_w <- (tpr_0 * weight0 + tpr_1 * weight1)
+  fpr_w <- (fpr_0 * weight0 + fpr_1 * weight1)
+  tnr_w <- (tnr_0 * weight0 + tnr_1 * weight1)
+  fnr_w <- (fnr_0 * weight0 + fnr_1 * weight1)
+  precision_w <- (precision_0 * weight0 + precision_1 * weight1)
+  recall_w <- (recall_0 * weight0 + recall_1 * weight1)
+  f_measure_w <- (f_measure_0 * weight0 + f_measure_1 * weight1)
+  mcc_w <- (mcc_0 * weight0 + mcc_1 * weight1)
+  kappa_w <- (k_0 * weight0 + k_1 * weight1)
+
   measures <- c("TPR_0", "FPR_0", "TNR_0", "FNR_0",
                 "Precision_0", "Recall_0", "F-measure_0", "MCC_0", "Kappa_0",
                 "TPR_1", "FPR_1", "TNR_1", "FNR_1",
-                "Precision_1", "Recall_1", "F-measure_1", "MCC_1", "Kappa_1")
+                "Precision_1", "Recall_1", "F-measure_1", "MCC_1", "Kappa_1",
+                "TPR_W", "FPR_W", "TNR_W", "FNR_W",
+                "Precision_W", "Recall_W", "F-measure_W", "MCC_W", "Kappa_W")
   values <- c(tpr_0, fpr_0, tnr_0, fnr_0,
               precision_0, recall_0, f_measure_0, mcc_0, k_0,
               tpr_1, fpr_1, tnr_1, fnr_1,
-              precision_1, recall_1, f_measure_1, mcc_1, k_1)
-  measure_df <- data.frame(measures, values)
+              precision_1, recall_1, f_measure_1, mcc_1, k_1,
+              tpr_w, fpr_w, tnr_w, fnr_w,
+              precision_w, recall_w, f_measure_w, mcc_w, kappa_w)
 
-  weight0 <- sum(df_train$Class == 0) / nrow(df_train)
-  weight1 <- sum(df_train$Class == 1) / nrow(df_train)
-  ratio <- weight0 / weight1
-  print(paste("Ratio of Class 0 to Class 1:", ratio))
+  measure_df <- data.frame(measures, values)
 
   return(measure_df)
 }
@@ -962,6 +992,8 @@ m_logistic_s2b1 <- glm(Class ~ ., data = df_logistic_s2b1, family = binomial)
 summary(m_logistic_s2b1)
 
 results_model1_s2b1 <- calculate_all_measures(logistic_model, df_test)
+
+results_model1_s2b1
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #---- 5-2 PEND *****    Model 2 K-Nearest Neighbors ----------------------------
