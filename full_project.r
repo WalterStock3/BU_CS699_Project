@@ -13,8 +13,18 @@
 # Target Variable: The Class variable represents difficulty living independently
 # and is binary (Yes(1)/No(0)).
 
+# Install the tidymodels package
+if (!requireNamespace("tidymodels", quietly = TRUE)) {
+  install.packages("tidymodels")
+}
+
 # Load necessary libraries
+# Load the tidymodels library
+library(tidymodels)
+# Prefer tidymodels for modeling
+tidymodels_prefer()
 library(tidyverse)
+library(tidymodels)
 library(ggplot2)
 library(gridExtra)
 library(caret)
@@ -22,7 +32,7 @@ library(rsample)
 library(ROSE)
 library(pROC)
 
-#---- 0.1 PROG *****    Functions - Performance Evaluation ---------------------
+#---- 0.1 DONE *****    Functions - Performance Evaluation ---------------------
 
 calculate_all_measures <- function(in_model, in_test_df) {
   in_test_df <- df_test
@@ -626,8 +636,6 @@ df_select2_balanced1 <- df_balanced1
 
 #---- 4-2-1-1-DONE *          Factor and Logical Variables ---------------------
 
-in_row_limit <- 2
-
 df_select2_balanced1_1factors <- df_balanced1 %>%
   select(Class, matches(paste0("^DETAILED-(",
                         paste(df_columns_info %>%
@@ -652,9 +660,11 @@ df_select2_balanced1_3levels <- df_balanced1 %>%
                                 pull(column_name), 
                               collapse = "|"), ")_")))
 
-df_select2_balanced1_merged <- cbind(df_select2_balanced1_1factors,
-                                     df_select2_balanced1_2logical,
-                                     df_select2_balanced1_3levels)
+df_select2_balanced1_allfact <- cbind(
+  df_select2_balanced1_1factors,
+  df_select2_balanced1_2logical %>% select(-Class),
+  df_select2_balanced1_3levels %>% select(-Class)
+)
 
 ##### Will use Fisher test over Chi-square to handle sparse data.
 
@@ -707,7 +717,7 @@ plt_sel2_bal1_fisher <-
          aes(x = reorder(substr(Column, 10, 60), -P_value),
              y = -log10(P_value))) +
   geom_bar(stat = "identity", fill = "steelblue") +
-  geom_hline(yintercept = -log10(0.01), color = "red", linetype = "dashed") +
+  geom_hline(yintercept = -log10(0.05), color = "red", linetype = "dashed") +
   coord_flip() +
   labs(title = "Fisher Scores for Categorical and Logical Variables 
        with Missing Included",
@@ -717,24 +727,21 @@ plt_sel2_bal1_fisher <-
        y = "-log10(P-value)") +
   theme_minimal()
 
+plt_sel2_bal1_fisher
+
+
 ggsave("plt_sel2_bal1_fisher.png", plot = plt_sel2_bal1_fisher,
        width = 10, height = 12, dpi = 300)
 
-# Display the Fisher results ordered by -log10(P_value) from largest to smallest
-fisher_results_df %>%
-  arrange(desc(-log10(P_value))) %>%
-  head(10) %>%
-  print()
-
-# Identify the in_row_limit columns with the highest neg_log10_P_value
-top_cols <- df_sel2_bal1_fisher_results %>%
+# Identify the columns with P-values less than 0.05
+select_cols <- df_sel2_bal1_fisher_results %>%
+  filter(P_value < 0.05) %>%
   arrange(desc(neg_log10_P_value)) %>%
-  slice_head(n = in_row_limit) %>%
   pull(Column)
 
 # Create a new dataframe with those columns
-df_select2_balanced1 <- df_select2_balanced1 %>%
-  select(Class, all_of(top_cols))
+df_select2_balanced1_allfact <- df_select2_balanced1_allfact %>%
+  select(Class, all_of(select_cols))
 
 #---- 4-2-1-2 DONE *          Integer Variables --------------------------------
 
@@ -746,7 +753,7 @@ df_select2_balanced1_4integers <- df_balanced1 %>%
                                        pull(column_name),
                                      collapse = "|"), ")_")))
 
-in_select1_cor_threshold <- 0.1
+in_select1_cor_threshold <- 0.05
 
 repeat {
   df_numeric <- df_select2_balanced1_4integers %>%
@@ -832,10 +839,9 @@ ggsave("plt_sel2_bal1_corr.png",
        plot = plt_sel2_bal1_corr, width = 10, height = 16, dpi = 300)
 
 # Based on boxplot distributions adding Income to Poverty Ratio and Work Hours.
-df_select2_balanced1 <- df_select2_balanced1 %>%
-  bind_cols(df_balanced1 %>%
-              select(starts_with("DETAILED-POVPIP"),
-                     starts_with("DETAILED-WKHP")))
+df_select2_balanced1 <- df_select2_balanced1_allfact %>% select(-Class) %>%
+  bind_cols(df_select2_balanced1_4integers)
+
 
 #---- 4-2-1-4 DONE *          Final --------------------------------------------
 
@@ -1022,6 +1028,42 @@ results_model1_s2b1
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #---- 5-2-1 PEND ***       Model 2 KNN - s1b1 ----------------------------------
+
+# Define the KNN model specification
+knn_spec <- nearest_neighbor(neighbors = 5, weight_func = "rectangular") %>%
+  set_engine("kknn") %>%
+  set_mode("classification")
+
+# Split the dataset into predictors and target
+df_knn_s2b1 <- df_select2_balanced1 %>%
+  select(Class, where(is.integer))
+
+# Create a recipe for preprocessing
+knn_recipe <- recipe(Class ~ ., data = df_knn_s2b1) %>%
+  step_normalize(all_predictors())
+
+# Create a workflow
+knn_workflow <- workflow() %>%
+  add_model(knn_spec) %>%
+  add_recipe(knn_recipe)
+
+# Fit the KNN model
+knn_fit <- knn_workflow %>%
+  fit(data = df_knn_s2b1)
+
+# Evaluate the model on the test dataset
+df_test_knn <- df_test %>%
+  select(Class, where(is.integer))
+
+knn_predictions <- knn_fit %>%
+  predict(new_data = df_test_knn) %>%
+  bind_cols(df_test_knn)
+
+# Calculate performance metrics
+knn_metrics <- knn_predictions %>%
+  metrics(truth = Class, estimate = .pred_class)
+
+print(knn_metrics)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #---- 5-3 PEND *****    Model 3 Decision Tree ----------------------------------
