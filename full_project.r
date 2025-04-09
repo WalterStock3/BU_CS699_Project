@@ -35,8 +35,8 @@ library(pROC)
 #---- 0.1 DONE *****    Functions - Performance Evaluation ---------------------
 
 calculate_all_measures <- function(in_model, in_test_df) {
-  in_test_df <- df_test
-  in_model <- m_logistic_s2b1
+  #in_test_df <- df_test
+  #in_model <- m_logistic_s2b1
   # Predict on the test dataset
   test_predictions <- predict(in_model,
                               newdata = in_test_df, type = "response")
@@ -729,7 +729,6 @@ plt_sel2_bal1_fisher <-
 
 plt_sel2_bal1_fisher
 
-
 ggsave("plt_sel2_bal1_fisher.png", plot = plt_sel2_bal1_fisher,
        width = 10, height = 12, dpi = 300)
 
@@ -841,7 +840,6 @@ ggsave("plt_sel2_bal1_corr.png",
 # Based on boxplot distributions adding Income to Poverty Ratio and Work Hours.
 df_select2_balanced1 <- df_select2_balanced1_allfact %>% select(-Class) %>%
   bind_cols(df_select2_balanced1_4integers)
-
 
 #---- 4-2-1-4 DONE *          Final --------------------------------------------
 
@@ -1011,13 +1009,56 @@ df_select3_balanced2 <- df_balanced2
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Logistic Regression Model
-df_logistic_s2b1 <- df_select2_balanced1 %>%
-  select(Class, where(is.integer))
 
-m_logistic_s2b1 <- glm(Class ~ ., data = df_logistic_s2b1, family = binomial)
+df_logistic_s2b1 <- df_select2_balanced1 %>%
+  select(Class, matches(paste0("^DETAILED-(",
+                               paste(df_columns_info %>%
+                                       filter(variable_type %in%
+                                                c("integer")) %>%
+                                       pull(column_name),
+                                     collapse = "|"), ")_")))
+
+logistic_model <- logistic_reg() %>%
+  set_engine("glm") %>%
+  set_mode("classification")
+
+m_logistic_s2b1 <- logistic_model %>%
+  fit(Class ~ ., data = df_logistic_s2b1)
+
+# Calculate test predictions for m_logistic_s2b1
+test_predictions <- predict(m_logistic_s2b1, new_data = df_test, type = "prob")
+
+# Add predicted class based on a threshold of 0.5
+test_predictions <- test_predictions %>%
+  mutate(predicted_class = factor(ifelse(.pred_1 > 0.5, 1, 0),
+                                  levels = c(0, 1)))
+
+# Combine predictions with actual test data
+test_results <- df_test %>%
+  select(Class) %>%
+  mutate(Class = factor(Class, levels = c(0, 1))) %>% # Ensure Class is a factor
+  bind_cols(test_predictions)
+
+# Generate a confusion matrix
+confusion_matrix <- test_results %>%
+  conf_mat(truth = Class, estimate = predicted_class)
+
+# Print the confusion matrix
+print(confusion_matrix)
+
+  # Visualize the confusion matrix
+  autoplot(confusion_matrix, type = "heatmap") +
+    labs(title = "Confusion Matrix",
+         x = "Predicted Class",
+         y = "Actual Class") +
+    theme_minimal()
 
 # Summary of the model
 summary(m_logistic_s2b1)
+
+m_logistic_s2b1 <- glm(Class ~ ., data = df_logistic_s2b1, family = binomial)
+
+
 
 results_model1_s2b1 <- calculate_all_measures(logistic_model, df_test)
 
