@@ -2,7 +2,7 @@
 ## TODO:
 #  - Complete a graph for Fisher Scores for Logical - 4-2-1-1
 #  - Complete a grpah for Factor wihout processing Missing.
-#  - There are a lot of Invalid Numbers in df - look into these.
+#  - Look into tuning logistic regression to get the best TP0 and TP1
 
 # Project Goal (Lecture 1): Generate a model to predict the likelihood of a
 # person having difficulty living independently.
@@ -34,15 +34,15 @@ library(pROC)
 
 #---- 0.1 DONE *****    Functions - Performance Evaluation ---------------------
 
-calculate_all_measures <- function(in_model, in_test_df) {
+calculate_all_measures <- function(in_model, in_test_df, threshold) {
   #in_test_df <- df_test
-  #in_model <- m_logistic_s2b1
+  #in_model <- m1_fit_s2b1
+
   # Predict on the test dataset
-  test_predictions <- predict(in_model,
-                              newdata = in_test_df, type = "response")
+  test_predictions <- predict(in_model, new_data = in_test_df, type = "prob")
 
   # Convert probabilities to binary predictions
-  test_predicted_class <- ifelse(test_predictions > 0.5, 1, 0)
+  test_predicted_class <- ifelse(test_predictions > threshold, 1, 0) [, 2]
 
   # Confusion matrix
   confusion_matrix <- table(Predicted = test_predicted_class,
@@ -81,7 +81,7 @@ calculate_all_measures <- function(in_model, in_test_df) {
                                              tp_1, fp_1, tn_1, fn_1)
   performance_measures
 
-  roc_curve <- roc(df_test$Class, test_predictions)
+  roc_curve <- roc(df_test$Class, test_predictions$.pred_0)
   auc_value <- auc(roc_curve)
 
   # Convert AUC value to double
@@ -105,6 +105,7 @@ calculate_all_measures <- function(in_model, in_test_df) {
 }
 
 calculate_measures <- function(tp_0, fp_0, tn_0, fn_0, tp_1, fp_1, tn_1, fn_1) {
+  accuracy <- (tp_0 + tn_0) / (tp_0 + fp_0 + tn_0 + fn_0)
   tpr_0 <- tp_0 / (tp_0 + fn_0)
   fpr_0 <- fp_0 / (fp_0 + tn_0)
   tnr_0 <- tn_0 / (fp_0 + tn_0)
@@ -173,13 +174,13 @@ calculate_measures <- function(tp_0, fp_0, tn_0, fn_0, tp_1, fp_1, tn_1, fn_1) {
   mcc_w <- (mcc_0 * weight0 + mcc_1 * weight1)
   kappa_w <- (k_0 * weight0 + k_1 * weight1)
 
-  measures <- c("TPR_0", "FPR_0", "TNR_0", "FNR_0",
+  measures <- c("ACCURACY", "TPR_0", "FPR_0", "TNR_0", "FNR_0",
                 "Precision_0", "Recall_0", "F-measure_0", "MCC_0", "Kappa_0",
                 "TPR_1", "FPR_1", "TNR_1", "FNR_1",
                 "Precision_1", "Recall_1", "F-measure_1", "MCC_1", "Kappa_1",
                 "TPR_W", "FPR_W", "TNR_W", "FNR_W",
                 "Precision_W", "Recall_W", "F-measure_W", "MCC_W", "Kappa_W")
-  values <- c(tpr_0, fpr_0, tnr_0, fnr_0,
+  values <- c(accuracy, tpr_0, fpr_0, tnr_0, fnr_0,
               precision_0, recall_0, f_measure_0, mcc_0, k_0,
               tpr_1, fpr_1, tnr_1, fnr_1,
               precision_1, recall_1, f_measure_1, mcc_1, k_1,
@@ -1005,7 +1006,7 @@ df_select3_balanced2 <- df_balanced2
 # Logistic regression is a statistical method for predicting binary classes.
 #---- 5-1-1 PROG ***       Model 1 Logistic Regression - s1b1 ------------------
 
-#---- 5-1-3 PROG ***       Model 1 Logistic Regression - s2b1 ------------------
+#---- 5-1-3 DONE ***       Model 1 Logistic Regression - s2b1 ------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Logistic Regression Model
@@ -1050,6 +1051,16 @@ m1_tune_res_s2b1 <- tune_grid(
   metrics = metric_set(roc_auc, accuracy, sens, spec)
 )
 
+# Show the tuning results
+m1_tune_res_s2b1
+summary(m1_tune_res_s2b1)
+library(ggplot2)
+autoplot(m1_tune_res_s2b1) +
+  labs(title = "Tuning Results for Logistic Regression",
+       x = "Penalty",
+       y = "Mixture") +
+  theme_minimal()
+
 # 7. Select the best parameters
 m1_model_s2b1 <- select_best(tune_res, metric = "roc_auc")
 
@@ -1086,55 +1097,45 @@ autoplot(m1_conf_matrix_s2b1, type = "heatmap") +
        y = "Actual Class") +
   theme_minimal()
 
+# 0.6 works best on the test data but I cannot tune with the test data.
+results_model1_s2b1 <- calculate_all_measures(m1_fit_s2b1, df_test, 0.5)
 
-
-
-
-
-
-
-m1_test_predict_s2b1 <- predict(m1_model_s2b1,
-                            new_data = df_test,
-                            type = "prob")
-
-m1_test_predict_s2b1 <- test_predictions(m1_model_s2b1,
-                                         new_data = df_test,
-                                         type = "prob")
-
-
-
-
-
-# Generate a confusion matrix
-confusion_matrix <- test_results %>%
-  conf_mat(truth = Class, estimate = predicted_class)
-
-# Print the confusion matrix
-print(confusion_matrix)
-
-  # Visualize the confusion matrix
-  autoplot(confusion_matrix, type = "heatmap") +
-    labs(title = "Confusion Matrix",
-         x = "Predicted Class",
-         y = "Actual Class") +
-    theme_minimal()
-
-# Summary of the model
-summary(m_logistic_s2b1)
-
-m_logistic_s2b1 <- glm(Class ~ ., data = df_logistic_s2b1, family = binomial)
-
-
-
-results_model1_s2b1 <- calculate_all_measures(logistic_model, df_test)
+# Function to store model results with timestamp and description
+store_results <- function(combination_key, results_df, description) {
+  # Get current date and time
+  current_datetime <- format(Sys.time(), "%Y-%m-%d %H:%M:%S")
+  
+  # Create a wide format dataframe with measures as columns
+  results_wide <- results_df %>%
+    pivot_wider(names_from = measures, values_from = values)
+  
+  # Add description and datetime columns
+  results_wide <- results_wide %>%
+    mutate(combination_key = combination_key,
+           description = description,
+           datetime = current_datetime)
+  
+  # Check if results_storage exists in the global environment
+  if (!exists("results_storage", envir = .GlobalEnv)) {
+    # Create it if it doesn't exist
+    results_storage <<- results_wide
+  } else {
+    # Append to existing dataframe if it does exist
+    results_storage <<- bind_rows(results_storage, results_wide)
+  }
+  
+  return(results_storage)
+}
 
 results_model1_s2b1
+
+store_results("m1s2b1", results_model1_s2b1, "Logistic Regression Model 1 - s2b1")
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #---- 5-2 PEND *****    Model 2 K-Nearest Neighbors ----------------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#---- 5-2-1 PEND ***       Model 2 KNN - s1b1 ----------------------------------
+#---- 5-2-3 PROG ***       Model 2 KNN - s1b1 ----------------------------------
 
 # Define the KNN model specification
 knn_spec <- nearest_neighbor(neighbors = 5, weight_func = "rectangular") %>%
@@ -1188,3 +1189,8 @@ print(knn_metrics)
 #---- 5-6 PEND *****    Model 6 Gradient Boosting ------------------------------
 
 ################################################################################
+
+#---- 6 PEND ******* Results - Project Step 6 ---------------------------------
+################################################################################
+# Results - Project Step 6
+
