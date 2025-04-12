@@ -70,8 +70,12 @@ calculate_all_measures <- function(in_model, in_test_df, threshold) {
   tpr_1 <- tp_1 / (tp_1 + fn_1)
   print(paste("Class Yes True Positive Rate (TPR):", tpr_1))
 
+  weight0 <- sum(in_test_df$Class == 0) / nrow(in_test_df)
+  weight1 <- sum(in_test_df$Class == 1) / nrow(in_test_df)
+
   performance_measures <- calculate_measures(tp_0, fp_0, tn_0, fn_0,
-                                             tp_1, fp_1, tn_1, fn_1)
+                                             tp_1, fp_1, tn_1, fn_1,
+                                              weight0, weight1)
   performance_measures
 
   roc_curve <- roc(df_test$Class, test_predictions$.pred_0)
@@ -97,7 +101,9 @@ calculate_all_measures <- function(in_model, in_test_df, threshold) {
 
 }
 
-calculate_measures <- function(tp_0, fp_0, tn_0, fn_0, tp_1, fp_1, tn_1, fn_1) {
+calculate_measures <- function(tp_0, fp_0, tn_0, fn_0,
+                               tp_1, fp_1, tn_1, fn_1,
+                               weight0, weight1) {
   accuracy <- (tp_0 + tn_0) / (tp_0 + fp_0 + tn_0 + fn_0)
   tpr_0 <- tp_0 / (tp_0 + fn_0)
   fpr_0 <- fp_0 / (fp_0 + tn_0)
@@ -150,9 +156,6 @@ calculate_measures <- function(tp_0, fp_0, tn_0, fn_0, tp_1, fp_1, tn_1, fn_1) {
   #print(paste("Kappa for 1, p_e_1:", p_e_1))
   k_1 <- (p_o_1 - p_e_1) / (1 - p_e_1) # Kappa statistic
   #print(paste("Kappa for 1, k_1:", k_1))
-
-  weight0 <- sum(in_test_df$Class == 0) / nrow(in_test_df)
-  weight1 <- sum(in_test_df$Class == 1) / nrow(in_test_df)
  
   #print(paste("Weight for Class 0 (weight0):", weight0))
   #print(paste("Weight for Class 1 (weight1):", weight1))
@@ -1072,9 +1075,6 @@ tune_results_m1_s2b1 <- tune_grid(
 )
 
 # Show the tuning results
-tune_results_m1_s2b1
-summary(tune_results_m1_s2b1)
-library(ggplot2)
 autoplot(tune_results_m1_s2b1) +
   labs(title = "Tuning Results for Logistic Regression",
        x = "Penalty",
@@ -1082,7 +1082,7 @@ autoplot(tune_results_m1_s2b1) +
   theme_minimal()
 
 # 7. Select the best parameters
-best_parameters_m1_s2b1 <- select_best(tune_res, metric = "roc_auc")
+best_parameters_m1_s2b1 <- select_best(tune_results_m1_s2b1, metric = "roc_auc")
 
 # 8. Finalize the workflow
 final_wf_m1_s2b1 <- finalize_workflow(wf_m1_s2b1, best_parameters_m1_s2b1)
@@ -1092,16 +1092,10 @@ final_fit_m1_s2b1 <- fit(final_wf_m1_s2b1, data = df_m1_s2b1)
 
 # 10. Evaluate the model on the test dataset
 # Evaluate the model on the test dataset
-test_predications_m1_s2b1 <- predict(final_fit_m1_s2b1, new_data = df_test, type = "prob") %>%
+test_predications_m1_s2b1 <-
+  predict(final_fit_m1_s2b1, new_data = df_test, type = "prob") %>%
   bind_cols(predict(final_fit_m1_s2b1, new_data = df_test, type = "class")) %>%
   bind_cols(df_test %>% select(Class))
-
-# Calculate performance metrics
-test_metrics_m1_s2b1 <- test_predications_m1_s2b1 %>%
-  metrics(truth = Class, estimate = .pred_class, .pred_1)
-
-# Print the performance metrics
-print(test_metrics_m1_s2b1)
 
 # Generate a confusion matrix
 confusion_matrix_m1_s2b1 <- test_predications_m1_s2b1 %>%
