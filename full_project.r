@@ -1125,11 +1125,11 @@ autoplot(m1_conf_matrix_s2b1, type = "heatmap") +
   theme_minimal()
 
 # 0.6 works best on the test data but I cannot tune with the test data.
-results_model1_s2b1 <- calculate_all_measures(m1_fit_s2b1, df_test, 0.5)
+results_m1_s2b1 <- calculate_all_measures(m1_fit_s2b1, df_test, 0.5)
 
-results_model1_s2b1
+results_m1_s2b1
 
-store_results("m1s2b1", results_model1_s2b1, "Logistic Regression Model 1 - s2b1")
+store_results("m1s2b1", results_m1_s2b1, "Logistic Regression Model 1 - s2b1")
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #---- 5-2 PEND *****    Model 2 K-Nearest Neighbors ----------------------------
@@ -1247,8 +1247,8 @@ threshold_df <- do.call(rbind, threshold_results)
 best_threshold <- threshold_df[which.min(threshold_df$diff_from_target), "threshold"]
 
 # Final evaluation with best threshold
-results_model2_s2b1 <- calculate_all_measures(m2_fit_s2b1, df_test, best_threshold)
-store_results("m2s2b1", results_model2_s2b1, "KNN Model - s2b1")
+results_m2_s2b1 <- calculate_all_measures(m2_fit_s2b1, df_test, best_threshold)
+store_results("m2s2b1", results_m2_s2b1, "KNN Model - s2b1")
 
 #---- 5-3 PEND *****    Model 3 Decision Tree ----------------------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
