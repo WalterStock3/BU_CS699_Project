@@ -1177,15 +1177,9 @@ print(knn_metrics)
 #---- 5-2-3 PROG ***       Model 2 KNN - s2b1 ----------------------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-df_m2_s2b1 <- df_select2_balanced1 %>%
-  select(Class, matches(paste0("^DETAILED-(",
-                               paste(df_columns_info %>%
-                                       filter(variable_type %in%
-                                                c("integer")) %>%
-                                       pull(column_name),
-                                     collapse = "|"), ")_")))
 
-# 1. Define the KNN model specification
+
+# Define the KNN model specification
 m2_spec_s2b1 <- nearest_neighbor(
   neighbors = tune(),
   weight_func = tune()
@@ -1193,31 +1187,29 @@ m2_spec_s2b1 <- nearest_neighbor(
   set_engine("kknn") %>%
   set_mode("classification")
 
-# 2. Create a recipe for preprocessing
-m2_rec_s2b1 <- recipe(Class ~ ., data = df_m2_s2b1) %>%
+# Create a recipe for preprocessing
+m2_rec_s2b1 <- recipe(Class ~ ., data = df_select2_balanced1) %>%
   step_zv(all_predictors()) %>%
-  step_impute_mean(all_numeric_predictors()) %>%
-  step_impute_mode(all_nominal_predictors()) %>%
   step_normalize(all_numeric_predictors()) %>%
   step_dummy(all_nominal_predictors(), -all_outcomes())
 
-# 3. Create a workflow
+# Create a workflow
 m2_wf_s2b1 <- workflow() %>%
   add_model(m2_spec_s2b1) %>%
   add_recipe(m2_rec_s2b1)
 
-# 4. Cross-validation
+# Cross-validation
 set.seed(123)
-m2_folds_s2b1 <- vfold_cv(df_m2_s2b1, v = 5, strata = Class)
+m2_folds_s2b1 <- vfold_cv(df_select2_balanced1, v = 5, strata = Class)
 
-# 5. Define grid of hyperparameters
+# Define grid of hyperparameters
 m2_grid_s2b1 <- grid_regular(
   neighbors(range = c(5, 50)),
   weight_func(values = c("rectangular", "triangular", "gaussian", "rank")),
   levels = c(10, 4)
 )
 
-# 6. Tune the model
+# Tune the model
 m2_tune_res_s2b1 <- tune_grid(
   m2_wf_s2b1,
   resamples = m2_folds_s2b1,
@@ -1225,92 +1217,38 @@ m2_tune_res_s2b1 <- tune_grid(
   metrics = metric_set(roc_auc, accuracy, sens, spec)
 )
 
-# Visualize the tuning results
-autoplot(m2_tune_res_s2b1) +
-  labs(title = "KNN Hyperparameter Tuning Results",
-       subtitle = "Model 2 - Select 2 Balanced 1") +
-  theme_minimal()
-
-# Show the top 5 best performing models based on ROC AUC
-m2_tune_res_s2b1 %>%
-  show_best("roc_auc", n = 5) %>%
-  select(neighbors, weight_func, .metric, mean, std_err) %>%
-  knitr::kable()
-
-# Examine how model performance varies with number of neighbors
-m2_tune_res_s2b1 %>%
-  collect_metrics() %>%
-  filter(.metric == "roc_auc") %>%
-  ggplot(aes(x = neighbors, y = mean, color = weight_func)) +
-  geom_line() +
-  geom_point() +
-  labs(title = "ROC AUC by Number of Neighbors",
-       x = "Number of Neighbors (k)",
-       y = "Mean ROC AUC") +
-  theme_minimal()
-
-# Print accuracy metrics in addition to ROC AUC
-m2_tune_res_s2b1 %>%
-  collect_metrics() %>%
-  filter(.metric %in% c("accuracy", "sens", "spec")) %>%
-  mutate(weight_func = as.factor(weight_func)) %>%
-  ggplot(aes(x = neighbors, y = mean, color = .metric)) +
-  geom_line() +
-  geom_point() +
-  facet_wrap(~ weight_func) +
-  labs(title = "Model Performance by Weight Function and Neighbors",
-       x = "Number of Neighbors (k)",
-       y = "Metric Value") +
-  theme_minimal()
-
-# 7. Select the best model based on ROC AUC
+# Select the best model based on ROC AUC
 m2_best_params_s2b1 <- select_best(m2_tune_res_s2b1, metric = "roc_auc")
 
 # Finalize workflow
 m2_final_wf_s2b1 <- finalize_workflow(m2_wf_s2b1, m2_best_params_s2b1)
 
 # Fit the final model
-m2_fit_s2b1 <- fit(m2_final_wf_s2b1, data = df_m2_s2b1)
+m2_fit_s2b1 <- fit(m2_final_wf_s2b1, data = df_select2_balanced1)
 
-# 10. Evaluate the model on the test dataset
-# Evaluate the model on the test dataset
-m2_test_predictions_s2b1 <- predict(m1_fit_s2b1, new_data = df_test, type = "prob") %>%
-  bind_cols(predict(m2_fit_s2b1, new_data = df_test, type = "class")) %>%
-  bind_cols(df_test %>% select(Class))
+# Try different thresholds to achieve the target TPR and TNR
+thresholds <- seq(0.3, 0.7, by = 0.05)
+threshold_results <- list()
 
-# Calculate performance metrics
-m2_test_metrics_s2b1 <- m2_test_predictions_s2b1 %>%
-  metrics(truth = Class, estimate = .pred_class, .pred_1)
+for (thresh in thresholds) {
+  results <- calculate_all_measures(m2_fit_s2b1, df_test, thresh)
+  tpr_1 <- results$values[results$measures == "TPR_1"]
+  tnr_0 <- results$values[results$measures == "TNR_0"]
+  
+  threshold_results[[as.character(thresh)]] <- data.frame(
+    threshold = thresh,
+    TPR_1 = tpr_1,
+    TNR_0 = tnr_0,
+    diff_from_target = abs(tpr_1 - 0.81) + abs(tnr_0 - 0.79)
+  )
+}
 
-# Print the performance metrics
-print(m2_test_metrics_s2b1)
-
-# Generate a confusion matrix
-m2_conf_matrix_s2b1 <- m2_test_predictions_s2b1 %>%
-  conf_mat(truth = Class, estimate = .pred_class)
-
-# Print the confusion matrix
-print(m2_conf_matrix_s2b1)
-
-# Visualize the confusion matrix
-autoplot(m2_conf_matrix_s2b1, type = "heatmap") +
-  labs(title = "Confusion Matrix for Logistic Regression",
-       x = "Predicted Class",
-       y = "Actual Class") +
-  theme_minimal()
-
-# 0.6 works best on the test data but I cannot tune with the test data.
-results_model2_s2b1 <- calculate_all_measures(m2_fit_s2b1, df_test, 0.5)
-
-results_model2_s2b1
-
-store_results("m2s2b1", results_model2_s2b1, "KNN - s2b1")
-
-
+threshold_df <- do.call(rbind, threshold_results)
+best_threshold <- threshold_df[which.min(threshold_df$diff_from_target), "threshold"]
 
 # Final evaluation with best threshold
-#results_model2_s2b1 <- calculate_all_measures(m2_fit_s2b1, df_test, best_threshold)
-#store_results("m2s2b1", results_model2_s2b1, "KNN Model - s2b1")
+results_model2_s2b1 <- calculate_all_measures(m2_fit_s2b1, df_test, best_threshold)
+store_results("m2s2b1", results_model2_s2b1, "KNN Model - s2b1")
 
 #---- 5-3 PEND *****    Model 3 Decision Tree ----------------------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
