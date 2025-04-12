@@ -1018,26 +1018,92 @@ df_logistic_s2b1 <- df_select2_balanced1 %>%
                                        pull(column_name),
                                      collapse = "|"), ")_")))
 
-logistic_model <- logistic_reg() %>%
-  set_engine("glm") %>%
+# 1. Model Specification
+m1_spec_s2b1 <- logistic_reg(penalty = tune(), mixture = tune()) %>%
+  set_engine("glmnet") %>%
   set_mode("classification")
 
-m_logistic_s2b1 <- logistic_model %>%
-  fit(Class ~ ., data = df_logistic_s2b1)
+# 2. Additional Processing
+m1_rec1_s2b1 <- recipe(Class ~ ., data = df_logistic_s2b1) %>%
+  step_zv(all_predictors()) %>%
+  step_impute_median(all_numeric_predictors()) %>%
+  step_normalize(all_predictors()) %>%
+  step_dummy(all_nominal_predictors(), -all_outcomes())
 
-# Calculate test predictions for m_logistic_s2b1
-test_predictions <- predict(m_logistic_s2b1, new_data = df_test, type = "prob")
+# 3. Create a workflow
+m1_wf1_s2b1 <- workflow() %>%
+  add_model(m1_spec_s2b1) %>%
+  add_recipe(m1_rec1_s2b1)
 
-# Add predicted class based on a threshold of 0.5
-test_predictions <- test_predictions %>%
-  mutate(predicted_class = factor(ifelse(.pred_1 > 0.5, 1, 0),
-                                  levels = c(0, 1)))
+# 4. Cross-validation
+set.seed(1)
+m1_folds_s2b1 <- vfold_cv(df_logistic_s2b1, v = 5, strata = Class)
 
-# Combine predictions with actual test data
-test_results <- df_test %>%
-  select(Class) %>%
-  mutate(Class = factor(Class, levels = c(0, 1))) %>% # Ensure Class is a factor
-  bind_cols(test_predictions)
+# 5. Grid of penalty and mixture values
+m1_tune_grid_wf1_s2b1 <- grid_regular(penalty(), mixture(), levels = 5)
+
+# 6. Tune the model
+m1_tune_res_s2b1 <- tune_grid(
+  m1_wf1_s2b1,
+  resamples = m1_folds_s2b1,
+  grid = m1_tune_grid_wf1_s2b1,
+  metrics = metric_set(roc_auc, accuracy, sens, spec)
+)
+
+# 7. Select the best parameters
+m1_model_s2b1 <- select_best(tune_res, metric = "roc_auc")
+
+# 8. Finalize the workflow
+m1_final_wf_s2b1 <- finalize_workflow(m1_wf1_s2b1, m1_model_s2b1)
+
+# 9. Fit the final model
+m1_fit_s2b1 <- fit(m1_final_wf_s2b1, data = df_logistic_s2b1)
+
+# 10. Evaluate the model on the test dataset
+# Evaluate the model on the test dataset
+m1_test_predictions_s2b1 <- predict(m1_fit_s2b1, new_data = df_test, type = "prob") %>%
+  bind_cols(predict(m1_fit_s2b1, new_data = df_test, type = "class")) %>%
+  bind_cols(df_test %>% select(Class))
+
+# Calculate performance metrics
+m1_test_metrics_s2b1 <- m1_test_predictions_s2b1 %>%
+  metrics(truth = Class, estimate = .pred_class, .pred_1)
+
+# Print the performance metrics
+print(m1_test_metrics_s2b1)
+
+# Generate a confusion matrix
+m1_conf_matrix_s2b1 <- m1_test_predictions_s2b1 %>%
+  conf_mat(truth = Class, estimate = .pred_class)
+
+# Print the confusion matrix
+print(m1_conf_matrix_s2b1)
+
+# Visualize the confusion matrix
+autoplot(m1_conf_matrix_s2b1, type = "heatmap") +
+  labs(title = "Confusion Matrix for Logistic Regression",
+       x = "Predicted Class",
+       y = "Actual Class") +
+  theme_minimal()
+
+
+
+
+
+
+
+
+m1_test_predict_s2b1 <- predict(m1_model_s2b1,
+                            new_data = df_test,
+                            type = "prob")
+
+m1_test_predict_s2b1 <- test_predictions(m1_model_s2b1,
+                                         new_data = df_test,
+                                         type = "prob")
+
+
+
+
 
 # Generate a confusion matrix
 confusion_matrix <- test_results %>%
