@@ -527,7 +527,7 @@ print(paste("training balanced 2 dataset - dim:", dim(df_balanced2)[1],
 
 print(paste("training balanced 2 dataset - class distribution:",
             table(df_balanced2$Class)[1], ",",
-            table(df_balanced2$Class)[2]))
+table(df_balanced2$Class)[2]))
 
 save(df_balanced2, file = "df_balanced2.RData")
 
@@ -1047,14 +1047,14 @@ spec_m1_s2b1 <- logistic_reg(penalty = tune(), mixture = tune()) %>%
   set_engine("glmnet") %>%
   set_mode("classification")
 
-# 2. Additional Processing
+# 2. Recipe
 rec_m1_s2b1 <- recipe(Class ~ ., data = df_m1_s2b1) %>%
   step_zv(all_predictors()) %>%
   step_impute_median(all_numeric_predictors()) %>%
   step_normalize(all_predictors()) %>%
   step_dummy(all_nominal_predictors(), -all_outcomes())
 
-# 3. Create a workflow
+# 3. Workflow
 wf_m1_s2b1 <- workflow() %>%
   add_model(spec_m1_s2b1) %>%
   add_recipe(rec_m1_s2b1)
@@ -1063,7 +1063,7 @@ wf_m1_s2b1 <- workflow() %>%
 set.seed(123)
 folds_m1_s2b1 <- vfold_cv(df_m1_s2b1, v = 5, strata = Class)
 
-# 5. Grid of penalty and mixture values
+# 5. Grid of hyperparameters
 tune_grid_m1_s2b1 <- grid_regular(penalty(), mixture(), levels = 5)
 
 # 6. Tune the model
@@ -1124,101 +1124,77 @@ store_results("m1s2b1", results_m1_s2b1, "Logistic Regression Model 1 - s2b1")
 
 #---- 5-2-1 PROG ***       Model 2 KNN - s1b1 ----------------------------------
 
-# Define the KNN model specification
-knn_spec <- nearest_neighbor(neighbors = 5, weight_func = "rectangular") %>%
-  set_engine("kknn") %>%
-  set_mode("classification")
-
-# Split the dataset into predictors and target
-df_knn_s2b1 <- df_select2_balanced1 %>%
-  select(Class, where(is.integer))
-
-# Create a recipe for preprocessing
-knn_recipe <- recipe(Class ~ ., data = df_knn_s2b1) %>%
-  step_normalize(all_predictors())
-
-# Create a workflow
-knn_workflow <- workflow() %>%
-  add_model(knn_spec) %>%
-  add_recipe(knn_recipe)
-
-# Fit the KNN model
-knn_fit <- knn_workflow %>%
-  fit(data = df_knn_s2b1)
-
-# Evaluate the model on the test dataset
-df_test_knn <- df_test %>%
-  select(Class, where(is.integer))
-
-knn_predictions <- knn_fit %>%
-  predict(new_data = df_test_knn) %>%
-  bind_cols(df_test_knn)
-
-# Calculate performance metrics
-knn_metrics <- knn_predictions %>%
-  metrics(truth = Class, estimate = .pred_class)
-
-print(knn_metrics)
-
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #---- 5-2-3 PROG ***       Model 2 KNN - s2b1 ----------------------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+df_m2_s2b1 <- df_select2_balanced1
 
-
-# Define the KNN model specification
-m2_spec_s2b1 <- nearest_neighbor(
+# 1. Model Specification
+spec_m2_s2b1 <- nearest_neighbor(
   neighbors = tune(),
   weight_func = tune()
 ) %>%
   set_engine("kknn") %>%
   set_mode("classification")
 
-# Create a recipe for preprocessing
-m2_rec_s2b1 <- recipe(Class ~ ., data = df_select2_balanced1) %>%
+# 2. Recipe
+rec_m2_s2b1 <- recipe(Class ~ ., data = df_select2_balanced1) %>%
   step_zv(all_predictors()) %>%
+  step_impute_median(all_numeric_predictors()) %>%
+  step_unknown(all_nominal_predictors(), new_level = "unknown") %>%
   step_normalize(all_numeric_predictors()) %>%
   step_dummy(all_nominal_predictors(), -all_outcomes())
 
-# Create a workflow
-m2_wf_s2b1 <- workflow() %>%
-  add_model(m2_spec_s2b1) %>%
-  add_recipe(m2_rec_s2b1)
+# Resolve conflict between kknn::contr.dummy and caret::contr.dummy
+conflicted::conflicts_prefer(kknn::contr.dummy)
 
-# Cross-validation
+# 3. Workflow
+wf_m2_s2b1 <- workflow() %>%
+  add_model(spec_m2_s2b1) %>%
+  add_recipe(rec_m2_s2b1)
+
+# 4. Cross-validation
 set.seed(123)
-m2_folds_s2b1 <- vfold_cv(df_select2_balanced1, v = 5, strata = Class)
+folds_m2_s2b1 <- vfold_cv(df_select2_balanced1, v = 5, strata = Class)
 
-# Define grid of hyperparameters
-m2_grid_s2b1 <- grid_regular(
+# 5. Grid of hyperparameters
+grid_m2_s2b1 <- grid_regular(
   neighbors(range = c(5, 50)),
   weight_func(values = c("rectangular", "triangular", "gaussian", "rank")),
   levels = c(10, 4)
 )
 
-# Tune the model
-m2_tune_res_s2b1 <- tune_grid(
-  m2_wf_s2b1,
-  resamples = m2_folds_s2b1,
-  grid = m2_grid_s2b1,
+# 6. Tune the model
+tune_results_m2_s2b1 <- tune_grid(
+  wf_m2_s2b1,
+  resamples = folds_m2_s2b1,
+  grid = grid_m2_s2b1,
   metrics = metric_set(roc_auc, accuracy, sens, spec)
 )
 
-# Select the best model based on ROC AUC
-m2_best_params_s2b1 <- select_best(m2_tune_res_s2b1, metric = "roc_auc")
+# Show the tuning results
+autoplot(tune_results_m1_s2b1) +
+  labs(title = "Tuning Results for Logistic Regression",
+       x = "Penalty",
+       y = "Mixture") +
+  theme_minimal()
 
-# Finalize workflow
-m2_final_wf_s2b1 <- finalize_workflow(m2_wf_s2b1, m2_best_params_s2b1)
+# 7. Select the best parameters
+best_params_m2_s2b1 <- select_best(tune_results_m2_s2b1, metric = "roc_auc")
 
-# Fit the final model
-m2_fit_s2b1 <- fit(m2_final_wf_s2b1, data = df_select2_balanced1)
+# 8. Finalize the workflow
+final_wf_m2_s2b1 <- finalize_workflow(wf_m2_s2b1, best_params_m2_s2b1)
+
+# 9. Fit the final model
+fit_m2_s2b1 <- fit(final_wf_m2_s2b1, data = df_select2_balanced1)
 
 # Try different thresholds to achieve the target TPR and TNR
 thresholds <- seq(0.3, 0.7, by = 0.05)
 threshold_results <- list()
 
 for (thresh in thresholds) {
-  results <- calculate_all_measures(m2_fit_s2b1, df_test, thresh)
+  results <- calculate_all_measures(fit_m2_s2b1, df_test, thresh)
   tpr_1 <- results$values[results$measures == "TPR_1"]
   tnr_0 <- results$values[results$measures == "TNR_0"]
   
@@ -1233,8 +1209,9 @@ for (thresh in thresholds) {
 threshold_df <- do.call(rbind, threshold_results)
 best_threshold <- threshold_df[which.min(threshold_df$diff_from_target), "threshold"]
 
-# Final evaluation with best threshold
-results_m2_s2b1 <- calculate_all_measures(m2_fit_s2b1, df_test, best_threshold)
+
+# 10. Evaluate the model on the test dataset
+results_m2_s2b1 <- calculate_all_measures(fit_m2_s2b1, df_test, best_threshold)
 store_results("m2s2b1", results_m2_s2b1, "KNN Model - s2b1")
 
 #---- 5-3 PEND *****    Model 3 Decision Tree ----------------------------------
