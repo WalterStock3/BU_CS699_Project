@@ -13,15 +13,8 @@
 # Target Variable: The Class variable represents difficulty living independently
 # and is binary (Yes(1)/No(0)).
 
-# Install the tidymodels package
-if (!requireNamespace("tidymodels", quietly = TRUE)) {
-  install.packages("tidymodels")
-}
-
 # Load necessary libraries
-# Load the tidymodels library
 library(tidymodels)
-# Prefer tidymodels for modeling
 tidymodels_prefer()
 library(tidyverse)
 library(tidymodels)
@@ -470,7 +463,7 @@ save(df_preprocessed, file = "df_preprocessed.RData")
 # Optional - Load the preprocessed dataset
 # load("df_preprocessed.RData")
 
-set.seed(1)
+set.seed(123)
 
 split <- initial_split(df_preprocessed, prop = 0.7, strata = "Class")
 df_train <- training(split)
@@ -706,15 +699,15 @@ fisher_not_possible <- c("SCHL", "ANC1P", "DETAILED-SCHL_",
 
 sel2_bal1_fisher_results <- list()
 
-for (col in names(df_select2_balanced1_merged)) {
+for (col in names(df_select2_balanced1_allfact)) {
   print(paste(Sys.time(), "- Processing column:", col))
   if (any(startsWith(col, fisher_not_possible))) {
     print(paste("Skipping column:", col))
     next
   }
   tryCatch({
-    table_data <- table(df_select2_balanced1_merged[[col]],
-                        df_select2_balanced1_merged$Class)
+    table_data <- table(df_select2_balanced1_allfact[[col]],
+                        df_select2_balanced1_allfact$Class)
     fisher_test <- fisher.test(table_data, workspace = 1e9)
     sel2_bal1_fisher_results[[col]] <-
       list(column = col, p_value = fisher_test$p.value)
@@ -1064,7 +1057,7 @@ m1_wf1_s2b1 <- workflow() %>%
   add_recipe(m1_rec1_s2b1)
 
 # 4. Cross-validation
-set.seed(1)
+set.seed(123)
 m1_folds_s2b1 <- vfold_cv(df_logistic_s2b1, v = 5, strata = Class)
 
 # 5. Grid of penalty and mixture values
