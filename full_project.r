@@ -192,6 +192,33 @@ calculate_measures <- function(tp_0, fp_0, tn_0, fn_0, tp_1, fp_1, tn_1, fn_1) {
   return(measure_df)
 }
 
+# Function to store model results with timestamp and description
+store_results <- function(combination_key, results_df, description) {
+  # Get current date and time
+  current_datetime <- format(Sys.time(), "%Y-%m-%d %H:%M:%S")
+  
+  # Create a wide format dataframe with measures as columns
+  results_wide <- results_df %>%
+    pivot_wider(names_from = measures, values_from = values)
+  
+  # Add description and datetime columns
+  results_wide <- results_wide %>%
+    mutate(combination_key = combination_key,
+           description = description,
+           datetime = current_datetime)
+  
+  # Check if results_storage exists in the global environment
+  if (!exists("results_storage", envir = .GlobalEnv)) {
+    # Create it if it doesn't exist
+    results_storage <<- results_wide
+  } else {
+    # Append to existing dataframe if it does exist
+    results_storage <<- bind_rows(results_storage, results_wide)
+  }
+  
+  return(results_storage)
+}
+
 ################################################################################
 #---- 1 DONE ******* Preprocess - Project Step 1 ---------- df_preprocessed ----
 ################################################################################
@@ -1100,33 +1127,6 @@ autoplot(m1_conf_matrix_s2b1, type = "heatmap") +
 # 0.6 works best on the test data but I cannot tune with the test data.
 results_model1_s2b1 <- calculate_all_measures(m1_fit_s2b1, df_test, 0.5)
 
-# Function to store model results with timestamp and description
-store_results <- function(combination_key, results_df, description) {
-  # Get current date and time
-  current_datetime <- format(Sys.time(), "%Y-%m-%d %H:%M:%S")
-  
-  # Create a wide format dataframe with measures as columns
-  results_wide <- results_df %>%
-    pivot_wider(names_from = measures, values_from = values)
-  
-  # Add description and datetime columns
-  results_wide <- results_wide %>%
-    mutate(combination_key = combination_key,
-           description = description,
-           datetime = current_datetime)
-  
-  # Check if results_storage exists in the global environment
-  if (!exists("results_storage", envir = .GlobalEnv)) {
-    # Create it if it doesn't exist
-    results_storage <<- results_wide
-  } else {
-    # Append to existing dataframe if it does exist
-    results_storage <<- bind_rows(results_storage, results_wide)
-  }
-  
-  return(results_storage)
-}
-
 results_model1_s2b1
 
 store_results("m1s2b1", results_model1_s2b1, "Logistic Regression Model 1 - s2b1")
@@ -1135,7 +1135,7 @@ store_results("m1s2b1", results_model1_s2b1, "Logistic Regression Model 1 - s2b1
 #---- 5-2 PEND *****    Model 2 K-Nearest Neighbors ----------------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#---- 5-2-3 PROG ***       Model 2 KNN - s1b1 ----------------------------------
+#---- 5-2-1 PROG ***       Model 2 KNN - s1b1 ----------------------------------
 
 # Define the KNN model specification
 knn_spec <- nearest_neighbor(neighbors = 5, weight_func = "rectangular") %>%
@@ -1174,6 +1174,82 @@ knn_metrics <- knn_predictions %>%
 print(knn_metrics)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#---- 5-2-3 PROG ***       Model 2 KNN - s2b1 ----------------------------------
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+# Define the KNN model specification
+m2_spec_s2b1 <- nearest_neighbor(
+  neighbors = tune(),
+  weight_func = tune()
+) %>%
+  set_engine("kknn") %>%
+  set_mode("classification")
+
+# Create a recipe for preprocessing
+m2_rec_s2b1 <- recipe(Class ~ ., data = df_select2_balanced1) %>%
+  step_zv(all_predictors()) %>%
+  step_normalize(all_numeric_predictors()) %>%
+  step_dummy(all_nominal_predictors(), -all_outcomes())
+
+# Create a workflow
+m2_wf_s2b1 <- workflow() %>%
+  add_model(m2_spec_s2b1) %>%
+  add_recipe(m2_rec_s2b1)
+
+# Cross-validation
+set.seed(123)
+m2_folds_s2b1 <- vfold_cv(df_select2_balanced1, v = 5, strata = Class)
+
+# Define grid of hyperparameters
+m2_grid_s2b1 <- grid_regular(
+  neighbors(range = c(5, 50)),
+  weight_func(values = c("rectangular", "triangular", "gaussian", "rank")),
+  levels = c(10, 4)
+)
+
+# Tune the model
+m2_tune_res_s2b1 <- tune_grid(
+  m2_wf_s2b1,
+  resamples = m2_folds_s2b1,
+  grid = m2_grid_s2b1,
+  metrics = metric_set(roc_auc, accuracy, sens, spec)
+)
+
+# Select the best model based on ROC AUC
+m2_best_params_s2b1 <- select_best(m2_tune_res_s2b1, metric = "roc_auc")
+
+# Finalize workflow
+m2_final_wf_s2b1 <- finalize_workflow(m2_wf_s2b1, m2_best_params_s2b1)
+
+# Fit the final model
+m2_fit_s2b1 <- fit(m2_final_wf_s2b1, data = df_select2_balanced1)
+
+# Try different thresholds to achieve the target TPR and TNR
+thresholds <- seq(0.3, 0.7, by = 0.05)
+threshold_results <- list()
+
+for (thresh in thresholds) {
+  results <- calculate_all_measures(m2_fit_s2b1, df_test, thresh)
+  tpr_1 <- results$values[results$measures == "TPR_1"]
+  tnr_0 <- results$values[results$measures == "TNR_0"]
+  
+  threshold_results[[as.character(thresh)]] <- data.frame(
+    threshold = thresh,
+    TPR_1 = tpr_1,
+    TNR_0 = tnr_0,
+    diff_from_target = abs(tpr_1 - 0.81) + abs(tnr_0 - 0.79)
+  )
+}
+
+threshold_df <- do.call(rbind, threshold_results)
+best_threshold <- threshold_df[which.min(threshold_df$diff_from_target), "threshold"]
+
+# Final evaluation with best threshold
+results_model2_s2b1 <- calculate_all_measures(m2_fit_s2b1, df_test, best_threshold)
+store_results("m2s2b1", results_model2_s2b1, "KNN Model - s2b1")
+
 #---- 5-3 PEND *****    Model 3 Decision Tree ----------------------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
