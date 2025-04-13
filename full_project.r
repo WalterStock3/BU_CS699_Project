@@ -1,4 +1,4 @@
-#---- 0 PROG ******* Project Step 0 --------------------------------------------
+#---- 0 DONE ******* Project Step 0 --------------------------------------------
 ## TODO:
 #  - Complete a graph for Fisher Scores for Logical - 4-2-1-1
 #  - Complete a grpah for Factor wihout processing Missing.
@@ -490,12 +490,12 @@ save(df_test, file = "df_test.RData")
 # Not using SMOTE because we have a large number of categorical variables.
 
 # Load the training and testing datasets
-# load("df_train.RData")
-# load("df_test.RData")
+# load("df_train.RData") # nolint
+# load("df_test.RData") # nolint
 
 # Verify the dimensions of the loaded datasets
-# print(paste("Loaded training dataset - dim:", dim(df_train)[1], ",", dim(df_train)[2]))
-# print(paste("Loaded testing dataset - dim:", dim(df_test)[1], ",", dim(df_test)[2]))
+# print(paste("Loaded training dataset - dim:", dim(df_train)[1], ",", dim(df_train)[2])) # nolint
+# print(paste("Loaded testing dataset - dim:", dim(df_test)[1], ",", dim(df_test)[2])) # nolint
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #---- 3.1 DONE *****    Balance - Method 1 - Down Sample ----- df_balanced1 ----
@@ -527,12 +527,12 @@ print(paste("training balanced 2 dataset - dim:", dim(df_balanced2)[1],
 
 print(paste("training balanced 2 dataset - class distribution:",
             table(df_balanced2$Class)[1], ",",
-table(df_balanced2$Class)[2]))
+            table(df_balanced2$Class)[2]))
 
 save(df_balanced2, file = "df_balanced2.RData")
 
 ################################################################################
-#---- 4 PROG ******* Select - Project Step 4 --------- df_select#_balanced# ----
+#---- 4 PROG ******* Select - Project Step 4 ---------------------- df_s#b# ----
 ################################################################################
 #
 #    Chapter 4 - Dimension Reduction
@@ -546,8 +546,8 @@ save(df_balanced2, file = "df_balanced2.RData")
 ################################################################################
 
 # Load the balanced datasets
-#load("df_balanced1.RData")
-#load("df_balanced2.RData")
+#load("df_balanced1.RData") # nolint
+#load("df_balanced2.RData") # nolint
 
 # Verify the dimensions of the loaded datasets
 #print(paste("Loaded df_balanced1 - dim:",
@@ -556,10 +556,10 @@ save(df_balanced2, file = "df_balanced2.RData")
 #            dim(df_balanced2)[1], ",", dim(df_balanced2)[2]))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#---- 4-1 DONE *****    Select 1 - Missing Removal --- df_select1_balanced# ----
+#---- 4-1 DONE *****    Select 1 - Missing Removal ---------------- df_s1b# ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#---- 4-1-1 DONE ***       Select 1 - balanced 1 ----- df_select1_balanced1 ----
+#---- 4-1-1 DONE ***       Select 1 - balanced 1 ------------------ df_s1b1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Inputs that can be tuned
@@ -602,11 +602,11 @@ print(paste("df_processing - total missing values:",
 df_processing_filt_rows <- df_processing_filt_rows %>%
   select(-calc_missing_values_row_count, -calc_missing_values_row_percent)
 
-df_select1_balanced1 <- df_processing_filt_rows
+df_s1b1 <- df_processing_filt_rows
 
-save(df_select1_balanced1, file = "df_select1_balanced1.RData")
+save(df_s1b1, file = "df_s1b1.RData")
 
-#---- 4-1-2 DONE ***       Select 1 - balanced 2 ----- df_select1_balanced2 ----
+#---- 4-1-2 DONE ***       Select 1 - balanced 2 ------------------ df_s1b2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Columns
@@ -645,15 +645,15 @@ print(paste("df_processing - total missing values:",
 df_processing_filt_rows <- df_processing_filt_rows %>%
   select(-calc_missing_values_row_count, -calc_missing_values_row_percent)
 
-df_select1_balanced2 <- df_processing_filt_rows
+df_s1b2 <- df_processing_filt_rows
 
-save(df_select1_balanced2, file = "df_select1_balanced2.RData")
+save(df_s1b2, file = "df_s1b2.RData")
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#---- 4-2 DONE *****    Select 2 - Fisher and Corr --- df_select2_balanced# ----
+#---- 4-2 DONE *****    Select 2 - Fisher and Corr ---------------- df_s2b# ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#---- 4-2-1 DONE ***       Select 2 - balanced 1 ----- df_s2b1 ----
+#---- 4-2-1 DONE ***       Select 2 - balanced 1 ------------------ df_s2b1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 df_s2b1 <- df_balanced1
@@ -662,27 +662,27 @@ df_s2b1 <- df_balanced1
 
 df_s2b1_1factors <- df_balanced1 %>%
   select(Class, matches(paste0("^DETAILED-(",
-                        paste(df_columns_info %>%
-                                filter(variable_type %in%
-                                         c("factor")) %>%
-                                pull(column_name), 
-                              collapse = "|"), ")_")))
+                               paste(df_columns_info %>%
+                                       filter(variable_type %in%
+                                                c("factor")) %>%
+                                       pull(column_name),
+                                     collapse = "|"), ")_")))
 
 df_s2b1_2logical <- df_balanced1 %>%
   select(Class, matches(paste0("^DETAILED-(",
-                        paste(df_columns_info %>%
-                                filter(variable_type %in%
-                                         c("logical")) %>%
-                                pull(column_name), 
-                              collapse = "|"), ")_")))
+                               paste(df_columns_info %>%
+                                       filter(variable_type %in%
+                                                c("logical")) %>%
+                                       pull(column_name),
+                                     collapse = "|"), ")_")))
 
 df_s2b1_3levels <- df_balanced1 %>%
   select(Class, matches(paste0("^DETAILED-(",
-                        paste(df_columns_info %>%
-                                filter(variable_type %in%
-                                         c("factor_levels")) %>%
-                                pull(column_name), 
-                              collapse = "|"), ")_")))
+                               paste(df_columns_info %>%
+                                       filter(variable_type %in%
+                                                  c("factor_levels")) %>%
+                                       pull(column_name), 
+                                     collapse = "|"), ")_")))
 
 df_s2b1_allfact <- cbind(
   df_s2b1_1factors,
@@ -700,7 +700,7 @@ fisher_not_possible <- c("SCHL", "ANC1P", "DETAILED-SCHL_",
                          "DETAILED-ANC1P_", 
                          "RACNH", "DETAILED-RACNH_", "Class")
 
-sel2_bal1_fisher_results <- list()
+s2b1_fisher_results <- list()
 
 for (col in names(df_s2b1_allfact)) {
   print(paste(Sys.time(), "- Processing column:", col))
@@ -712,32 +712,32 @@ for (col in names(df_s2b1_allfact)) {
     table_data <- table(df_s2b1_allfact[[col]],
                         df_s2b1_allfact$Class)
     fisher_test <- fisher.test(table_data, workspace = 1e9)
-    sel2_bal1_fisher_results[[col]] <-
+    s2b1_fisher_results[[col]] <-
       list(column = col, p_value = fisher_test$p.value)
     print(paste(Sys.time(),
                 "- Fisher test column:", col, "p-value:", fisher_test$p.value))
   }, error = function(e) {
     message(paste("Error processing column:", col, "-", e$message))
-    sel2_bal1_fisher_results[[col]] <- list(column = col, p_value = NA)
+    s2b1_fisher_results[[col]] <- list(column = col, p_value = NA)
   })
 }
 
 # Convert results to a data frame for easier interpretation
-df_sel2_bal1_fisher_results <- 
-  do.call(rbind, lapply(sel2_bal1_fisher_results, as.data.frame))
+df_s2b1_fisher_results <-
+  do.call(rbind, lapply(s2b1_fisher_results, as.data.frame))
 
-names(df_sel2_bal1_fisher_results) <- c("Column", "P_value")
+names(df_s2b1_fisher_results) <- c("Column", "P_value")
 
-df_sel2_bal1_fisher_results$neg_log10_P_value <-
-  -log10(df_sel2_bal1_fisher_results$P_value)
+df_s2b1_fisher_results$neg_log10_P_value <-
+  -log10(df_s2b1_fisher_results$P_value)
 
 # Create a bar plot for Fisher scores
-df_sel2_bal1_fisher_plt <- df_sel2_bal1_fisher_results %>%
+df_s2b1_fisher_plt <- df_s2b1_fisher_results %>%
   mutate(P_value = as.numeric(as.character(P_value))) %>%
   arrange(P_value)
 
-plt_sel2_bal1_fisher <-
-  ggplot(df_sel2_bal1_fisher_plt,
+plt_s2b1_fisher <-
+  ggplot(df_s2b1_fisher_plt,
          aes(x = reorder(substr(Column, 10, 60), -P_value),
              y = -log10(P_value))) +
   geom_bar(stat = "identity", fill = "steelblue") +
@@ -751,13 +751,13 @@ plt_sel2_bal1_fisher <-
        y = "-log10(P-value)") +
   theme_minimal()
 
-plt_sel2_bal1_fisher
+plt_s2b1_fisher
 
-ggsave("plt_sel2_bal1_fisher.png", plot = plt_sel2_bal1_fisher,
+ggsave("plt_s2b1_fisher.png", plot = plt_s2b1_fisher,
        width = 10, height = 12, dpi = 300)
 
 # Identify the columns with P-values less than 0.05
-select_cols <- df_sel2_bal1_fisher_results %>%
+select_cols <- df_s2b1_fisher_results %>%
   filter(P_value < 0.05) %>%
   arrange(desc(neg_log10_P_value)) %>%
   pull(Column)
@@ -856,10 +856,10 @@ plt_list <- lapply(names(df_s2b1_4integers)
                              axis.ticks.y = element_blank())
                   })
 
-plt_sel2_bal1_corr <- grid.arrange(grobs = plt_list, ncol = 7)
+plt_s2b1_corr <- grid.arrange(grobs = plt_list, ncol = 7)
 
-ggsave("plt_sel2_bal1_corr.png",
-       plot = plt_sel2_bal1_corr, width = 10, height = 16, dpi = 300)
+ggsave("plt_s2b1_corr.png",
+       plot = plt_s2b1_corr, width = 10, height = 16, dpi = 300)
 
 # Based on boxplot distributions adding Income to Poverty Ratio and Work Hours.
 df_s2b1 <- df_s2b1_allfact %>% select(-Class) %>%
@@ -869,12 +869,42 @@ df_s2b1 <- df_s2b1_allfact %>% select(-Class) %>%
 
 save(df_s2b1, file = "df_s2b1.RData")
 
-#---- 4-2-2 PEND ***       Select 2 - balanced 2 ----- df_select2_balanced2 ----
+#---- 4-2-2 PROG ***       Select 2 - balanced 2 ----- df_s2b2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-df_select2_balanced2 <- df_balanced2
+df_s2b2 <- df_balanced2
 
 #---- 4-2-2-1 PEND *          Factor and Logical Variables ---------------------
+
+df_s2b2_1factors <- df_balanced2 %>%
+  select(Class, matches(paste0("^DETAILED-(",
+                               paste(df_columns_info %>%
+                                       filter(variable_type %in%
+                                                c("factor")) %>%
+                                       pull(column_name),
+                                     collapse = "|"), ")_")))
+
+df_s2b2_2logical <- df_balanced2 %>%
+  select(Class, matches(paste0("^DETAILED-(",
+                               paste(df_columns_info %>%
+                                       filter(variable_type %in%
+                                                c("logical")) %>%
+                                       pull(column_name),
+                                     collapse = "|"), ")_")))
+
+df_s2b2_3levels <- df_balanced2 %>%
+  select(Class, matches(paste0("^DETAILED-(",
+                               paste(df_columns_info %>%
+                                       filter(variable_type %in%
+                                                  c("factor_levels")) %>%
+                                       pull(column_name), 
+                                     collapse = "|"), ")_")))
+
+df_s2b2_allfact <- cbind(
+  df_s2b2_1factors,
+  df_s2b2_2logical %>% select(-Class),
+  df_s2b2_3levels %>% select(-Class)
+)
 
 #---- 4-2-2-2 PEND *          Integer Variables --------------------------------
 
@@ -976,7 +1006,7 @@ ggplot(df_s3b1_fisher_plt,
   theme_minimal()
 
 # Identify the 2 columns with the highest neg_log10_P_value
-top_cols <- df_sel2_bal1_fisher_results %>%
+top_cols <- df_s2b1_fisher_results %>%
   arrange(desc(neg_log10_P_value)) %>%
   slice_head(n = 2) %>%
   pull(Column)
