@@ -1530,6 +1530,8 @@ save(df_s3b2, file = "df_s3b2.RData")
 #---- 5-1-1 TEST ***       Model 1 Logistic Regression - s1b1 ------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+# load("df_s1b1.RData")
+
 # Logistic Regression Model
 
 df_m1_s1b1 <- df_s1b1 %>%
