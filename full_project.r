@@ -458,6 +458,7 @@ write.csv(df_preprocessed, file = "df_preprocessed.csv", row.names = FALSE)
 
 # Export df_preprocessed as an R data file
 save(df_preprocessed, file = "df_preprocessed.RData")
+save(df_columns_info, file = "df_columns_info.RData")
 
 ################################################################################
 #---- 2 DONE ******* Split - Project Step 2 ------------- df_train, df_test ----
@@ -684,11 +685,9 @@ df_s2b1_3levels <- df_balanced1 %>%
                                        pull(column_name), 
                                      collapse = "|"), ")_")))
 
-df_s2b1_allfact <- cbind(
-  df_s2b1_1factors,
-  df_s2b1_2logical %>% select(-Class),
-  df_s2b1_3levels %>% select(-Class)
-)
+df_s2b1_allfact <- cbind(df_s2b1_1factors,
+                         df_s2b1_2logical %>% select(-Class),
+                         df_s2b1_3levels %>% select(-Class))
 
 ##### Will use Fisher test over Chi-square to handle sparse data.
 
@@ -861,20 +860,23 @@ plt_s2b1_corr <- grid.arrange(grobs = plt_list, ncol = 7)
 ggsave("plt_s2b1_corr.png",
        plot = plt_s2b1_corr, width = 10, height = 16, dpi = 300)
 
-# Based on boxplot distributions adding Income to Poverty Ratio and Work Hours.
-df_s2b1 <- df_s2b1_allfact %>% select(-Class) %>%
+# Removing class to avoid duplication.  Class is included in both dfs.
+df_s2b1 <- df_s2b1_allfact %>% select(-Class) %>% # nolint
   bind_cols(df_s2b1_4integers)
 
 #---- 4-2-1-4 DONE *          Final --------------------------------------------
 
 save(df_s2b1, file = "df_s2b1.RData")
 
-#---- 4-2-2 PROG ***       Select 2 - balanced 2 ----- df_s2b2 ----
+#---- 4-2-2 DONE ***       Select 2 - balanced 2 ------------------ df_s2b2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+load("df_balanced2.RData") # nolint
+load("df_columns_info.RData") # nolint
 
 df_s2b2 <- df_balanced2
 
-#---- 4-2-2-1 PEND *          Factor and Logical Variables ---------------------
+#---- 4-2-2-1 DONE *          Factor and Logical Variables ---------------------
 
 df_s2b2_1factors <- df_balanced2 %>%
   select(Class, matches(paste0("^DETAILED-(",
@@ -906,17 +908,192 @@ df_s2b2_allfact <- cbind(
   df_s2b2_3levels %>% select(-Class)
 )
 
-#---- 4-2-2-2 PEND *          Integer Variables --------------------------------
+##### Will use Fisher test over Chi-square to handle sparse data.
 
-#---- 4-2-2-3 PEND *          Outliers -----------------------------------------
+# Some columns have too many levels to be used in Fisher test.
+# SCHL - LDSTP too small - 2e9
+# ANC1P - LDSTP too small - 1e9
 
-#---- 4-2-2-4 PEND *          Final --------------------------------------------
+fisher_not_possible <- c("Class")
 
-#---- 4-3 PROG *****    Select 3 - Missing Added ----- df_s3b1 ----
+s2b2_fisher_results <- list()
+
+# Simulation-based Fisher test
+for (col in names(df_s2b2_allfact)) {
+  print(paste(Sys.time(), "- Processing column:", col))
+  if (any(startsWith(col, fisher_not_possible))) {
+    print(paste("Skipping column:", col))
+    next
+  }
+  tryCatch({
+    table_data <- table(df_s2b2_allfact[[col]],
+                        df_s2b2_allfact$Class)
+    fisher_test <- fisher.test(table_data, workspace = 1e9,
+                               simulate.p.value = TRUE, B = 2000)
+    s2b2_fisher_results[[col]] <-
+      list(column = col, p_value = fisher_test$p.value)
+    print(paste(Sys.time(),
+                "- Fisher test column:", col, "p-value:", fisher_test$p.value))
+  }, error = function(e) {
+    message(paste("Error processing column:", col, "-", e$message))
+    s2b2_fisher_results[[col]] <- list(column = col, p_value = NA)
+  })
+}
+
+# Convert results to a data frame for easier interpretation
+df_s2b2_fisher_results <-
+  do.call(rbind, lapply(s2b2_fisher_results, as.data.frame))
+
+names(df_s2b2_fisher_results) <- c("Column", "P_value")
+
+df_s2b2_fisher_results$neg_log10_P_value <-
+  -log10(df_s2b2_fisher_results$P_value)
+
+# Create a bar plot for Fisher scores
+df_s2b2_fisher_plt <- df_s2b2_fisher_results %>%
+  mutate(P_value = as.numeric(as.character(P_value))) %>%
+  arrange(P_value)
+
+plt_s2b2_fisher <-
+  ggplot(df_s2b2_fisher_plt,
+         aes(x = reorder(substr(Column, 10, 60), -P_value),
+             y = -log10(P_value))) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  geom_hline(yintercept = -log10(0.05), color = "red", linetype = "dashed") +
+  coord_flip() +
+  labs(title = "Fisher Scores for Categorical and Logical Variables 
+       with Missing Included",
+       subtitle = "Select 2 - Balanced 2",
+       caption = "Red line indicates p-value threshold of 0.01",
+       x = "",
+       y = "-log10(P-value)") +
+  theme_minimal()
+
+plt_s2b2_fisher
+
+ggsave("plt_s2b2_fisher.png", plot = plt_s2b2_fisher,
+       width = 10, height = 12, dpi = 300)
+
+# Identify the columns with P-values less than 0.05
+select_cols <- df_s2b2_fisher_results %>%
+  filter(P_value < 0.05) %>%
+  arrange(desc(neg_log10_P_value)) %>%
+  pull(Column)
+
+# Create a new dataframe with those columns
+df_s2b2_allfact <- df_s2b2_allfact %>%
+  select(Class, all_of(select_cols))
+
+#---- 4-2-2-2 DONE *          Integer Variables --------------------------------
+
+df_s2b2_4integers <- df_balanced2 %>%
+  select(Class, matches(paste0("^DETAILED-(",
+                               paste(df_columns_info %>%
+                                       filter(variable_type %in%
+                                                c("integer")) %>%
+                                       pull(column_name),
+                                     collapse = "|"), ")_")))
+
+in_select2_cor_threshold <- 0.05
+
+repeat {
+  df_numeric <- df_s2b2_4integers %>%
+    mutate(across(where(is.integer), as.numeric))
+
+  # Check for collinearity using a correlation matrix
+  correlation_matrix_full <- cor(df_numeric %>% select(-Class))
+  correlation_matrix <- correlation_matrix_full
+
+  # Identify the two variables that are most correlated
+  correlation_matrix[upper.tri(correlation_matrix, diag = TRUE)] <- NA
+  most_correlated_location <- which(abs(correlation_matrix) ==
+                                      max(abs(correlation_matrix),
+                                          na.rm = TRUE), arr.ind = TRUE)
+  most_correlated_vars <- colnames(correlation_matrix)[most_correlated_location]
+  most_correlated_correlation <- correlation_matrix[most_correlated_location]
+
+  # Break the loop if the highest correlation is less than a threshold.
+  if (abs(most_correlated_correlation) <= in_select2_cor_threshold) {
+    break
+  }
+
+  print(paste("Most correlated:", most_correlated_vars[1],
+              "and", most_correlated_vars[2],
+              "at", most_correlated_correlation))
+
+  # Sum the correlations to decide which one to remove
+  row_to_sum1 <- abs(correlation_matrix_full[most_correlated_vars[1],
+                                             , drop = FALSE])
+  row_sum1 <- sum(row_to_sum1, na.rm = TRUE)
+
+  row_to_sum2 <- abs(correlation_matrix_full[most_correlated_vars[2],
+                                             , drop = FALSE])
+  row_sum2 <- sum(row_to_sum2, na.rm = TRUE)
+
+  print(paste("Variable:", most_correlated_vars[1], "Row Sum:", row_sum1))
+  print(paste("Variable:", most_correlated_vars[2], "Row Sum:", row_sum2))
+
+  # Remove the variable with the highest sum of correlations
+  highly_correlated <- ifelse(row_sum1 > row_sum2, most_correlated_vars[1],
+                              most_correlated_vars[2])
+  df_s2b2_4integers <- df_numeric %>%
+    select(-all_of(highly_correlated))
+
+  print(paste("Removed variable:", highly_correlated))
+}
+
+#---- 4-2-2-3 DONE *          Outliers -----------------------------------------
+# Create boxplots for each numeric variable in the dataset
+
+# Generate boxplots dynamically for all numeric columns
+boxplots <- lapply(df_s2b2_4integers, function(col) {
+  ggplot(df_s2b2_4integers, aes(x = "", y = .data[[col]])) +
+    geom_boxplot() +
+    theme(axis.title.x = element_blank(),
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank())
+})
+
+plt_list <- lapply(names(df_s2b2_4integers)
+                   [names(df_s2b2_4integers) != "Class"],
+                   function(col_name) {
+                     ggplot(df_s2b2_4integers,
+                            aes(x = "", y = .data[[col_name]])) +
+                       geom_boxplot() +
+                       labs(title = 
+                              substr(col_name, 10, regexpr("_", col_name) - 1),
+                            y = substr(col_name, regexpr("_", col_name) + 1,
+                                       regexpr("_", col_name) + 60)) +
+                       theme(plot.title = element_text(hjust = .9)) +
+                       theme_minimal() +
+                       theme(
+                             axis.title.x = element_blank(),
+                             axis.text.x  = element_blank(),
+                             axis.ticks.x = element_blank(),
+                             axis.text.y  = element_blank(),
+                             axis.ticks.y = element_blank())
+                   })
+
+plt_s2b2_corr <- grid.arrange(grobs = plt_list, ncol = 7)
+
+ggsave("plt_s2b2_corr.png",
+       plot = plt_s2b2_corr, width = 10, height = 16, dpi = 300)
+
+# Removing class to avoid duplication.  Class is included in both dfs.
+df_s2b2 <- df_s2b2_allfact %>% select(-Class) %>% # nolint
+  bind_cols(df_s2b2_4integers)
+
+#---- 4-2-2-4 DONE *          Final --------------------------------------------
+
+save(df_s2b1, file = "df_s2b2.RData")
+
+#---- 4-3 PROG *****    Select 3 - Missing Added ------------------ df_s3b1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#---- 4-3-1 PROG ***       Select 3 - balanced 1 ----- df_s3b1 ----
+#---- 4-3-1 DONE ***       Select 3 - balanced 1 ----- df_s3b1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+load("df_balanced1.RData")
 
 df_s3b1 <- df_balanced1
 
@@ -943,9 +1120,9 @@ df_s3b1_6lvl_miss <- df_s2b1_3levels %>%
                                                "Missing")),
                              "Missing")))
 
-df_s3b1__miss <- cbind(df_s3b1_4fct_miss,
-                                        df_s3b1_5log_miss,
-                                        df_s3b1_6lvl_miss)
+df_s3b1_allfact_miss <- cbind(df_s3b1_4fct_miss,
+                              df_s3b1_5log_miss %>% select(-Class),
+                              df_s3b1_6lvl_miss %>% select(-Class))
 
 ##### Will use Fisher test over Chi-square to handle sparse data.
 
@@ -959,15 +1136,15 @@ fisher_not_possible <- c("SCHL", "ANC1P", "DETAILED-SCHL_",
 
 s3b1_fisher_results <- list()
 
-for (col in names(df_s3b1_merg_miss)) {
+for (col in names(df_s3b1_allfact_miss)) {
   print(paste(Sys.time(), "- Processing column:", col))
   if (any(startsWith(col, fisher_not_possible))) {
     print(paste("Skipping column:", col))
     next
   }
   tryCatch({
-    table_data <- table(df_s3b1_merg_miss[[col]],
-                        df_s3b1_merg_miss$Class)
+    table_data <- table(df_s3b1_allfact_miss[[col]],
+                        df_s3b1_allfact_miss$Class)
     fisher_test <- fisher.test(table_data, workspace = 1e9)
     s3b1_fisher_results[[col]] <-
       list(column = col, p_value = fisher_test$p.value)
@@ -980,7 +1157,7 @@ for (col in names(df_s3b1_merg_miss)) {
 }
 
 # Convert results to a data frame for easier interpretation
-df_s3b1_fisher_results <- 
+df_s3b1_fisher_results <-
   do.call(rbind, lapply(s3b1_fisher_results, as.data.frame))
 
 names(df_s3b1_fisher_results) <- c("Column", "P_value")
@@ -993,33 +1170,35 @@ df_s3b1_fisher_plt <- df_s3b1_fisher_results %>%
   mutate(P_value = as.numeric(as.character(P_value))) %>%
   arrange(P_value)
 
-ggplot(df_s3b1_fisher_plt,
-       aes(x = reorder(substr(Column, 10, 60), -P_value),
-           y = -log10(P_value))) +
+plt_s3b1_fisher <-
+  ggplot(df_s3b1_fisher_plt,
+         aes(x = reorder(substr(Column, 10, 60), -P_value),
+             y = -log10(P_value))) +
   geom_bar(stat = "identity", fill = "steelblue") +
-  geom_hline(yintercept = -log10(0.01), color = "red", linetype = "dashed") +
+  geom_hline(yintercept = -log10(0.05), color = "red", linetype = "dashed") +
   coord_flip() +
   labs(title = "Fisher Scores for Categorical and Logical Variables 
-      with Missing Included",
+       with Missing Included",
+       subtitle = "Select 2 - Balanced 1",
+       caption = "Red line indicates p-value threshold of 0.01",
        x = "",
        y = "-log10(P-value)") +
   theme_minimal()
 
-# Identify the 2 columns with the highest neg_log10_P_value
-top_cols <- df_s2b1_fisher_results %>%
+plt_s3b1_fisher
+
+ggsave("plt_s3b1_fisher.png", plot = plt_s3b1_fisher,
+       width = 10, height = 12, dpi = 300)
+
+# Identify the columns with P-values less than 0.05
+select_cols <- df_s3b1_fisher_results %>%
+  filter(P_value < 0.05) %>%
   arrange(desc(neg_log10_P_value)) %>%
-  slice_head(n = 2) %>%
   pull(Column)
 
 # Create a new dataframe with those columns
-df_s2b1 <- df_s2b1 %>%
-  select(all_of(top_cols))
-
-# Use Correlation to check for independence between numeric variables
-#   and the target variable.
-
-df_s2b1_factors <- df_s2b1 %>%
-  select(where(is.factor))
+df_s3b1_allfact <- df_s3b1_allfact %>%
+  select(Class, all_of(select_cols))
 
 #---- 4-3-1-2 PEND *          Integer Variables --------------------------------
 
