@@ -25,7 +25,7 @@ library(rsample)
 library(ROSE)
 library(pROC)
 
-#---- 0.1 DONE *****    Functions - Performance Evaluation ---------------------
+#---- 0.1 DONE *****    Functions - Full Performance Evaluation ----------------
 
 calculate_all_measures <- function(in_model, in_test_df, threshold) {
   #in_test_df <- df_test # nolint
@@ -100,6 +100,8 @@ calculate_all_measures <- function(in_model, in_test_df, threshold) {
   return(performance_measures)
 
 }
+
+#---- 0.2 DONE *****    Functions - Calc Performance Measures ------------------
 
 calculate_measures <- function(tp_0, fp_0, tn_0, fn_0,
                                tp_1, fp_1, tn_1, fn_1,
@@ -188,6 +190,7 @@ calculate_measures <- function(tp_0, fp_0, tn_0, fn_0,
   return(measure_df)
 }
 
+#---- 0.3 DONE *****    Functions - Store Performance Evaluation ---------------
 # Function to store model results with timestamp and description
 store_results <- function(combination_key, results_df, description) {
   # Get current date and time
