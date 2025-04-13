@@ -409,7 +409,7 @@ factor_columns <- df_columns_info %>%
   filter(variable_type == "factor", column_name %in% names(df)) %>%
   pull(column_name)
 
-df <- df %>% 
+df <- df %>%
   mutate(across(all_of(factor_columns), as.factor)) %>%
   mutate(across(all_of(matches(paste0("^DETAILED-",
                                       paste(factor_columns, collapse = "|"),
@@ -445,7 +445,7 @@ integer_columns <- df_columns_info %>%
   filter(variable_type == "integer") %>%
   pull(column_name)
 
-df <- df %>% 
+df <- df %>%
   mutate(across(all_of(integer_columns), as.integer)) %>%
   mutate(across(all_of(matches(paste0("^DETAILED-",
                                       paste(integer_columns, collapse = "|"),
@@ -468,7 +468,7 @@ save(df_columns_info, file = "df_columns_info.RData")
 ################################################################################
 
 # Optional - Load the preprocessed dataset
-# load("df_preprocessed.RData")
+# load("df_preprocessed.RData") # nolint
 
 set.seed(123)
 
@@ -488,7 +488,7 @@ save(df_train, file = "df_train.RData")
 save(df_test, file = "df_test.RData")
 
 ################################################################################
-#---- 3 DONE ******* Balance - Project Step 3 -- df_balanced1, df_balanced2 ----
+#---- 3 DONE ******* Balance - Project Step 3 -------------- df_balanced# ------
 ################################################################################
 
 # Not using SMOTE because we have a large number of categorical variables.
@@ -536,7 +536,7 @@ print(paste("training balanced 2 dataset - class distribution:",
 save(df_balanced2, file = "df_balanced2.RData")
 
 ################################################################################
-#---- 4 PROG ******* Select - Project Step 4 ---------------------- df_s#b# ----
+#---- 4 PROG ******* Select - Project Step 4 ------------------ df_s#b# --------
 ################################################################################
 #
 #    Chapter 4 - Dimension Reduction
@@ -560,7 +560,7 @@ save(df_balanced2, file = "df_balanced2.RData")
 #            dim(df_balanced2)[1], ",", dim(df_balanced2)[2]))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#---- 4-1 DONE *****    Select 1 - Missing Removal ---------------- df_s1b# ----
+#---- 4-1 DONE *****    Select 1 - Missing Removal -------------- df_s1b# ------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #---- 4-1-1 DONE ***       Select 1 - balanced 1 ------------------ df_s1b1 ----
@@ -655,7 +655,7 @@ df_s1b2 <- df_processing_filt_rows
 save(df_s1b2, file = "df_s1b2.RData")
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#---- 4-2 DONE *****    Select 2 - Fisher and Corr ---------------- df_s2b# ----
+#---- 4-2 DONE *****    Select 2 - Fisher and Corr -------------- df_s2b# ------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #---- 4-2-1 DONE ***       Select 2 - balanced 1 ------------------ df_s2b1 ----
@@ -685,8 +685,8 @@ df_s2b1_3levels <- df_balanced1 %>%
   select(Class, matches(paste0("^DETAILED-(",
                                paste(df_columns_info %>%
                                        filter(variable_type %in%
-                                                  c("factor_levels")) %>%
-                                       pull(column_name), 
+                                                c("factor_levels")) %>%
+                                       pull(column_name),
                                      collapse = "|"), ")_")))
 
 df_s2b1_allfact <- cbind(df_s2b1_1factors,
@@ -700,7 +700,7 @@ df_s2b1_allfact <- cbind(df_s2b1_1factors,
 # ANC1P - LDSTP too small - 1e9
 
 fisher_not_possible <- c("SCHL", "ANC1P", "DETAILED-SCHL_",
-                         "DETAILED-ANC1P_", 
+                         "DETAILED-ANC1P_",
                          "RACNH", "DETAILED-RACNH_", "Class")
 
 s2b1_fisher_results <- list()
@@ -845,7 +845,7 @@ plt_list <- lapply(names(df_s2b1_4integers)
                      ggplot(df_s2b1_4integers,
                             aes(x = "", y = .data[[col_name]])) +
                        geom_boxplot() +
-                       labs(title = 
+                       labs(title =
                               substr(col_name, 10, regexpr("_", col_name) - 1),
                             y = substr(col_name, regexpr("_", col_name) + 1,
                                        regexpr("_", col_name) + 60)) +
@@ -857,7 +857,7 @@ plt_list <- lapply(names(df_s2b1_4integers)
                              axis.ticks.x = element_blank(),
                              axis.text.y  = element_blank(),
                              axis.ticks.y = element_blank())
-                  })
+                   })
 
 plt_s2b1_corr <- grid.arrange(grobs = plt_list, ncol = 7)
 
@@ -902,8 +902,8 @@ df_s2b2_3levels <- df_balanced2 %>%
   select(Class, matches(paste0("^DETAILED-(",
                                paste(df_columns_info %>%
                                        filter(variable_type %in%
-                                                  c("factor_levels")) %>%
-                                       pull(column_name), 
+                                                c("factor_levels")) %>%
+                                       pull(column_name),
                                      collapse = "|"), ")_")))
 
 df_s2b2_allfact <- cbind(
@@ -1060,7 +1060,7 @@ plt_list <- lapply(names(df_s2b2_4integers)
                      ggplot(df_s2b2_4integers,
                             aes(x = "", y = .data[[col_name]])) +
                        geom_boxplot() +
-                       labs(title = 
+                       labs(title =
                               substr(col_name, 10, regexpr("_", col_name) - 1),
                             y = substr(col_name, regexpr("_", col_name) + 1,
                                        regexpr("_", col_name) + 60)) +
@@ -1087,10 +1087,10 @@ df_s2b2 <- df_s2b2_allfact %>% select(-Class) %>% # nolint
 
 save(df_s2b1, file = "df_s2b2.RData")
 
-#---- 4-3 DONE *****    Select 3 - Missing Added ------------------ df_s3b1 ----
+#---- 4-3 DONE *****    Select 3 - Missing Added ---------------- df_s3b# ------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#---- 4-3-1 DONE ***       Select 3 - balanced 1 ----- df_s3b1 ----
+#---- 4-3-1 DONE ***       Select 3 - balanced 1 ------------------ df_s3b1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # load("df_balanced1.RData") # nolint
@@ -1131,7 +1131,7 @@ df_s3b1_allfact_miss <- cbind(df_s3b1_4fct_miss,
 # ANC1P - LDSTP too small - 1e9
 
 fisher_not_possible <- c("SCHL", "ANC1P", "DETAILED-SCHL_",
-                         "DETAILED-ANC1P_", 
+                         "DETAILED-ANC1P_",
                          "RACNH", "DETAILED-RACNH_", "Class")
 
 s3b1_fisher_results <- list()
@@ -1277,7 +1277,7 @@ plt_list <- lapply(names(df_s3b1_4integers)
                      ggplot(df_s3b1_4integers,
                             aes(x = "", y = .data[[col_name]])) +
                        geom_boxplot() +
-                       labs(title = 
+                       labs(title =
                               substr(col_name, 10, regexpr("_", col_name) - 1),
                             y = substr(col_name, regexpr("_", col_name) + 1,
                                        regexpr("_", col_name) + 60)) +
@@ -1289,7 +1289,7 @@ plt_list <- lapply(names(df_s3b1_4integers)
                              axis.ticks.x = element_blank(),
                              axis.text.y  = element_blank(),
                              axis.ticks.y = element_blank())
-                  })
+                   })
 
 plt_s3b1_corr <- grid.arrange(grobs = plt_list, ncol = 7)
 
@@ -1304,7 +1304,7 @@ df_s3b1 <- df_s3b1_allfact %>% select(-Class) %>% # nolint
 
 save(df_s3b1, file = "df_s3b1.RData")
 
-#---- 4-3-2 DONE ***       Select - 3 balanced dataset 2 -----------------------
+#---- 4-3-2 DONE ***       Select - 3 balanced dataset 2 ---------- df_s3b2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # load("df_balanced2.RData") # nolint
@@ -1488,7 +1488,7 @@ plt_list <- lapply(names(df_s3b2_4integers)
                      ggplot(df_s3b2_4integers,
                             aes(x = "", y = .data[[col_name]])) +
                        geom_boxplot() +
-                       labs(title = 
+                       labs(title =
                               substr(col_name, 10, regexpr("_", col_name) - 1),
                             y = substr(col_name, regexpr("_", col_name) + 1,
                                        regexpr("_", col_name) + 60)) +
@@ -1500,7 +1500,7 @@ plt_list <- lapply(names(df_s3b2_4integers)
                              axis.ticks.x = element_blank(),
                              axis.text.y  = element_blank(),
                              axis.ticks.y = element_blank())
-                    })
+                   })
 
 plt_s3b2_corr <- grid.arrange(grobs = plt_list, ncol = 7)
 
@@ -1516,7 +1516,7 @@ df_s3b2 <- df_s3b2_allfact %>% select(-Class) %>% # nolint
 save(df_s3b2, file = "df_s3b2.RData")
 
 ################################################################################
-#---- 5 PROG ******* Models - Project Step 5 -----------------------------------
+#---- 5 PROG ******* Models - Project Step 5 ------------------ m#_s#b# --------
 ################################################################################
 
 ## Models - Project Step 5
@@ -1528,13 +1528,13 @@ save(df_s3b2, file = "df_s3b2.RData")
 # * Neural networks.
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#---- 5-1 PROG *****    Model 1 Logistic Regression ----------------------------
+#---- 5-1 PROG *****    Model 1 Logistic Regression ------------- m1_s#b# ------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Logistic regression is a statistical method for predicting binary classes.
-#---- 5-1-1 TEST ***       Model 1 Logistic Regression - s1b1 ------------------
+#---- 5-1-1 DONE ***       Model 1 Logistic Regression ------------ m1_s1b1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-# load("df_s1b1.RData")
+# load("df_s1b1.RData") # nolint
 
 # Logistic Regression Model
 
@@ -1622,7 +1622,96 @@ results_m1_s1b1
 
 store_results("m1s1b1", results_m1_s1b1, "Logistic Regression Model 1 - s1b1")
 
-#---- 5-1-2 PEND ***       Model 1 Logistic Regression - s1b2 ------------------
+#---- 5-1-2 TEST ***       Model 1 Logistic Regression ------------ m1_s1b2 ----
+
+# load("df_s1b2.RData") # nolint
+
+# Logistic Regression Model
+
+df_m1_s1b2 <- df_s1b2 %>%
+  select(Class, matches(paste0("^DETAILED-(",
+                               paste(df_columns_info %>%
+                                       filter(variable_type %in%
+                                                c("integer")) %>%
+                                       pull(column_name),
+                                     collapse = "|"), ")_")))
+
+# 1. Model Specification
+spec_m1_s1b2 <- logistic_reg(penalty = tune(), mixture = tune()) %>%
+  set_engine("glmnet") %>%
+  set_mode("classification")
+
+# 2. Recipe
+rec_m1_s1b2 <- recipe(Class ~ ., data = df_m1_s1b2) %>%
+  step_zv(all_predictors()) %>%
+  step_impute_median(all_numeric_predictors()) %>%
+  step_normalize(all_predictors()) %>%
+  step_dummy(all_nominal_predictors(), -all_outcomes())
+
+# 3. Workflow
+wf_m1_s1b2 <- workflow() %>%
+  add_model(spec_m1_s1b2) %>%
+  add_recipe(rec_m1_s1b2)
+
+# 4. Cross-validation
+set.seed(123)
+folds_m1_s1b2 <- vfold_cv(df_m1_s1b2, v = 5, strata = Class)
+
+# 5. Grid of hyperparameters
+tune_grid_m1_s1b2 <- grid_regular(penalty(), mixture(), levels = 5)
+
+# 6. Tune the model
+tune_results_m1_s1b2 <- tune_grid(
+  wf_m1_s1b2,
+  resamples = folds_m1_s1b2,
+  grid = tune_grid_m1_s1b2,
+  metrics = metric_set(roc_auc, accuracy, sens, spec)
+)
+
+# Show the tuning results
+autoplot(tune_results_m1_s1b2) +
+  labs(title = "Tuning Results for Logistic Regression",
+       x = "Penalty",
+       y = "Mixture") +
+  theme_minimal()
+
+# 7. Select the best parameters
+best_parameters_m1_s1b2 <- select_best(tune_results_m1_s1b2, metric = "roc_auc")
+
+# 8. Finalize the workflow
+final_wf_m1_s1b2 <- finalize_workflow(wf_m1_s1b2, best_parameters_m1_s1b2)
+
+# 9. Fit the final model
+final_fit_m1_s1b2 <- fit(final_wf_m1_s1b2, data = df_m1_s1b2)
+
+# 10. Evaluate the model on the test dataset
+# Evaluate the model on the test dataset
+test_predications_m1_s1b2 <-
+  predict(final_fit_m1_s1b2, new_data = df_test, type = "prob") %>%
+  bind_cols(predict(final_fit_m1_s1b2, new_data = df_test, type = "class")) %>%
+  bind_cols(df_test %>% select(Class))
+
+# Generate a confusion matrix
+confusion_matrix_m1_s1b2 <- test_predications_m1_s1b2 %>%
+  conf_mat(truth = Class, estimate = .pred_class)
+
+# Print the confusion matrix
+print(confusion_matrix_m1_s1b2)
+
+# Visualize the confusion matrix
+autoplot(confusion_matrix_m1_s1b2, type = "heatmap") +
+  labs(title = "Confusion Matrix for Logistic Regression",
+       x = "Predicted Class",
+       y = "Actual Class") +
+  theme_minimal()
+
+# 0.6 works best on the test data but I cannot tune with the test data.
+results_m1_s1b2 <- calculate_all_measures(final_fit_m1_s1b2, df_test, 0.5)
+
+results_m1_s1b2
+
+store_results("m1s1b2", results_m1_s1b2, "Logistic Regression Model 1 - s1b2")
+
 #---- 5-1-3 DONE ***       Model 1 Logistic Regression - s2b1 ------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -1712,16 +1801,24 @@ results_m1_s2b1
 
 store_results("m1s2b1", results_m1_s2b1, "Logistic Regression Model 1 - s2b1")
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #---- 5-1-4 PEND ***       Model 1 Logistic Regression - s2b2 ------------------
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+f
+
 #---- 5-1-5 PEND ***       Model 1 Logistic Regression - s3b1 ------------------
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 #---- 5-1-6 PEND ***       Model 1 Logistic Regression - s3b2 ------------------
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #---- 5-2 PEND *****    Model 2 K-Nearest Neighbors ----------------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #---- 5-2-1 PROG ***       Model 2 KNN - s1b1 ----------------------------------
-
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 #---- 5-2-3 PROG ***       Model 2 KNN - s2b1 ----------------------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -1804,7 +1901,8 @@ for (thresh in thresholds) {
 }
 
 threshold_df <- do.call(rbind, threshold_results)
-best_threshold <- threshold_df[which.min(threshold_df$diff_from_target), "threshold"]
+best_threshold <-
+  threshold_df[which.min(threshold_df$diff_from_target), "threshold"]
 
 # 10. Evaluate the model on the test dataset
 results_m2_s2b1 <- calculate_all_measures(fit_m2_s2b1, df_test, best_threshold)
