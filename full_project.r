@@ -610,6 +610,7 @@ df_s1b1 <- df_processing_filt_rows
 
 save(df_s1b1, file = "df_s1b1.RData")
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #---- 4-1-2 DONE ***       Select 1 - balanced 2 ------------------ df_s1b2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -874,8 +875,8 @@ save(df_s2b1, file = "df_s2b1.RData")
 #---- 4-2-2 DONE ***       Select 2 - balanced 2 ------------------ df_s2b2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-load("df_balanced2.RData") # nolint
-load("df_columns_info.RData") # nolint
+#load("df_balanced2.RData") # nolint
+#load("df_columns_info.RData") # nolint
 
 df_s2b2 <- df_balanced2
 
@@ -928,7 +929,7 @@ for (col in names(df_s2b2_allfact)) {
     table_data <- table(df_s2b2_allfact[[col]],
                         df_s2b2_allfact$Class)
     fisher_test <- fisher.test(table_data, workspace = 1e9,
-                               simulate.p.value = TRUE, B = 200000)
+                               simulate.p.value = TRUE, B = 2000000)
     s2b2_fisher_results[[col]] <-
       list(column = col, p_value = fisher_test$p.value)
     print(paste(Sys.time(),
@@ -1196,7 +1197,7 @@ select_cols <- df_s3b1_fisher_results %>%
   pull(Column)
 
 # Create a new dataframe with those columns
-df_s3b1_allfact <- df_s3b1_allfact %>%
+df_s3b1_allfact_miss <- df_s3b1_allfact_miss %>%
   select(Class, all_of(select_cols))
 
 #---- 4-3-1-2 DONE *          Integer Variables --------------------------------
