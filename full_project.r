@@ -75,7 +75,7 @@ calculate_all_measures <- function(in_model, in_test_df, threshold) {
 
   performance_measures <- calculate_measures(tp_0, fp_0, tn_0, fn_0,
                                              tp_1, fp_1, tn_1, fn_1,
-                                              weight0, weight1)
+                                             weight0, weight1)
   performance_measures
 
   roc_curve <- roc(df_test$Class, test_predictions$.pred_0)
@@ -116,21 +116,21 @@ calculate_measures <- function(tp_0, fp_0, tn_0, fn_0,
   mcc_0 <- (tp_0 * tn_0 - fp_0 * fn_0) /
     (sqrt(tp_0 + fp_0) * sqrt(tp_0 + fn_0) *
        sqrt(tn_0 + fp_0) * sqrt(tn_0 + fn_0))
-  
+
   # Kappa total records
   total_0 <- (tp_0 + fn_0 + fp_0 + tn_0)
-  #print(paste("Kappa for 0, total_0:", total_0))
+  #print(paste("Kappa for 0, total_0:", total_0)) # nolint
 
   # Kappa - proportion of agreement to total records
   p_o_0 <- (tp_0 + tn_0) / total_0
   p_e1_0 <- ((tp_0 + fn_0) / total_0) * ((tp_0 + fp_0) / total_0)
-  #print(paste("Kappa for 0, p_e1_0:", p_e1_0))
+  #print(paste("Kappa for 0, p_e1_0:", p_e1_0)) # nolint
   p_e2_0 <- ((fp_0 + tn_0) / total_0) * ((fn_0 + tn_0) / total_0)
-  #print(paste("Kappa for 0, p_e2_0:", p_e2_0))
+  #print(paste("Kappa for 0, p_e2_0:", p_e2_0)) # nolint
   p_e_0 <- p_e1_0 + p_e2_0
-  #print(paste("Kappa for 0, p_e_0:", p_e_0))
+  #print(paste("Kappa for 0, p_e_0:", p_e_0)) # nolint
   k_0 <- (p_o_0 - p_e_0) / (1 - p_e_0) # Kappa statistic
-  #print(paste("Kappa for 0, k_0:", k_0))
+  #print(paste("Kappa for 0, k_0:", k_0)) # nolint
 
   tpr_1 <- tp_1 / (tp_1 + fn_1)
   fpr_1 <- fp_1 / (fp_1 + tn_1)
@@ -139,26 +139,26 @@ calculate_measures <- function(tp_0, fp_0, tn_0, fn_0,
   precision_1 <- tp_1 / (tp_1 + fp_1)
   recall_1 <- tpr_1
   f_measure_1 <- (2 * precision_1 * recall_1) / (precision_1 + recall_1)
-  
+
   mcc_1 <- (tp_1 * tn_1 - fp_1 * fn_1) /
     (sqrt(tp_1 + fp_1) * sqrt(tp_1 + fn_1) *
        sqrt(tn_1 + fp_1) * sqrt(tn_1 + fn_1))
 
   total_1 <- (tp_1 + fn_1 + fp_1 + tn_1)
-  #print(paste("Kappa for 1, total_1:", total_1))
+  #print(paste("Kappa for 1, total_1:", total_1)) # nolint
   p_o_1 <- (tp_1 + tn_1) / total_1
-  #print(paste("Kappa for 1, p_o_1:", p_o_1))
+  #print(paste("Kappa for 1, p_o_1:", p_o_1)) # nolint
   p_e1_1 <- ((tp_1 + fn_1) / total_1) * ((tp_1 + fp_1) / total_1)
-  #print(paste("Kappa for 1, p_e1_1:", p_e1_1))
+  #print(paste("Kappa for 1, p_e1_1:", p_e1_1)) # nolint
   p_e2_1 <- ((fp_1 + tn_1) / total_1) * ((fn_1 + tn_1) / total_1)
-  #print(paste("Kappa for 1, p_e2_1:", p_e2_1))
+  #print(paste("Kappa for 1, p_e2_1:", p_e2_1)) # nolint
   p_e_1 <- p_e1_1 + p_e2_1
-  #print(paste("Kappa for 1, p_e_1:", p_e_1))
+  #print(paste("Kappa for 1, p_e_1:", p_e_1)) # nolint
   k_1 <- (p_o_1 - p_e_1) / (1 - p_e_1) # Kappa statistic
-  #print(paste("Kappa for 1, k_1:", k_1))
- 
-  #print(paste("Weight for Class 0 (weight0):", weight0))
-  #print(paste("Weight for Class 1 (weight1):", weight1))
+  #print(paste("Kappa for 1, k_1:", k_1)) # nolint
+
+  #print(paste("Weight for Class 0 (weight0):", weight0)) # nolint
+  #print(paste("Weight for Class 1 (weight1):", weight1)) # nolint
 
   tpr_w <- (tpr_0 * weight0 + tpr_1 * weight1)
   fpr_w <- (fpr_0 * weight0 + fpr_1 * weight1)
@@ -194,7 +194,7 @@ store_results <- function(combination_key, results_df, description) {
   current_datetime <- format(Sys.time(), "%Y-%m-%d %H:%M:%S")
 
   # Create a wide format dataframe with measures as columns
-  results_wide <- results_df %>%
+  results_wide <- results_df %>% # nolint
     pivot_wider(names_from = measures, values_from = values) # nolint
 
   # Add description and datetime columns
