@@ -1527,8 +1527,96 @@ save(df_s3b2, file = "df_s3b2.RData")
 #---- 5-1 PROG *****    Model 1 Logistic Regression ----------------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Logistic regression is a statistical method for predicting binary classes.
-#---- 5-1-1 PROG ***       Model 1 Logistic Regression - s1b1 ------------------
+#---- 5-1-1 TEST ***       Model 1 Logistic Regression - s1b1 ------------------
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+# Logistic Regression Model
+
+df_m1_s1b1 <- df_s1b1 %>%
+  select(Class, matches(paste0("^DETAILED-(",
+                               paste(df_columns_info %>%
+                                       filter(variable_type %in%
+                                                c("integer")) %>%
+                                       pull(column_name),
+                                     collapse = "|"), ")_")))
+
+# 1. Model Specification
+spec_m1_s1b1 <- logistic_reg(penalty = tune(), mixture = tune()) %>%
+  set_engine("glmnet") %>%
+  set_mode("classification")
+
+# 2. Recipe
+rec_m1_s1b1 <- recipe(Class ~ ., data = df_m1_s1b1) %>%
+  step_zv(all_predictors()) %>%
+  step_impute_median(all_numeric_predictors()) %>%
+  step_normalize(all_predictors()) %>%
+  step_dummy(all_nominal_predictors(), -all_outcomes())
+
+# 3. Workflow
+wf_m1_s1b1 <- workflow() %>%
+  add_model(spec_m1_s1b1) %>%
+  add_recipe(rec_m1_s1b1)
+
+# 4. Cross-validation
+set.seed(123)
+folds_m1_s1b1 <- vfold_cv(df_m1_s1b1, v = 5, strata = Class)
+
+# 5. Grid of hyperparameters
+tune_grid_m1_s1b1 <- grid_regular(penalty(), mixture(), levels = 5)
+
+# 6. Tune the model
+tune_results_m1_s1b1 <- tune_grid(
+  wf_m1_s1b1,
+  resamples = folds_m1_s1b1,
+  grid = tune_grid_m1_s1b1,
+  metrics = metric_set(roc_auc, accuracy, sens, spec)
+)
+
+# Show the tuning results
+autoplot(tune_results_m1_s1b1) +
+  labs(title = "Tuning Results for Logistic Regression",
+       x = "Penalty",
+       y = "Mixture") +
+  theme_minimal()
+
+# 7. Select the best parameters
+best_parameters_m1_s1b1 <- select_best(tune_results_m1_s1b1, metric = "roc_auc")
+
+# 8. Finalize the workflow
+final_wf_m1_s1b1 <- finalize_workflow(wf_m1_s1b1, best_parameters_m1_s1b1)
+
+# 9. Fit the final model
+final_fit_m1_s1b1 <- fit(final_wf_m1_s1b1, data = df_m1_s1b1)
+
+# 10. Evaluate the model on the test dataset
+# Evaluate the model on the test dataset
+test_predications_m1_s1b1 <-
+  predict(final_fit_m1_s1b1, new_data = df_test, type = "prob") %>%
+  bind_cols(predict(final_fit_m1_s1b1, new_data = df_test, type = "class")) %>%
+  bind_cols(df_test %>% select(Class))
+
+# Generate a confusion matrix
+confusion_matrix_m1_s1b1 <- test_predications_m1_s1b1 %>%
+  conf_mat(truth = Class, estimate = .pred_class)
+
+# Print the confusion matrix
+print(confusion_matrix_m1_s1b1)
+
+# Visualize the confusion matrix
+autoplot(confusion_matrix_m1_s1b1, type = "heatmap") +
+  labs(title = "Confusion Matrix for Logistic Regression",
+       x = "Predicted Class",
+       y = "Actual Class") +
+  theme_minimal()
+
+# 0.6 works best on the test data but I cannot tune with the test data.
+results_m1_s1b1 <- calculate_all_measures(final_fit_m1_s1b1, df_test, 0.5)
+
+results_m1_s1b1
+
+store_results("m1s1b1", results_m1_s1b1, "Logistic Regression Model 1 - s1b1")
+
+#---- 5-1-2 PEND ***       Model 1 Logistic Regression - s1b2 ------------------
 #---- 5-1-3 DONE ***       Model 1 Logistic Regression - s2b1 ------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -1619,6 +1707,9 @@ results_m1_s2b1
 store_results("m1s2b1", results_m1_s2b1, "Logistic Regression Model 1 - s2b1")
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#---- 5-1-4 PEND ***       Model 1 Logistic Regression - s2b2 ------------------
+#---- 5-1-5 PEND ***       Model 1 Logistic Regression - s3b1 ------------------
+#---- 5-1-6 PEND ***       Model 1 Logistic Regression - s3b2 ------------------
 #---- 5-2 PEND *****    Model 2 K-Nearest Neighbors ----------------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -1709,7 +1800,6 @@ for (thresh in thresholds) {
 threshold_df <- do.call(rbind, threshold_results)
 best_threshold <- threshold_df[which.min(threshold_df$diff_from_target), "threshold"]
 
-
 # 10. Evaluate the model on the test dataset
 results_m2_s2b1 <- calculate_all_measures(fit_m2_s2b1, df_test, best_threshold)
 store_results("m2s2b1", results_m2_s2b1, "KNN Model - s2b1")
@@ -1730,7 +1820,6 @@ store_results("m2s2b1", results_m2_s2b1, "KNN Model - s2b1")
 
 ################################################################################
 
-#---- 6 PEND ******* Results - Project Step 6 ---------------------------------
+#---- 6 PEND ******* Results - Project Step 6 ----------------------------------
 ################################################################################
 # Results - Project Step 6
-
