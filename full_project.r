@@ -28,8 +28,8 @@ library(pROC)
 #---- 0.1 DONE *****    Functions - Performance Evaluation ---------------------
 
 calculate_all_measures <- function(in_model, in_test_df, threshold) {
-  #in_test_df <- df_test
-  #in_model <- final_fit_m1_s2b1
+  #in_test_df <- df_test # nolint
+  #in_model <- final_fit_m1_s2b1 # nolint
 
   # Predict on the test dataset
   test_predictions <- predict(in_model, new_data = in_test_df, type = "prob")
@@ -85,17 +85,17 @@ calculate_all_measures <- function(in_model, in_test_df, threshold) {
   auc_value_double <- as.double(auc_value)
 
   # Add ROC values to the performance measures dataframe
-  performance_measures <- performance_measures %>%
-    add_row(measures = "ROC_0", values = auc_value_double) %>%
+  performance_measures <- performance_measures %>% # nolint
+    add_row(measures = "ROC_0", values = auc_value_double) %>% # nolint
     add_row(measures = "ROC_1", values = auc_value_double) %>%
     add_row(measures = "ROC_W", values = auc_value_double)
 
   # Print the AUC value
-  #print(paste("Area Under the ROC Curve (AUC):", auc_value))
+  #print(paste("Area Under the ROC Curve (AUC):", auc_value)) # nolint
 
   # Plot the ROC curve
-  #plot(roc_curve, main = "ROC Curve", col = "blue", lwd = 2)
-  #abline(a = 0, b = 1, lty = 2, col = "red")
+  #plot(roc_curve, main = "ROC Curve", col = "blue", lwd = 2) # nolint
+  #abline(a = 0, b = 1, lty = 2, col = "red") # nolint
 
   return(performance_measures)
 
@@ -192,27 +192,27 @@ calculate_measures <- function(tp_0, fp_0, tn_0, fn_0,
 store_results <- function(combination_key, results_df, description) {
   # Get current date and time
   current_datetime <- format(Sys.time(), "%Y-%m-%d %H:%M:%S")
-  
+
   # Create a wide format dataframe with measures as columns
   results_wide <- results_df %>%
-    pivot_wider(names_from = measures, values_from = values)
-  
+    pivot_wider(names_from = measures, values_from = values) # nolint
+
   # Add description and datetime columns
-  results_wide <- results_wide %>%
-    mutate(combination_key = combination_key,
+  results_wide <- results_wide %>% # nolint
+    mutate(combination_key = combination_key, # nolint
            description = description,
            datetime = current_datetime)
-  
+
   # Check if results_storage exists in the global environment
   if (!exists("results_storage", envir = .GlobalEnv)) {
     # Create it if it doesn't exist
-    results_storage <<- results_wide
+    results_storage <<- results_wide # nolint
   } else {
     # Append to existing dataframe if it does exist
-    results_storage <<- bind_rows(results_storage, results_wide)
+    results_storage <<- bind_rows(results_storage, results_wide) # nolint
   }
-  
-  return(results_storage)
+
+  return(results_storage) # nolint
 }
 
 ################################################################################
@@ -653,14 +653,14 @@ save(df_select1_balanced2, file = "df_select1_balanced2.RData")
 #---- 4-2 DONE *****    Select 2 - Fisher and Corr --- df_select2_balanced# ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#---- 4-2-1 DONE ***       Select 2 - balanced 1 ----- df_select2_balanced1 ----
+#---- 4-2-1 DONE ***       Select 2 - balanced 1 ----- df_s2b1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-df_select2_balanced1 <- df_balanced1
+df_s2b1 <- df_balanced1
 
 #---- 4-2-1-1-DONE *          Factor and Logical Variables ---------------------
 
-df_select2_balanced1_1factors <- df_balanced1 %>%
+df_s2b1_1factors <- df_balanced1 %>%
   select(Class, matches(paste0("^DETAILED-(",
                         paste(df_columns_info %>%
                                 filter(variable_type %in%
@@ -668,7 +668,7 @@ df_select2_balanced1_1factors <- df_balanced1 %>%
                                 pull(column_name), 
                               collapse = "|"), ")_")))
 
-df_select2_balanced1_2logical <- df_balanced1 %>%
+df_s2b1_2logical <- df_balanced1 %>%
   select(Class, matches(paste0("^DETAILED-(",
                         paste(df_columns_info %>%
                                 filter(variable_type %in%
@@ -676,7 +676,7 @@ df_select2_balanced1_2logical <- df_balanced1 %>%
                                 pull(column_name), 
                               collapse = "|"), ")_")))
 
-df_select2_balanced1_3levels <- df_balanced1 %>%
+df_s2b1_3levels <- df_balanced1 %>%
   select(Class, matches(paste0("^DETAILED-(",
                         paste(df_columns_info %>%
                                 filter(variable_type %in%
@@ -684,10 +684,10 @@ df_select2_balanced1_3levels <- df_balanced1 %>%
                                 pull(column_name), 
                               collapse = "|"), ")_")))
 
-df_select2_balanced1_allfact <- cbind(
-  df_select2_balanced1_1factors,
-  df_select2_balanced1_2logical %>% select(-Class),
-  df_select2_balanced1_3levels %>% select(-Class)
+df_s2b1_allfact <- cbind(
+  df_s2b1_1factors,
+  df_s2b1_2logical %>% select(-Class),
+  df_s2b1_3levels %>% select(-Class)
 )
 
 ##### Will use Fisher test over Chi-square to handle sparse data.
@@ -702,15 +702,15 @@ fisher_not_possible <- c("SCHL", "ANC1P", "DETAILED-SCHL_",
 
 sel2_bal1_fisher_results <- list()
 
-for (col in names(df_select2_balanced1_allfact)) {
+for (col in names(df_s2b1_allfact)) {
   print(paste(Sys.time(), "- Processing column:", col))
   if (any(startsWith(col, fisher_not_possible))) {
     print(paste("Skipping column:", col))
     next
   }
   tryCatch({
-    table_data <- table(df_select2_balanced1_allfact[[col]],
-                        df_select2_balanced1_allfact$Class)
+    table_data <- table(df_s2b1_allfact[[col]],
+                        df_s2b1_allfact$Class)
     fisher_test <- fisher.test(table_data, workspace = 1e9)
     sel2_bal1_fisher_results[[col]] <-
       list(column = col, p_value = fisher_test$p.value)
@@ -763,12 +763,12 @@ select_cols <- df_sel2_bal1_fisher_results %>%
   pull(Column)
 
 # Create a new dataframe with those columns
-df_select2_balanced1_allfact <- df_select2_balanced1_allfact %>%
+df_s2b1_allfact <- df_s2b1_allfact %>%
   select(Class, all_of(select_cols))
 
 #---- 4-2-1-2 DONE *          Integer Variables --------------------------------
 
-df_select2_balanced1_4integers <- df_balanced1 %>%
+df_s2b1_4integers <- df_balanced1 %>%
   select(Class, matches(paste0("^DETAILED-(",
                                paste(df_columns_info %>%
                                        filter(variable_type %in%
@@ -779,7 +779,7 @@ df_select2_balanced1_4integers <- df_balanced1 %>%
 in_select1_cor_threshold <- 0.05
 
 repeat {
-  df_numeric <- df_select2_balanced1_4integers %>%
+  df_numeric <- df_s2b1_4integers %>%
     mutate(across(where(is.integer), as.numeric))
 
   # Check for collinearity using a correlation matrix
@@ -818,7 +818,7 @@ repeat {
   # Remove the variable with the highest sum of correlations
   highly_correlated <- ifelse(row_sum1 > row_sum2, most_correlated_vars[1],
                               most_correlated_vars[2])
-  df_select2_balanced1_4integers <- df_numeric %>%
+  df_s2b1_4integers <- df_numeric %>%
     select(-all_of(highly_correlated))
 
   print(paste("Removed variable:", highly_correlated))
@@ -828,18 +828,18 @@ repeat {
 # Create boxplots for each numeric variable in the dataset
 
 # Generate boxplots dynamically for all numeric columns
-boxplots <- lapply(df_select2_balanced1_4integers, function(col) {
-  ggplot(df_select2_balanced1_4integers, aes(x = "", y = .data[[col]])) +
+boxplots <- lapply(df_s2b1_4integers, function(col) {
+  ggplot(df_s2b1_4integers, aes(x = "", y = .data[[col]])) +
     geom_boxplot() +
     theme(axis.title.x = element_blank(),
           axis.text.x = element_blank(),
           axis.ticks.x = element_blank())
 })
 
-plt_list <- lapply(names(df_select2_balanced1_4integers)
-                   [names(df_select2_balanced1_4integers) != "Class"],
+plt_list <- lapply(names(df_s2b1_4integers)
+                   [names(df_s2b1_4integers) != "Class"],
                    function(col_name) {
-                     ggplot(df_select2_balanced1_4integers,
+                     ggplot(df_s2b1_4integers,
                             aes(x = "", y = .data[[col_name]])) +
                        geom_boxplot() +
                        labs(title = 
@@ -862,12 +862,12 @@ ggsave("plt_sel2_bal1_corr.png",
        plot = plt_sel2_bal1_corr, width = 10, height = 16, dpi = 300)
 
 # Based on boxplot distributions adding Income to Poverty Ratio and Work Hours.
-df_select2_balanced1 <- df_select2_balanced1_allfact %>% select(-Class) %>%
-  bind_cols(df_select2_balanced1_4integers)
+df_s2b1 <- df_s2b1_allfact %>% select(-Class) %>%
+  bind_cols(df_s2b1_4integers)
 
 #---- 4-2-1-4 DONE *          Final --------------------------------------------
 
-save(df_select2_balanced1, file = "df_select2_balanced1.RData")
+save(df_s2b1, file = "df_s2b1.RData")
 
 #---- 4-2-2 PEND ***       Select 2 - balanced 2 ----- df_select2_balanced2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -882,42 +882,40 @@ df_select2_balanced2 <- df_balanced2
 
 #---- 4-2-2-4 PEND *          Final --------------------------------------------
 
-#---- 4-3 PROG *****    Select 3 - Missing Added ----- df_select3_balanced1 ----
+#---- 4-3 PROG *****    Select 3 - Missing Added ----- df_s3b1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#---- 4-3-1 PROG ***       Select 3 - balanced 1 ----- df_select3_balanced1 ----
+#---- 4-3-1 PROG ***       Select 3 - balanced 1 ----- df_s3b1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-df_select3_balanced1 <- df_balanced1
+df_s3b1 <- df_balanced1
 
 #---- 4-3-1-1 PROG *          Factor and Logical Variables ---------------------
 
-in_row_limit_with_missing <- 1
-
-df_select2_balanced1_4fct_miss <- df_select2_balanced1_1factors %>%
+df_s3b1_4fct_miss <- df_s2b1_1factors %>%
   mutate(across(everything(),
                 ~ replace_na(factor(.x,
                                     levels = c(levels(.x),
                                                "Missing")),
                              "Missing")))
 
-df_select2_balanced1_5log_miss <- df_select2_balanced1_2logical %>%
+df_s3b1_5log_miss <- df_s2b1_2logical %>%
   mutate(across(everything(),
                 ~ replace_na(factor(.x,
                                     levels = c(levels(.x),
                                                "Missing")),
                              "Missing")))
 
-df_select2_balanced1_6lvl_miss <- df_select2_balanced1_3levels %>%
+df_s3b1_6lvl_miss <- df_s2b1_3levels %>%
   mutate(across(everything(),
                 ~ replace_na(factor(.x,
                                     levels = c(levels(.x),
                                                "Missing")),
                              "Missing")))
 
-df_select2_balanced1_merg_miss <- cbind(df_select2_balanced1_4fct_miss,
-                                        df_select2_balanced1_5log_miss,
-                                        df_select2_balanced1_6lvl_miss)
+df_s3b1__miss <- cbind(df_s3b1_4fct_miss,
+                                        df_s3b1_5log_miss,
+                                        df_s3b1_6lvl_miss)
 
 ##### Will use Fisher test over Chi-square to handle sparse data.
 
@@ -929,43 +927,43 @@ fisher_not_possible <- c("SCHL", "ANC1P", "DETAILED-SCHL_",
                          "DETAILED-ANC1P_", 
                          "RACNH", "DETAILED-RACNH_", "Class")
 
-sel3_bal1_fisher_results <- list()
+s3b1_fisher_results <- list()
 
-for (col in names(df_select2_balanced1_merg_miss)) {
+for (col in names(df_s3b1_merg_miss)) {
   print(paste(Sys.time(), "- Processing column:", col))
   if (any(startsWith(col, fisher_not_possible))) {
     print(paste("Skipping column:", col))
     next
   }
   tryCatch({
-    table_data <- table(df_select2_balanced1_merg_miss[[col]],
-                        df_select2_balanced1_merg_miss$Class)
+    table_data <- table(df_s3b1_merg_miss[[col]],
+                        df_s3b1_merg_miss$Class)
     fisher_test <- fisher.test(table_data, workspace = 1e9)
-    sel3_bal1_fisher_results[[col]] <-
+    s3b1_fisher_results[[col]] <-
       list(column = col, p_value = fisher_test$p.value)
     print(paste(Sys.time(),
                 "- Fisher test column:", col, "p-value:", fisher_test$p.value))
   }, error = function(e) {
     message(paste("Error processing column:", col, "-", e$message))
-    sel3_bal1_fisher_results[[col]] <- list(column = col, p_value = NA)
+    s3b1_fisher_results[[col]] <- list(column = col, p_value = NA)
   })
 }
 
 # Convert results to a data frame for easier interpretation
-df_sel3_bal1_fisher_results <- 
-  do.call(rbind, lapply(sel3_bal1_fisher_results, as.data.frame))
+df_s3b1_fisher_results <- 
+  do.call(rbind, lapply(s3b1_fisher_results, as.data.frame))
 
-names(df_sel3_bal1_fisher_results) <- c("Column", "P_value")
+names(df_s3b1_fisher_results) <- c("Column", "P_value")
 
-df_sel3_bal1_fisher_results$neg_log10_P_value <-
-  -log10(df_sel3_bal1_fisher_results$P_value)
+df_s3b1_fisher_results$neg_log10_P_value <-
+  -log10(df_s3b1_fisher_results$P_value)
 
 # Create a bar plot for Fisher scores
-df_sel3_bal1_fisher_plt <- df_sel3_bal1_fisher_results %>%
+df_s3b1_fisher_plt <- df_s3b1_fisher_results %>%
   mutate(P_value = as.numeric(as.character(P_value))) %>%
   arrange(P_value)
 
-ggplot(df_sel3_bal1_fisher_plt,
+ggplot(df_s3b1_fisher_plt,
        aes(x = reorder(substr(Column, 10, 60), -P_value),
            y = -log10(P_value))) +
   geom_bar(stat = "identity", fill = "steelblue") +
@@ -984,13 +982,13 @@ top_cols <- df_sel2_bal1_fisher_results %>%
   pull(Column)
 
 # Create a new dataframe with those columns
-df_select2_balanced1 <- df_select2_balanced1 %>%
+df_s2b1 <- df_s2b1 %>%
   select(all_of(top_cols))
 
 # Use Correlation to check for independence between numeric variables
 #   and the target variable.
 
-df_select2_balanced1_factors <- df_select2_balanced1 %>%
+df_s2b1_factors <- df_s2b1 %>%
   select(where(is.factor))
 
 #---- 4-3-1-2 PEND *          Integer Variables --------------------------------
@@ -1034,7 +1032,7 @@ df_select3_balanced2 <- df_balanced2
 
 # Logistic Regression Model
 
-df_m1_s2b1 <- df_select2_balanced1 %>%
+df_m1_s2b1 <- df_s2b1 %>%
   select(Class, matches(paste0("^DETAILED-(",
                                paste(df_columns_info %>%
                                        filter(variable_type %in%
@@ -1128,7 +1126,7 @@ store_results("m1s2b1", results_m1_s2b1, "Logistic Regression Model 1 - s2b1")
 #---- 5-2-3 PROG ***       Model 2 KNN - s2b1 ----------------------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-df_m2_s2b1 <- df_select2_balanced1
+df_m2_s2b1 <- df_s2b1
 
 # 1. Model Specification
 spec_m2_s2b1 <- nearest_neighbor(
@@ -1139,7 +1137,7 @@ spec_m2_s2b1 <- nearest_neighbor(
   set_mode("classification")
 
 # 2. Recipe
-rec_m2_s2b1 <- recipe(Class ~ ., data = df_select2_balanced1) %>%
+rec_m2_s2b1 <- recipe(Class ~ ., data = df_s2b1) %>%
   step_zv(all_predictors()) %>%
   step_impute_median(all_numeric_predictors()) %>%
   step_unknown(all_nominal_predictors(), new_level = "unknown") %>%
@@ -1156,7 +1154,7 @@ wf_m2_s2b1 <- workflow() %>%
 
 # 4. Cross-validation
 set.seed(123)
-folds_m2_s2b1 <- vfold_cv(df_select2_balanced1, v = 5, strata = Class)
+folds_m2_s2b1 <- vfold_cv(df_s2b1, v = 5, strata = Class)
 
 # 5. Grid of hyperparameters
 grid_m2_s2b1 <- grid_regular(
@@ -1187,7 +1185,7 @@ best_params_m2_s2b1 <- select_best(tune_results_m2_s2b1, metric = "roc_auc")
 final_wf_m2_s2b1 <- finalize_workflow(wf_m2_s2b1, best_params_m2_s2b1)
 
 # 9. Fit the final model
-fit_m2_s2b1 <- fit(final_wf_m2_s2b1, data = df_select2_balanced1)
+fit_m2_s2b1 <- fit(final_wf_m2_s2b1, data = df_s2b1)
 
 # Try different thresholds to achieve the target TPR and TNR
 thresholds <- seq(0.3, 0.7, by = 0.05)
