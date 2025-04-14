@@ -3,6 +3,7 @@
 #  - Complete a graph for Fisher Scores for Logical - 4-2-1-1
 #  - Complete a grpah for Factor wihout processing Missing.
 #  - Look into tuning logistic regression to get the best TP0 and TP1
+#  - Look into filtering down the select to only include Details
 
 # Project Goal (Lecture 1): Generate a model to predict the likelihood of a
 # person having difficulty living independently.
@@ -606,7 +607,8 @@ print(paste("df_processing - total missing values:",
 df_processing_filt_rows <- df_processing_filt_rows %>%
   select(-calc_missing_values_row_count, -calc_missing_values_row_percent)
 
-df_s1b1 <- df_processing_filt_rows
+df_s1b1 <- df_processing_filt_rows %>%
+  select(Class, starts_with("DETAILED-"))
 
 save(df_s1b1, file = "df_s1b1.RData")
 
@@ -2063,11 +2065,97 @@ results_m1_s3b2
 store_results("m1s3b2", results_m1_s3b2, "Logistic Regression Model 1 - s3b2")
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#---- 5-2 PEND *****    Model 2 K-Nearest Neighbors ----------------------------
+#---- 5-2 PROG *****    Model 2 K-Nearest Neighbors ----------------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#---- 5-2-1 PROG ***       Model 2 KNN - s1b1 ----------------------------------
+#---- 5-2-1 PEND ***       Model 2 KNN - s1b1 ----------------------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+df_m2_s1b1 <- df_s1b1
+
+# 1. Model Specification
+spec_m2_s1b1 <- nearest_neighbor(
+  neighbors = tune(),
+  weight_func = tune()
+) %>%
+  set_engine("kknn") %>%
+  set_mode("classification")
+
+# 2. Recipe
+rec_m2_s1b1 <- recipe(Class ~ ., data = df_s1b1) %>%
+  step_zv(all_predictors()) %>%
+  step_impute_median(all_numeric_predictors()) %>%
+  step_unknown(all_nominal_predictors(), new_level = "unknown") %>%
+  step_normalize(all_numeric_predictors()) %>%
+  step_dummy(all_nominal_predictors(), -all_outcomes())
+
+# Resolve conflict between kknn::contr.dummy and caret::contr.dummy
+conflicted::conflicts_prefer(kknn::contr.dummy)
+
+# 3. Workflow
+wf_m2_s1b1 <- workflow() %>%
+  add_model(spec_m2_s1b1) %>%
+  add_recipe(rec_m2_s1b1)
+
+# 4. Cross-validation
+set.seed(123)
+folds_m2_s1b1 <- vfold_cv(df_s1b1, v = 5, strata = Class)
+
+# 5. Grid of hyperparameters
+grid_m2_s1b1 <- grid_regular(
+  neighbors(range = c(5, 50)),
+  weight_func(values = c("rectangular", "triangular", "gaussian", "rank")),
+  levels = c(10, 4)
+)
+
+# 6. Tune the model
+tune_results_m2_s1b1 <- tune_grid(
+  wf_m2_s1b1,
+  resamples = folds_m2_s1b1,
+  grid = grid_m2_s1b1,
+  metrics = metric_set(roc_auc, accuracy, sens, spec)
+)
+
+# Show the tuning results
+autoplot(tune_results_m1_s1b1) +
+  labs(title = "Tuning Results for Logistic Regression",
+       x = "Penalty",
+       y = "Mixture") +
+  theme_minimal()
+
+# 7. Select the best parameters
+best_params_m2_s1b1 <- select_best(tune_results_m2_s1b1, metric = "roc_auc")
+
+# 8. Finalize the workflow
+final_wf_m2_s1b1 <- finalize_workflow(wf_m2_s1b1, best_params_m2_s1b1)
+
+# 9. Fit the final model
+fit_m2_s1b1 <- fit(final_wf_m2_s1b1, data = df_s1b1)
+
+# Try different thresholds to achieve the target TPR and TNR
+thresholds <- seq(0.3, 0.7, by = 0.05)
+threshold_results <- list()
+
+for (thresh in thresholds) {
+  results <- calculate_all_measures(fit_m2_s1b1, df_test, thresh)
+  tpr_1 <- results$values[results$measures == "TPR_1"]
+  tnr_0 <- results$values[results$measures == "TNR_0"]
+
+  threshold_results[[as.character(thresh)]] <- data.frame(
+    threshold = thresh,
+    TPR_1 = tpr_1,
+    TNR_0 = tnr_0,
+    diff_from_target = abs(tpr_1 - 0.81) + abs(tnr_0 - 0.79)
+  )
+}
+
+threshold_df <- do.call(rbind, threshold_results)
+best_threshold <-
+  threshold_df[which.min(threshold_df$diff_from_target), "threshold"]
+
+# 10. Evaluate the model on the test dataset
+results_m2_s1b1 <- calculate_all_measures(fit_m2_s1b1, df_test, best_threshold)
+store_results("m2s1b1", results_m2_s1b1, "KNN Model - s1b1")
 
 #---- 5-2-3 PROG ***       Model 2 KNN - s2b1 ----------------------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
