@@ -652,7 +652,8 @@ print(paste("df_processing - total missing values:",
 df_processing_filt_rows <- df_processing_filt_rows %>%
   select(-calc_missing_values_row_count, -calc_missing_values_row_percent)
 
-df_s1b2 <- df_processing_filt_rows
+df_s1b2 <- df_processing_filt_rows %>%
+  select(Class, starts_with("DETAILED-"))
 
 save(df_s1b2, file = "df_s1b2.RData")
 
@@ -2071,7 +2072,15 @@ store_results("m1s3b2", results_m1_s3b2, "Logistic Regression Model 1 - s3b2")
 #---- 5-2-1 PEND ***       Model 2 KNN - s1b1 ----------------------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-df_m2_s1b1 <- df_s1b1
+# Use Integers
+df_m2_s1b1 <- df_s1b1 %>%
+  select(Class, matches(paste0("^DETAILED-(",
+                               paste(df_columns_info %>%
+                                       filter(variable_type %in%
+                                                c("integer")) %>%
+                                       pull(column_name),
+                                     collapse = "|"), ")_")))
+
 
 # 1. Model Specification
 spec_m2_s1b1 <- nearest_neighbor(
