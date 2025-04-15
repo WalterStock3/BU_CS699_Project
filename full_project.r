@@ -1088,8 +1088,9 @@ df_s2b2 <- df_s2b2_allfact %>% select(-Class) %>% # nolint
 
 #---- 4-2-2-4 DONE *          Final --------------------------------------------
 
-save(df_s2b1, file = "df_s2b2.RData")
+save(df_s2b2, file = "df_s2b2.RData")
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #---- 4-3 DONE *****    Select 3 - Missing Added ---------------- df_s3b# ------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -1103,7 +1104,7 @@ df_s3b1 <- df_balanced1
 #---- 4-3-1-1 DONE *          Factor and Logical Variables ---------------------
 
 df_s3b1_4fct_miss <- df_s2b1_1factors %>%
-  mutate(across(everything(),
+  mutate(across(where(~ any(is.na(.))),
                 ~ replace_na(factor(.x,
                                     levels = c(levels(.x),
                                                "Missing")),
