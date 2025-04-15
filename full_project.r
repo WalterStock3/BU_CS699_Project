@@ -406,51 +406,85 @@ df_columns_info <- df_columns_info %>%
   ))
 
 # Factor - update columns to factor based on variable_type in df_columns_info
+
+# factor
+
 factor_columns <- df_columns_info %>%
   filter(variable_type == "factor", column_name %in% names(df)) %>%
   pull(column_name)
 
+num_factor_columns_before <- sum(sapply(df, is.factor))
+print(paste("Number of factor columns before update:",
+            num_factor_columns_before))
+
 df <- df %>%
   mutate(across(all_of(factor_columns), as.factor)) %>%
-  mutate(across(all_of(matches(paste0("^DETAILED-",
-                                      paste(factor_columns, collapse = "|"),
-                                      "_"))), as.factor))
+  mutate(across(matches(paste0("^DETAILED-",
+                               paste(factor_columns, collapse = "|"),
+                               "_")), as.factor))
 
-# Logical - update columns to logical based on variable_type in df_columns_info
+num_factor_columns_after <- sum(sapply(df, is.factor))
+print(paste("Number of factor columns after update:",
+            num_factor_columns_after))
+
+# logical
+
 logical_columns <- df_columns_info %>%
-  filter(variable_type == "logical") %>%
+  filter(variable_type == "logical", column_name %in% names(df)) %>%
   pull(column_name)
+
+num_factor_columns_before <- sum(sapply(df, is.factor))
+print(paste("Number of factor columns before logical update:",
+            num_factor_columns_before))
 
 df <- df %>%
   mutate(across(all_of(logical_columns), as.factor)) %>%
-  mutate(across(all_of(matches(paste0("^DETAILED-",
-                                      paste(logical_columns, collapse = "|"),
-                                      "_"))), as.factor))
+  mutate(across(matches(paste0("^DETAILED-",
+                               paste(logical_columns, collapse = "|"),
+                               "_")), as.factor))
 
-# Factor_Levels - update columns based on variable_type in df_columns_info
-factor_levels_columns <- df_columns_info %>%
-  filter(variable_type == "factor_levels") %>%
+num_factor_columns_after <- sum(sapply(df, is.factor))
+print(paste("Number of factor columns after logical update:",
+            num_factor_columns_after))
+
+#factor level column
+
+factor_level_columns <- df_columns_info %>%
+  filter(variable_type == "factor_levels", column_name %in% names(df)) %>%
   pull(column_name)
 
+num_factor_columns_before <- sum(sapply(df, is.factor))
+print(paste("Number of factor columns before factor levels update:",
+            num_factor_columns_before))
+
 df <- df %>%
-  mutate(across(all_of(factor_levels_columns), ~ factor(.x,
-                                                        ordered = TRUE))) %>%
-  mutate(across(all_of(matches(paste0("^DETAILED-",
-                                      paste(factor_levels_columns,
-                                            collapse = "|"),
-                                      "_"))), ~ factor(.x,
-                                                       ordered = TRUE)))
+  mutate(across(all_of(factor_level_columns), as.factor)) %>%
+  mutate(across(matches(paste0("^DETAILED-",
+                               paste(factor_level_columns, collapse = "|"),
+                               "_")), as.factor))
+
+num_factor_columns_after <- sum(sapply(df, is.factor))
+print(paste("Number of factor columns after factor_levels update:",
+            num_factor_columns_after))
 
 # Integer - update columns to integer based on variable_type in df_columns_info
 integer_columns <- df_columns_info %>%
   filter(variable_type == "integer") %>%
   pull(column_name)
 
+num_integer_columns_before <- sum(sapply(df, is.integer))
+print(paste("Number of integer columns before integer update:",
+            num_integer_columns_before))
+
 df <- df %>%
   mutate(across(all_of(integer_columns), as.integer)) %>%
-  mutate(across(all_of(matches(paste0("^DETAILED-",
-                                      paste(integer_columns, collapse = "|"),
-                                      "_"))), as.integer))
+  mutate(across(matches(paste0("^DETAILED-",
+                               paste(integer_columns, collapse = "|"),
+                               "_")), as.integer))
+
+num_integer_columns_after <- sum(sapply(df, is.integer))
+print(paste("Number of integer columns after integer update:",
+            num_integer_columns_after))
 
 df <- df %>%
   mutate(across(names(df)[columns_with_invalid], ~ na_if(.x, "Invalid Number")))
