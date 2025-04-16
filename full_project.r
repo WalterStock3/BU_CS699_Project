@@ -2197,13 +2197,14 @@ tune_results_m2_s1b1 <- tune_grid(
 
 # Show the tuning results
 autoplot(tune_results_m2_s1b1) +
-  labs(title = "Tuning Results for Logistic Regression",
-       x = "Penalty",
-       y = "Mixture") +
+  labs(title = "Tuning Results for K-Nearest Neighbors",
+       x = "Tuned Parameter") +
   theme_minimal()
 
 # 7. Select the best parameters
 best_params_m2_s1b1 <- select_best(tune_results_m2_s1b1, metric = "roc_auc")
+
+print(best_params_m2_s1b1)
 
 # 8. Finalize the workflow
 final_wf_m2_s1b1 <- finalize_workflow(wf_m2_s1b1, best_params_m2_s1b1)
@@ -2216,15 +2217,15 @@ thresholds <- seq(0.3, 0.7, by = 0.05)
 threshold_results <- list()
 
 for (thresh in thresholds) {
-  results <- calculate_all_measures(fit_m2_s1b1, df_test, thresh)
+  results <- calculate_all_measures(fit_m2_s1b1, df_s1b1, thresh)
   tpr_1 <- results$values[results$measures == "TPR_1"]
-  tnr_0 <- results$values[results$measures == "TNR_0"]
+  tpr_0 <- results$values[results$measures == "TPR_0"]
 
   threshold_results[[as.character(thresh)]] <- data.frame(
     threshold = thresh,
     TPR_1 = tpr_1,
-    TNR_0 = tnr_0,
-    diff_from_target = abs(tpr_1 - 0.81) + abs(tnr_0 - 0.79)
+    TPR_0 = tpr_0,
+    diff_from_target = abs(tpr_1 - 0.81) + abs(tpr_0 - 0.79)
   )
 }
 
@@ -2234,6 +2235,7 @@ best_threshold <-
 
 # 10. Evaluate the model on the test dataset
 results_m2_s1b1 <- calculate_all_measures(fit_m2_s1b1, df_test, best_threshold)
+results_m2_s1b1
 store_results("m2s1b1", results_m2_s1b1, "KNN Model - s1b1")
 
 #---- 5-2-3 PROG ***       Model 2 KNN - s2b1 ----------------------------------
