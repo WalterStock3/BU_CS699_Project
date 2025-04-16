@@ -2135,7 +2135,7 @@ store_results("m1s3b2", results_m1_s3b2, "Logistic Regression Model 1 - s3b2")
 #---- 5-2 PROG *****    Model 2 K-Nearest Neighbors ----------------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#---- 5-2-1 PEND ***       Model 2 KNN - s1b1 ----------------------------------
+#---- 5-2-1 DONE ***       Model 2 KNN - s1b1 ----------------------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #load("df_s1b1.RData") # nolint
@@ -2150,7 +2150,6 @@ df_m2_s1b1 <- df_s1b1 %>%
                                                 c("integer")) %>%
                                        pull(column_name),
                                      collapse = "|"), ")_")))
-
 
 # 1. Model Specification
 spec_m2_s1b1 <- nearest_neighbor(
@@ -2241,10 +2240,127 @@ store_results("m2s1b1", results_m2_s1b1, "KNN Model - s1b1")
 # Save the results to an RData file
 save(results_storage, file = "results_after_m2_s1b1.RData")
 
+#---- 5-2-2 PROG ***       Model 2 KNN - s1b2 ----------------------------------
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#load("df_s1b2.RData") # nolint
+#load("df_columns_info.RData") # nolint
+#load("df_test.RData") # nolint
+
+# Use Integers
+df_m2_s1b2 <- df_s1b2 %>%
+  select(Class, matches(paste0("^DETAILED-(",
+                               paste(df_columns_info %>%
+                                       filter(variable_type %in%
+                                                c("integer")) %>%
+                                       pull(column_name),
+                                     collapse = "|"), ")_")))
+
+# 1. Model Specification
+spec_m2_s1b2 <- nearest_neighbor(
+  neighbors = tune(),
+  weight_func = tune()
+) %>%
+  set_engine("kknn") %>%
+  set_mode("classification")
+
+# 2. Recipe
+rec_m2_s1b2 <- recipe(Class ~ ., data = df_s1b2) %>%
+  step_zv(all_predictors()) %>%
+  step_impute_median(all_numeric_predictors()) %>%
+  step_unknown(all_nominal_predictors(), new_level = "unknown") %>%
+  step_normalize(all_numeric_predictors()) %>%
+  step_dummy(all_nominal_predictors(), -all_outcomes())
+
+# Resolve conflict between kknn::contr.dummy and caret::contr.dummy
+conflicted::conflicts_prefer(kknn::contr.dummy)
+
+# 3. Workflow
+wf_m2_s1b2 <- workflow() %>%
+  add_model(spec_m2_s1b2) %>%
+  add_recipe(rec_m2_s1b2)
+
+# 4. Cross-validation
+set.seed(123)
+folds_m2_s1b2 <- vfold_cv(df_s1b2, v = 5, strata = Class)
+
+# 5. Grid of hyperparameters
+grid_m2_s1b2 <- grid_regular(
+  neighbors(range = c(5, 50)),
+  weight_func(values = c("rectangular", "triangular", "gaussian", "rank")),
+  levels = c(10, 4)
+)
+
+# 6. Tune the model
+tune_results_m2_s1b2 <- tune_grid(
+  wf_m2_s1b2,
+  resamples = folds_m2_s1b2,
+  grid = grid_m2_s1b2,
+  metrics = metric_set(roc_auc, accuracy, sens, spec)#,
+#  control = control_grid(verbose = TRUE, save_pred = TRUE)
+)
+
+# Show the tuning results
+autoplot(tune_results_m2_s1b2) +
+  labs(title = "Tuning Results for K-Nearest Neighbors",
+       x = "Tuned Parameter") +
+  theme_minimal()
+
+# 7. Select the best parameters
+best_params_m2_s1b2 <- select_best(tune_results_m2_s1b2, metric = "roc_auc")
+
+print(best_params_m2_s1b2)
+
+# 8. Finalize the workflow
+final_wf_m2_s1b2 <- finalize_workflow(wf_m2_s1b2, best_params_m2_s1b2)
+
+# 9. Fit the final model
+fit_m2_s1b2 <- fit(final_wf_m2_s1b2, data = df_s1b2)
+
+# Try different thresholds to achieve the target TPR and TNR
+thresholds <- seq(0.3, 0.7, by = 0.05)
+threshold_results <- list()
+
+for (thresh in thresholds) {
+  results <- calculate_all_measures(fit_m2_s1b2, df_s1b2, thresh)
+  tpr_1 <- results$values[results$measures == "TPR_1"]
+  tpr_0 <- results$values[results$measures == "TPR_0"]
+
+  threshold_results[[as.character(thresh)]] <- data.frame(
+    threshold = thresh,
+    TPR_1 = tpr_1,
+    TPR_0 = tpr_0,
+    diff_from_target = abs(tpr_1 - 0.81) + abs(tpr_0 - 0.79)
+  )
+}
+
+threshold_df <- do.call(rbind, threshold_results)
+best_threshold <-
+  threshold_df[which.min(threshold_df$diff_from_target), "threshold"]
+
+# 10. Evaluate the model on the test dataset
+results_m2_s1b2 <- calculate_all_measures(fit_m2_s1b2, df_test, best_threshold)
+results_m2_s1b2
+store_results("m2s1b2", results_m2_s1b2, "KNN Model - s1b2")
+
+# Save the results to an RData file
+save(results_storage, file = "results_after_m2_s1b2.RData")
+
 #---- 5-2-3 PROG ***       Model 2 KNN - s2b1 ----------------------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-1
-df_m2_s2b1 <- df_s2b1
+
+load("df_s2b1.RData") # nolint
+#load("df_columns_info.RData") # nolint
+#load("df_test.RData") # nolint
+
+# Use Integers
+df_m2_s2b1 <- df_s2b1 %>%
+  select(Class, matches(paste0("^DETAILED-(",
+                               paste(df_columns_info %>%
+                                       filter(variable_type %in%
+                                                c("integer")) %>%
+                                       pull(column_name),
+                                     collapse = "|"), ")_")))
 
 # 1. Model Specification
 spec_m2_s2b1 <- nearest_neighbor(
@@ -2290,14 +2406,15 @@ tune_results_m2_s2b1 <- tune_grid(
 )
 
 # Show the tuning results
-autoplot(tune_results_m1_s2b1) +
-  labs(title = "Tuning Results for Logistic Regression",
-       x = "Penalty",
-       y = "Mixture") +
+autoplot(tune_results_m2_s2b1) +
+  labs(title = "Tuning Results for K-Nearest Neighbors",
+       x = "Tuned Parameter") +
   theme_minimal()
 
 # 7. Select the best parameters
 best_params_m2_s2b1 <- select_best(tune_results_m2_s2b1, metric = "roc_auc")
+
+print(best_params_m2_s2b1)
 
 # 8. Finalize the workflow
 final_wf_m2_s2b1 <- finalize_workflow(wf_m2_s2b1, best_params_m2_s2b1)
@@ -2310,15 +2427,122 @@ thresholds <- seq(0.3, 0.7, by = 0.05)
 threshold_results <- list()
 
 for (thresh in thresholds) {
-  results <- calculate_all_measures(fit_m2_s1b1, df_s1b1, thresh)
+  results <- calculate_all_measures(fit_m2_s2b1, df_s2b1, thresh)
   tpr_1 <- results$values[results$measures == "TPR_1"]
-  tnr_0 <- results$values[results$measures == "TNR_0"]
+  tpr_0 <- results$values[results$measures == "TPR_0"]
 
   threshold_results[[as.character(thresh)]] <- data.frame(
     threshold = thresh,
     TPR_1 = tpr_1,
-    TNR_0 = tnr_0,
-    diff_from_target = abs(tpr_1 - 0.81) + abs(tnr_0 - 0.79)
+    TPR_0 = tpr_0,
+    diff_from_target = abs(tpr_1 - 0.81) + abs(tpr_0 - 0.79)
+  )
+}
+
+threshold_df <- do.call(rbind, threshold_results)
+best_threshold <-
+  threshold_df[which.min(threshold_df$diff_from_target), "threshold"]
+
+print(best_threshold)
+
+# 10. Evaluate the model on the test dataset
+results_m2_s2b1 <- calculate_all_measures(fit_m2_s2b1, df_test, best_threshold)
+results_m2_s2b1
+store_results("m2s2b1", results_m2_s2b1, "KNN Model - s2b1")
+
+# Save the results to an RData file
+save(results_storage, file = "results_after_m2_s2b1.RData")
+
+#---- 5-2-4 PROG ***       Model 2 KNN - s2b2 ----------------------------------
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#load("df_s2b2.RData") # nolint
+#load("df_columns_info.RData") # nolint
+#load("df_test.RData") # nolint
+
+# Use Integers
+df_m2_s2b2 <- df_s2b2 %>%
+  select(Class, matches(paste0("^DETAILED-(",
+                               paste(df_columns_info %>%
+                                       filter(variable_type %in%
+                                                c("integer")) %>%
+                                       pull(column_name),
+                                     collapse = "|"), ")_")))
+
+# 1. Model Specification
+spec_m2_s2b2 <- nearest_neighbor(
+  neighbors = tune(),
+  weight_func = tune()
+) %>%
+  set_engine("kknn") %>%
+  set_mode("classification")
+
+# 2. Recipe
+rec_m2_s2b2 <- recipe(Class ~ ., data = df_s2b2) %>%
+  step_zv(all_predictors()) %>%
+  step_impute_median(all_numeric_predictors()) %>%
+  step_unknown(all_nominal_predictors(), new_level = "unknown") %>%
+  step_normalize(all_numeric_predictors()) %>%
+  step_dummy(all_nominal_predictors(), -all_outcomes())
+
+# Resolve conflict between kknn::contr.dummy and caret::contr.dummy
+conflicted::conflicts_prefer(kknn::contr.dummy)
+
+# 3. Workflow
+wf_m2_s2b2 <- workflow() %>%
+  add_model(spec_m2_s2b2) %>%
+  add_recipe(rec_m2_s2b2)
+
+# 4. Cross-validation
+set.seed(123)
+folds_m2_s2b2 <- vfold_cv(df_s2b2, v = 5, strata = Class)
+
+# 5. Grid of hyperparameters
+grid_m2_s2b2 <- grid_regular(
+  neighbors(range = c(5, 50)),
+  weight_func(values = c("rectangular", "triangular", "gaussian", "rank")),
+  levels = c(10, 4)
+)
+
+# 6. Tune the model
+tune_results_m2_s2b2 <- tune_grid(
+  wf_m2_s2b2,
+  resamples = folds_m2_s2b2,
+  grid = grid_m2_s2b2,
+  metrics = metric_set(roc_auc, accuracy, sens, spec)
+)
+
+# Show the tuning results
+autoplot(tune_results_m2_s2b2) +
+  labs(title = "Tuning Results for K-Nearest Neighbors",
+       x = "Tuned Parameter") +
+  theme_minimal()
+
+# 7. Select the best parameters
+best_params_m2_s2b2 <- select_best(tune_results_m2_s2b2, metric = "roc_auc")
+
+print(best_params_m2_s2b2)
+
+# 8. Finalize the workflow
+final_wf_m2_s2b2 <- finalize_workflow(wf_m2_s2b2, best_params_m2_s2b2)
+
+# 9. Fit the final model
+fit_m2_s2b2 <- fit(final_wf_m2_s2b2, data = df_s2b2)
+
+# Try different thresholds to achieve the target TPR and TNR
+thresholds <- seq(0.3, 0.7, by = 0.05)
+threshold_results <- list()
+
+for (thresh in thresholds) {
+  results <- calculate_all_measures(fit_m2_s2b2, df_s2b2, thresh)
+  tpr_1 <- results$values[results$measures == "TPR_1"]
+  tpr_0 <- results$values[results$measures == "TPR_0"]
+
+  threshold_results[[as.character(thresh)]] <- data.frame(
+    threshold = thresh,
+    TPR_1 = tpr_1,
+    TPR_0 = tpr_0,
+    diff_from_target = abs(tpr_1 - 0.81) + abs(tpr_0 - 0.79)
   )
 }
 
@@ -2327,8 +2551,224 @@ best_threshold <-
   threshold_df[which.min(threshold_df$diff_from_target), "threshold"]
 
 # 10. Evaluate the model on the test dataset
-results_m2_s2b1 <- calculate_all_measures(fit_m2_s2b1, df_test, best_threshold)
-store_results("m2s2b1", results_m2_s2b1, "KNN Model - s2b1")
+results_m2_s2b2 <- calculate_all_measures(fit_m2_s2b2, df_test, best_threshold)
+results_m2_s2b2
+store_results("m2s2b2", results_m2_s2b2, "KNN Model - s2b2")
+
+# Save the results to an RData file
+save(results_storage, file = "results_after_m2_s2b2.RData")
+
+#---- 5-2-5 PROG ***       Model 2 KNN - s3b1 ----------------------------------
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#load("df_s3b1.RData") # nolint
+#load("df_columns_info.RData") # nolint
+#load("df_test.RData") # nolint
+
+# Use Integers
+df_m2_s3b1 <- df_s3b1 %>%
+  select(Class, matches(paste0("^DETAILED-(",
+                               paste(df_columns_info %>%
+                                       filter(variable_type %in%
+                                                c("integer")) %>%
+                                       pull(column_name),
+                                     collapse = "|"), ")_"))) %>%
+  select(-matches("SERIALNO"))
+
+# 1. Model Specification
+spec_m2_s3b1 <- nearest_neighbor(
+  neighbors = tune(),
+  weight_func = tune()
+) %>%
+  set_engine("kknn") %>%
+  set_mode("classification")
+
+# 2. Recipe
+rec_m2_s3b1 <- recipe(Class ~ ., data = df_m2_s3b1) %>%
+  step_zv(all_predictors()) %>%
+  step_impute_median(all_numeric_predictors()) %>%
+  step_unknown(all_nominal_predictors(), new_level = "unknown") %>%
+  step_normalize(all_numeric_predictors()) %>%
+  step_dummy(all_nominal_predictors(), -all_outcomes())
+
+# Resolve conflict between kknn::contr.dummy and caret::contr.dummy
+conflicted::conflicts_prefer(kknn::contr.dummy)
+
+# 3. Workflow
+wf_m2_s3b1 <- workflow() %>%
+  add_model(spec_m2_s3b1) %>%
+  add_recipe(rec_m2_s3b1)
+
+# 4. Cross-validation
+set.seed(123)
+folds_m2_s3b1 <- vfold_cv(df_m2_s3b1, v = 5, strata = Class)
+
+# 5. Grid of hyperparameters
+grid_m2_s3b1 <- grid_regular(
+  neighbors(range = c(5, 50)),
+  weight_func(values = c("rectangular", "triangular", "gaussian", "rank")),
+  levels = c(10, 4)
+)
+
+# 6. Tune the model
+tune_results_m2_s3b1 <- tune_grid(
+  wf_m2_s3b1,
+  resamples = folds_m2_s3b1,
+  grid = grid_m2_s3b1,
+  metrics = metric_set(roc_auc, accuracy, sens, spec)
+)
+
+# Show the tuning results
+autoplot(tune_results_m2_s3b1) +
+  labs(title = "Tuning Results for K-Nearest Neighbors",
+       x = "Tuned Parameter") +
+  theme_minimal()
+
+# 7. Select the best parameters
+best_params_m2_s3b1 <- select_best(tune_results_m2_s3b1, metric = "roc_auc")
+
+print(best_params_m2_s3b1)
+
+# 8. Finalize the workflow
+final_wf_m2_s3b1 <- finalize_workflow(wf_m2_s3b1, best_params_m2_s3b1)
+
+# 9. Fit the final model
+fit_m2_s3b1 <- fit(final_wf_m2_s3b1, data = df_s3b1)
+
+# Try different thresholds to achieve the target TPR and TNR
+thresholds <- seq(0.3, 0.7, by = 0.05)
+threshold_results <- list()
+
+for (thresh in thresholds) {
+  results <- calculate_all_measures(fit_m2_s3b1, df_s3b1, thresh)
+  tpr_1 <- results$values[results$measures == "TPR_1"]
+  tpr_0 <- results$values[results$measures == "TPR_0"]
+
+  threshold_results[[as.character(thresh)]] <- data.frame(
+    threshold = thresh,
+    TPR_1 = tpr_1,
+    TPR_0 = tpr_0,
+    diff_from_target = abs(tpr_1 - 0.81) + abs(tpr_0 - 0.79)
+  )
+}
+
+threshold_df <- do.call(rbind, threshold_results)
+best_threshold <-
+  threshold_df[which.min(threshold_df$diff_from_target), "threshold"]
+
+# 10. Evaluate the model on the test dataset
+results_m2_s3b1 <- calculate_all_measures(fit_m2_s3b1, df_test, best_threshold)
+results_m2_s3b1
+store_results("m2s3b1", results_m2_s3b1, "KNN Model - s3b1")
+
+# Save the results to an RData file
+save(results_storage, file = "results_after_m2_s3b1.RData")
+
+#---- 5-2-6 PROG ***       Model 2 KNN - s3b2 ----------------------------------
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+load("df_s3b2.RData") # nolint
+#load("df_columns_info.RData") # nolint
+#load("df_test.RData") # nolint
+
+# Use Integers
+df_m2_s3b2 <- df_s3b2 %>%
+  select(Class, matches(paste0("^DETAILED-(",
+                               paste(df_columns_info %>%
+                                       filter(variable_type %in%
+                                                c("integer")) %>%
+                                       pull(column_name),
+                                     collapse = "|"), ")_"))) %>%
+  select(-matches("SERIALNO"))
+
+# 1. Model Specification
+spec_m2_s3b2 <- nearest_neighbor(
+  neighbors = tune(),
+  weight_func = tune()
+) %>%
+  set_engine("kknn") %>%
+  set_mode("classification")
+
+# 2. Recipe
+rec_m2_s3b2 <- recipe(Class ~ ., data = df_m2_s3b2) %>%
+  step_zv(all_predictors()) %>%
+  step_impute_median(all_numeric_predictors()) %>%
+  step_unknown(all_nominal_predictors(), new_level = "unknown") %>%
+  step_normalize(all_numeric_predictors()) %>%
+  step_dummy(all_nominal_predictors(), -all_outcomes())
+
+# Resolve conflict between kknn::contr.dummy and caret::contr.dummy
+conflicted::conflicts_prefer(kknn::contr.dummy)
+
+# 3. Workflow
+wf_m2_s3b2 <- workflow() %>%
+  add_model(spec_m2_s3b2) %>%
+  add_recipe(rec_m2_s3b2)
+
+# 4. Cross-validation
+set.seed(123)
+folds_m2_s3b2 <- vfold_cv(df_m2_s3b2, v = 5, strata = Class)
+
+# 5. Grid of hyperparameters
+grid_m2_s3b2 <- grid_regular(
+  neighbors(range = c(5, 50)),
+  weight_func(values = c("rectangular", "triangular", "gaussian", "rank")),
+  levels = c(10, 4)
+)
+
+# 6. Tune the model
+tune_results_m2_s3b2 <- tune_grid(
+  wf_m2_s3b2,
+  resamples = folds_m2_s3b2,
+  grid = grid_m2_s3b2,
+  metrics = metric_set(roc_auc, accuracy, sens, spec)
+)
+
+# Show the tuning results
+autoplot(tune_results_m2_s3b2) +
+  labs(title = "Tuning Results for K-Nearest Neighbors",
+       x = "Tuned Parameter") +
+  theme_minimal()
+
+# 7. Select the best parameters
+best_params_m2_s3b2 <- select_best(tune_results_m2_s3b2, metric = "roc_auc")
+
+print(best_params_m2_s3b2)
+
+# 8. Finalize the workflow
+final_wf_m2_s3b2 <- finalize_workflow(wf_m2_s3b2, best_params_m2_s3b2)
+
+# 9. Fit the final model
+fit_m2_s3b2 <- fit(final_wf_m2_s3b2, data = df_s3b2)
+
+# Try different thresholds to achieve the target TPR and TNR
+thresholds <- seq(0.3, 0.7, by = 0.05)
+threshold_results <- list()
+
+for (thresh in thresholds) {
+  results <- calculate_all_measures(fit_m2_s3b2, df_s3b2, thresh)
+  tpr_1 <- results$values[results$measures == "TPR_1"]
+  tpr_0 <- results$values[results$measures == "TPR_0"]
+
+  threshold_results[[as.character(thresh)]] <- data.frame(
+    threshold = thresh,
+    TPR_1 = tpr_1,
+    TPR_0 = tpr_0,
+    diff_from_target = abs(tpr_1 - 0.81) + abs(tpr_0 - 0.79)
+  )
+}
+
+threshold_df <- do.call(rbind, threshold_results)
+best_threshold <-
+  threshold_df[which.min(threshold_df$diff_from_target), "threshold"]
+
+# 10. Evaluate the model on the test dataset
+results_m2_s3b2 <- calculate_all_measures(fit_m2_s3b2, df_test, best_threshold)
+results_m2_s3b2
+store_results("m2s3b2", results_m2_s3b2, "KNN Model - s3b2")
+
+# Save the results to an RData file
+save(results_storage, file = "results_after_m2_s3b2.RData")
 
 #---- 5-3 PEND *****    Model 3 Decision Tree ----------------------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
