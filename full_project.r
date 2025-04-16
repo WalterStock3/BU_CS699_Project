@@ -2149,7 +2149,8 @@ df_m2_s1b1 <- df_s1b1 %>%
                                        filter(variable_type %in%
                                                 c("integer")) %>%
                                        pull(column_name),
-                                     collapse = "|"), ")_")))
+                                     collapse = "|"), ")_"))) %>%
+  select(-matches("SERIALNO"))
 
 # 1. Model Specification
 spec_m2_s1b1 <- nearest_neighbor(
@@ -2160,7 +2161,7 @@ spec_m2_s1b1 <- nearest_neighbor(
   set_mode("classification")
 
 # 2. Recipe
-rec_m2_s1b1 <- recipe(Class ~ ., data = df_s1b1) %>%
+rec_m2_s1b1 <- recipe(Class ~ ., data = df_m2_s1b1) %>%
   step_zv(all_predictors()) %>%
   step_impute_median(all_numeric_predictors()) %>%
   step_unknown(all_nominal_predictors(), new_level = "unknown") %>%
@@ -2177,7 +2178,7 @@ wf_m2_s1b1 <- workflow() %>%
 
 # 4. Cross-validation
 set.seed(123)
-folds_m2_s1b1 <- vfold_cv(df_s1b1, v = 5, strata = Class)
+folds_m2_s1b1 <- vfold_cv(df_m2_s1b1, v = 5, strata = Class)
 
 # 5. Grid of hyperparameters
 grid_m2_s1b1 <- grid_regular(
@@ -2254,7 +2255,8 @@ df_m2_s1b2 <- df_s1b2 %>%
                                        filter(variable_type %in%
                                                 c("integer")) %>%
                                        pull(column_name),
-                                     collapse = "|"), ")_")))
+                                     collapse = "|"), ")_"))) %>%
+  select(-matches("SERIALNO"))
 
 # 1. Model Specification
 spec_m2_s1b2 <- nearest_neighbor(
@@ -2265,7 +2267,7 @@ spec_m2_s1b2 <- nearest_neighbor(
   set_mode("classification")
 
 # 2. Recipe
-rec_m2_s1b2 <- recipe(Class ~ ., data = df_s1b2) %>%
+rec_m2_s1b2 <- recipe(Class ~ ., data = df_m2_s1b2) %>%
   step_zv(all_predictors()) %>%
   step_impute_median(all_numeric_predictors()) %>%
   step_unknown(all_nominal_predictors(), new_level = "unknown") %>%
@@ -2282,7 +2284,7 @@ wf_m2_s1b2 <- workflow() %>%
 
 # 4. Cross-validation
 set.seed(123)
-folds_m2_s1b2 <- vfold_cv(df_s1b2, v = 5, strata = Class)
+folds_m2_s1b2 <- vfold_cv(df_m2_s1b2, v = 5, strata = Class)
 
 # 5. Grid of hyperparameters
 grid_m2_s1b2 <- grid_regular(
@@ -2296,8 +2298,7 @@ tune_results_m2_s1b2 <- tune_grid(
   wf_m2_s1b2,
   resamples = folds_m2_s1b2,
   grid = grid_m2_s1b2,
-  metrics = metric_set(roc_auc, accuracy, sens, spec)#,
-#  control = control_grid(verbose = TRUE, save_pred = TRUE)
+  metrics = metric_set(roc_auc, accuracy, sens, spec)
 )
 
 # Show the tuning results
@@ -2349,7 +2350,7 @@ save(results_storage, file = "results_after_m2_s1b2.RData")
 #---- 5-2-3 PROG ***       Model 2 KNN - s2b1 ----------------------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-load("df_s2b1.RData") # nolint
+#load("df_s2b1.RData") # nolint
 #load("df_columns_info.RData") # nolint
 #load("df_test.RData") # nolint
 
@@ -2360,7 +2361,8 @@ df_m2_s2b1 <- df_s2b1 %>%
                                        filter(variable_type %in%
                                                 c("integer")) %>%
                                        pull(column_name),
-                                     collapse = "|"), ")_")))
+                                     collapse = "|"), ")_"))) %>%
+  select(-matches("SERIALNO"))
 
 # 1. Model Specification
 spec_m2_s2b1 <- nearest_neighbor(
@@ -2371,7 +2373,7 @@ spec_m2_s2b1 <- nearest_neighbor(
   set_mode("classification")
 
 # 2. Recipe
-rec_m2_s2b1 <- recipe(Class ~ ., data = df_s2b1) %>%
+rec_m2_s2b1 <- recipe(Class ~ ., data = df_m2_s2b1) %>%
   step_zv(all_predictors()) %>%
   step_impute_median(all_numeric_predictors()) %>%
   step_unknown(all_nominal_predictors(), new_level = "unknown") %>%
@@ -2388,7 +2390,7 @@ wf_m2_s2b1 <- workflow() %>%
 
 # 4. Cross-validation
 set.seed(123)
-folds_m2_s2b1 <- vfold_cv(df_s2b1, v = 5, strata = Class)
+folds_m2_s2b1 <- vfold_cv(df_m2_s2b1, v = 5, strata = Class)
 
 # 5. Grid of hyperparameters
 grid_m2_s2b1 <- grid_regular(
@@ -2443,8 +2445,6 @@ threshold_df <- do.call(rbind, threshold_results)
 best_threshold <-
   threshold_df[which.min(threshold_df$diff_from_target), "threshold"]
 
-print(best_threshold)
-
 # 10. Evaluate the model on the test dataset
 results_m2_s2b1 <- calculate_all_measures(fit_m2_s2b1, df_test, best_threshold)
 results_m2_s2b1
@@ -2467,7 +2467,8 @@ df_m2_s2b2 <- df_s2b2 %>%
                                        filter(variable_type %in%
                                                 c("integer")) %>%
                                        pull(column_name),
-                                     collapse = "|"), ")_")))
+                                     collapse = "|"), ")_"))) %>%
+  select(-matches("SERIALNO"))
 
 # 1. Model Specification
 spec_m2_s2b2 <- nearest_neighbor(
@@ -2478,7 +2479,7 @@ spec_m2_s2b2 <- nearest_neighbor(
   set_mode("classification")
 
 # 2. Recipe
-rec_m2_s2b2 <- recipe(Class ~ ., data = df_s2b2) %>%
+rec_m2_s2b2 <- recipe(Class ~ ., data = df_m2_s2b2) %>%
   step_zv(all_predictors()) %>%
   step_impute_median(all_numeric_predictors()) %>%
   step_unknown(all_nominal_predictors(), new_level = "unknown") %>%
@@ -2495,7 +2496,7 @@ wf_m2_s2b2 <- workflow() %>%
 
 # 4. Cross-validation
 set.seed(123)
-folds_m2_s2b2 <- vfold_cv(df_s2b2, v = 5, strata = Class)
+folds_m2_s2b2 <- vfold_cv(df_m2_s2b2, v = 5, strata = Class)
 
 # 5. Grid of hyperparameters
 grid_m2_s2b2 <- grid_regular(
@@ -2556,7 +2557,7 @@ results_m2_s2b2
 store_results("m2s2b2", results_m2_s2b2, "KNN Model - s2b2")
 
 # Save the results to an RData file
-save(results_storage, file = "results_after_m2_s2b2.RData")
+save(results_storage, file = "results_after_m2_s3b1.RData")
 
 #---- 5-2-5 PROG ***       Model 2 KNN - s3b1 ----------------------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2667,7 +2668,7 @@ save(results_storage, file = "results_after_m2_s3b1.RData")
 #---- 5-2-6 PROG ***       Model 2 KNN - s3b2 ----------------------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-load("df_s3b2.RData") # nolint
+#load("df_s3b2.RData") # nolint
 #load("df_columns_info.RData") # nolint
 #load("df_test.RData") # nolint
 
