@@ -2238,9 +2238,12 @@ results_m2_s1b1 <- calculate_all_measures(fit_m2_s1b1, df_test, best_threshold)
 results_m2_s1b1
 store_results("m2s1b1", results_m2_s1b1, "KNN Model - s1b1")
 
+# Save the results to an RData file
+save(results_storage, file = "results_after_m2_s1b1.RData")
+
 #---- 5-2-3 PROG ***       Model 2 KNN - s2b1 ----------------------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+1
 df_m2_s2b1 <- df_s2b1
 
 # 1. Model Specification
