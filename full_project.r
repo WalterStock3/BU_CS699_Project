@@ -28,9 +28,17 @@ library(pROC)
 
 #---- 0.1 DONE *****    Functions - Full Performance Evaluation ----------------
 
+#results_m2_s1b1 <- calculate_all_measures(fit_m2_s1b1, df_test, best_threshold)
+#results_m1_s1b1 <- calculate_all_measures(final_fit_m1_s1b1, df_test, 0.5)
+
 calculate_all_measures <- function(in_model, in_test_df, threshold) {
   #in_test_df <- df_test # nolint
-  #in_model <- final_fit_m1_s2b1 # nolint
+  #in_model <- fit_m2_s1b1 # nolint
+  #threshold <- best_threshold # nolint
+
+  #in_test_df <- df_test # nolint
+  #in_model <- final_fit_m1_s1b1 # nolint
+  #threshold <- 0.5 # nolint
 
   # Predict on the test dataset
   test_predictions <- predict(in_model, new_data = in_test_df, type = "prob")
@@ -40,7 +48,7 @@ calculate_all_measures <- function(in_model, in_test_df, threshold) {
 
   # Confusion matrix
   confusion_matrix <- table(Predicted = test_predicted_class,
-                            Actual = df_test$Class)
+                            Actual = in_test_df$Class)
   print(confusion_matrix)
 
   # Calculate accuracy
@@ -79,7 +87,7 @@ calculate_all_measures <- function(in_model, in_test_df, threshold) {
                                              weight0, weight1)
   performance_measures
 
-  roc_curve <- roc(df_test$Class, test_predictions$.pred_0)
+  roc_curve <- roc(in_test_df$Class, test_predictions$.pred_0)
   auc_value <- auc(roc_curve)
 
   # Convert AUC value to double
@@ -1557,6 +1565,9 @@ save(df_s3b2, file = "df_s3b2.RData")
 #---- 5 PROG ******* Models - Project Step 5 ------------------ m#_s#b# --------
 ################################################################################
 
+#load("df_columns_info.RData") # nolint
+#load("df_test.RData") # nolint
+
 ## Models - Project Step 5
 # Lecture 1 - Classification Slide:
 # * Decision trees,
@@ -1572,7 +1583,9 @@ save(df_s3b2, file = "df_s3b2.RData")
 #---- 5-1-1 DONE ***       Model 1 Logistic Regression ------------ m1_s1b1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-# load("df_s1b1.RData") # nolint
+#load("df_s1b1.RData") # nolint
+#load("df_columns_info.RData") # nolint
+#load("df_test.RData") # nolint
 
 # Logistic Regression Model
 
@@ -1661,7 +1674,9 @@ store_results("m1s1b1", results_m1_s1b1, "Logistic Regression Model 1 - s1b1")
 
 #---- 5-1-2 DONE ***       Model 1 Logistic Regression ------------ m1_s1b2 ----
 
-# load("df_s1b2.RData") # nolint
+#load("df_s1b2.RData") # nolint
+#load("df_columns_info.RData") # nolint
+#load("df_test.RData") # nolint
 
 # Logistic Regression Model
 
@@ -1751,6 +1766,10 @@ store_results("m1s1b2", results_m1_s1b2, "Logistic Regression Model 1 - s1b2")
 #---- 5-1-3 DONE ***       Model 1 Logistic Regression ------------ m1_s2b1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+#load("df_s2b1.RData") # nolint
+#load("df_columns_info.RData") # nolint
+#load("df_test.RData") # nolint
+
 # Logistic Regression Model
 
 df_m1_s2b1 <- df_s2b1 %>%
@@ -1838,6 +1857,10 @@ store_results("m1s2b1", results_m1_s2b1, "Logistic Regression Model 1 - s2b1")
 
 #---- 5-1-4 DONE ***       Model 1 Logistic Regression ------------ m1_s2b2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#load("df_s2b2.RData") # nolint
+#load("df_columns_info.RData") # nolint
+#load("df_test.RData") # nolint
 
 # Logistic Regression Model
 
@@ -1927,6 +1950,10 @@ store_results("m1s2b2", results_m1_s2b2, "Logistic Regression Model 1 - s2b2")
 #---- 5-1-5 DONE ***       Model 1 Logistic Regression ------------ m1_s3b1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+#load("df_s3b1.RData") # nolint
+#load("df_columns_info.RData") # nolint
+#load("df_test.RData") # nolint
+
 # Logistic Regression Model
 
 df_m1_s3b1 <- df_s3b1 %>%
@@ -2014,6 +2041,10 @@ store_results("m1s3b1", results_m1_s3b1, "Logistic Regression Model 1 - s3b1")
 
 #---- 5-1-6 DONE ***       Model 1 Logistic Regression ------------ m1_s3b2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#load("df_s3b2.RData") # nolint
+#load("df_columns_info.RData") # nolint
+#load("df_test.RData") # nolint
 
 # Logistic Regression Model
 
@@ -2107,6 +2138,10 @@ store_results("m1s3b2", results_m1_s3b2, "Logistic Regression Model 1 - s3b2")
 #---- 5-2-1 PEND ***       Model 2 KNN - s1b1 ----------------------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+#load("df_s1b1.RData") # nolint
+#load("df_columns_info.RData") # nolint
+#load("df_test.RData") # nolint
+
 # Use Integers
 df_m2_s1b1 <- df_s1b1 %>%
   select(Class, matches(paste0("^DETAILED-(",
@@ -2161,7 +2196,7 @@ tune_results_m2_s1b1 <- tune_grid(
 )
 
 # Show the tuning results
-autoplot(tune_results_m1_s1b1) +
+autoplot(tune_results_m2_s1b1) +
   labs(title = "Tuning Results for Logistic Regression",
        x = "Penalty",
        y = "Mixture") +
@@ -2270,7 +2305,7 @@ thresholds <- seq(0.3, 0.7, by = 0.05)
 threshold_results <- list()
 
 for (thresh in thresholds) {
-  results <- calculate_all_measures(fit_m2_s2b1, df_test, thresh)
+  results <- calculate_all_measures(fit_m2_s1b1, df_s1b1, thresh)
   tpr_1 <- results$values[results$measures == "TPR_1"]
   tnr_0 <- results$values[results$measures == "TNR_0"]
 
