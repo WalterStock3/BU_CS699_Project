@@ -5169,3 +5169,67 @@ save(results_storage, file = "results_after_m6_s3b2.RData")
 #---- 6 PEND ******* Results - Project Step 6 ----------------------------------
 ################################################################################
 # Results - Project Step 6
+
+# Load the final results dataframe
+load("results_after_m6_s3b2.RData")
+
+# View the structure of the results
+str(results_storage)
+
+# Create a cleaner view of the results focusing on key metrics
+key_metrics <- c("ACCURACY", "TPR_0", "TPR_1", "ROC_W", "Kappa_W")
+
+comparison_results <- results_storage %>%
+  select(combination_key, description, all_of(key_metrics)) %>%
+  arrange(desc(ACCURACY))
+
+# Display the top 10 models by accuracy
+view(comparison_results)
+
+# Create visualizations to compare model performance
+# Plot of TPR_0 vs TPR_1 (true positive rate for each class)
+ggplot(results_storage, aes(x = TPR_0, y = TPR_1, color = substr(combination_key, 1, 2))) +
+  geom_point(size = 3, alpha = 0.7) +
+  geom_text_repel(aes(label = combination_key), size = 3) +
+  labs(title = "Model Performance: TPR_0 vs TPR_1",
+     x = "True Positive Rate - Class 0",
+     y = "True Positive Rate - Class 1",
+     color = "Model Type") +
+  theme_minimal() +
+  coord_fixed() +
+  geom_hline(yintercept = 0.8, linetype = "dashed", color = "gray") +
+  geom_vline(xintercept = 0.8, linetype = "dashed", color = "gray")
+
+# Compare accuracy across different model types and data preparation strategies
+ggplot(results_storage, aes(x = substr(combination_key, 1, 2), y = ACCURACY, fill = substr(combination_key, 3, 6))) +
+  geom_boxplot() +
+  labs(title = "Model Accuracy by Model Type and Data Strategy",
+     x = "Model Type",
+     y = "Accuracy",
+     fill = "Data Strategy") +
+  theme_minimal() +
+  coord_flip()
+
+# Find the best model based on balanced performance (high TPR for both classes)
+balanced_score <- results_storage %>%
+  mutate(balanced_metric = (TPR_0 + TPR_1)/2,
+     tpr_difference = abs(TPR_0 - TPR_1)) %>%
+  arrange(desc(balanced_metric), tpr_difference)
+
+# Display the top 5 most balanced models
+head(balanced_score %>% select(combination_key, description, TPR_0, TPR_1, balanced_metric, tpr_difference), 5)
+
+# Get the best overall model details
+best_model <- balanced_score %>%
+  filter(row_number() == 1)
+
+cat("Best Overall Model:\n")
+cat("Model:", best_model$combination_key, "-", best_model$description, "\n")
+cat("Accuracy:", round(best_model$ACCURACY, 4), "\n")
+cat("TPR Class 0:", round(best_model$TPR_0, 4), "\n")
+cat("TPR Class 1:", round(best_model$TPR_1, 4), "\n")
+cat("ROC AUC:", round(best_model$ROC_W, 4), "\n")
+cat("Kappa:", round(best_model$Kappa_W, 4), "\n")
+
+# Save the comparison results to a CSV file
+write.csv(comparison_results, "model_comparison_results.csv", row.names = FALSE)
