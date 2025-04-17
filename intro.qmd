@@ -1,7 +1,0 @@
-# Introduction
-
-This document includes:
-
- * A brief description of data mining tools used in the project.
- * A brief description of all classification algorithms used.
- * A detailed description of the data mining procedure, including all data preprocessing steps.

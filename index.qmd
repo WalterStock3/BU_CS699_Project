@@ -1,3 +1,0 @@
-# Preface {.unnumbered}
-
-This document was created by Arfaan Jeddy and Walter Stock for BU CS-699 Datamining Spring 2025.
