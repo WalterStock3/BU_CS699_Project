@@ -1556,7 +1556,7 @@ ggsave("plt_s3b2_corr.png",
        plot = plt_s3b2_corr, width = 10, height = 16, dpi = 300)
 
 # Removing class to avoid duplication.  Class is included in both dfs.
-df_s3b2 <- df_s3b2_allfact %>% select(-Class) %>% # nolint
+df_s3b2 <- df_s3b2_allfact_miss %>% select(-Class) %>% # nolint
   bind_cols(df_s3b2_4integers)
 
 #---- 4-3-2-4 DONE *          Final --------------------------------------------
