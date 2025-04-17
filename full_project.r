@@ -25,6 +25,7 @@ library(caret)
 library(rsample)
 library(ROSE)
 library(pROC)
+library(ranger)
 
 #---- 0.1 DONE *****    Functions - Full Performance Evaluation ----------------
 
@@ -1577,7 +1578,7 @@ save(df_s3b2, file = "df_s3b2.RData")
 # * Neural networks.
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#---- 5-1 DONE *****    Model 1 Logistic Regression ------------- m1_s#b# ------
+#---- 5-1 DONE *****    Model 1 Logistic Regression ----------------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Logistic regression is a statistical method for predicting binary classes.
 #---- 5-1-1 DONE ***       Model 1 Logistic Regression ------------ m1_s1b1 ----
@@ -2132,10 +2133,10 @@ results_m1_s3b2
 store_results("m1s3b2", results_m1_s3b2, "Logistic Regression Model 1 - s3b2")
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#---- 5-2 PROG *****    Model 2 K-Nearest Neighbors ----------------------------
+#---- 5-2 DONE *****    Model 2 K-Nearest Neighbors ----------------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#---- 5-2-1 DONE ***       Model 2 KNN - s1b1 ----------------------------------
+#---- 5-2-1 DONE ***       Model 2 KNN - s1b1 --------------------- m2-s1b1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #load("df_s1b1.RData") # nolint
@@ -2241,7 +2242,7 @@ store_results("m2s1b1", results_m2_s1b1, "KNN Model - s1b1")
 # Save the results to an RData file
 save(results_storage, file = "results_after_m2_s1b1.RData")
 
-#---- 5-2-2 PROG ***       Model 2 KNN - s1b2 ----------------------------------
+#---- 5-2-2 DONE ***       Model 2 KNN - s1b2 --------------------- m2-s1b2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #load("df_s1b2.RData") # nolint
@@ -2347,7 +2348,7 @@ store_results("m2s1b2", results_m2_s1b2, "KNN Model - s1b2")
 # Save the results to an RData file
 save(results_storage, file = "results_after_m2_s1b2.RData")
 
-#---- 5-2-3 PROG ***       Model 2 KNN - s2b1 ----------------------------------
+#---- 5-2-3 DONE ***       Model 2 KNN - s2b1 --------------------- m2-s2b1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #load("df_s2b1.RData") # nolint
@@ -2453,7 +2454,7 @@ store_results("m2s2b1", results_m2_s2b1, "KNN Model - s2b1")
 # Save the results to an RData file
 save(results_storage, file = "results_after_m2_s2b1.RData")
 
-#---- 5-2-4 PROG ***       Model 2 KNN - s2b2 ----------------------------------
+#---- 5-2-4 DONE ***       Model 2 KNN - s2b2 --------------------- m2-s2b2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #load("df_s2b2.RData") # nolint
@@ -2559,7 +2560,7 @@ store_results("m2s2b2", results_m2_s2b2, "KNN Model - s2b2")
 # Save the results to an RData file
 save(results_storage, file = "results_after_m2_s3b1.RData")
 
-#---- 5-2-5 PROG ***       Model 2 KNN - s3b1 ----------------------------------
+#---- 5-2-5 DONE ***       Model 2 KNN - s3b1 --------------------- m2-s3b1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #load("df_s3b1.RData") # nolint
@@ -2665,7 +2666,7 @@ store_results("m2s3b1", results_m2_s3b1, "KNN Model - s3b1")
 # Save the results to an RData file
 save(results_storage, file = "results_after_m2_s3b1.RData")
 
-#---- 5-2-6 PROG ***       Model 2 KNN - s3b2 ----------------------------------
+#---- 5-2-6 DONE ***       Model 2 KNN - s3b2 --------------------- m2-s3b2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #load("df_s3b2.RData") # nolint
@@ -2771,12 +2772,1142 @@ store_results("m2s3b2", results_m2_s3b2, "KNN Model - s3b2")
 # Save the results to an RData file
 save(results_storage, file = "results_after_m2_s3b2.RData")
 
-#---- 5-3 PEND *****    Model 3 Decision Tree ----------------------------------
+#---- 5-3 DONE *****    Model 3 Decision Tree ----------------------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+#---- 5-3-1 DONE *****    Model 3 Decision Tree ------------------- m3-s1b1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#---- 5-4 PEND *****    Model 4 Random Forest ----------------------------------
+
+#load("df_s1b1.RData") # nolint
+#load("df_columns_info.RData") # nolint
+#load("df_test.RData") # nolint
+
+# Use Integers
+df_m3_s1b1 <- df_s1b1 %>%
+  select(Class, 
+         matches(paste0("^DETAILED-(",
+                        paste(df_columns_info %>%
+                                filter(variable_type %in%
+                                         c("factor",
+                                           "logical",
+                                           "factor-level")) %>%
+                                pull(column_name),
+                              collapse = "|"), ")_"))) %>%
+  select(-matches("SERIALNO"))
+
+# 1. Model Specification
+spec_m3_s1b1 <- decision_tree(
+  cost_complexity = tune(),
+  tree_depth = tune(),
+  min_n = tune()
+) %>%
+  set_engine("rpart") %>%
+  set_mode("classification")
+
+# 2. Recipe
+rec_m3_s1b1 <- recipe(Class ~ ., data = df_m3_s1b1)
+
+# 3. Workflow
+wf_m3_s1b1 <- workflow() %>%
+  add_model(spec_m3_s1b1) %>%
+  add_recipe(rec_m3_s1b1)
+
+# 4. Cross-validation
+set.seed(123)
+folds_m3_s1b1 <- vfold_cv(df_m3_s1b1, v = 5, strata = Class)
+
+# 5. Grid of hyperparameters
+grid_m3_s1b1 <- grid_regular(
+  cost_complexity(),
+  tree_depth(),
+  min_n(),
+  levels = 5
+)
+
+# 6. Tune the model
+tune_results_m3_s1b1 <- tune_grid(
+  wf_m3_s1b1,
+  resamples = folds_m3_s1b1,
+  grid = grid_m3_s1b1,
+  metrics = metric_set(roc_auc, accuracy, sens, spec)
+)
+
+# Show the tuning results
+autoplot(tune_results_m3_s1b1) +
+  labs(title = "Tuning Results for Decision Tree",
+       x = "Tuned Parameter") +
+  theme_minimal()
+
+# 7. Select the best parameters
+best_params_m3_s1b1 <- select_best(tune_results_m3_s1b1, metric = "roc_auc")
+
+print(best_params_m3_s1b1)
+
+# 8. Finalize the workflow
+final_wf_m3_s1b1 <- finalize_workflow(wf_m3_s1b1, best_params_m3_s1b1)
+
+# 9. Fit the final model
+fit_m3_s1b1 <- fit(final_wf_m3_s1b1, data = df_s1b1)
+
+# 10. Evaluate the model on the test dataset
+results_m3_s1b1 <- calculate_all_measures(fit_m3_s1b1, df_test, 0.5)
+results_m3_s1b1
+store_results("m3s1b1", results_m3_s1b1, "Decision Tree Model - s1b1")
+
+# Save the results to an RData file
+save(results_storage, file = "results_after_m3_s1b1.RData")
+
+#---- 5-3-2 DONE *****    Model 3 Decision Tree ------------------- m3-s1b2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#load("df_s1b2.RData") # nolint
+#load("df_columns_info.RData") # nolint
+#load("df_test.RData") # nolint
+
+# Use Integers
+df_m3_s1b2 <- df_s1b2 %>%
+  select(Class, 
+         matches(paste0("^DETAILED-(",
+                        paste(df_columns_info %>%
+                                filter(variable_type %in%
+                                         c("factor",
+                                           "logical",
+                                           "factor-level")) %>%
+                                pull(column_name),
+                              collapse = "|"), ")_"))) %>%
+  select(-matches("SERIALNO"))
+
+# 1. Model Specification
+spec_m3_s1b2 <- decision_tree(
+  cost_complexity = tune(),
+  tree_depth = tune(),
+  min_n = tune()
+) %>%
+  set_engine("rpart") %>%
+  set_mode("classification")
+
+# 2. Recipe
+rec_m3_s1b2 <- recipe(Class ~ ., data = df_m3_s1b2)
+
+# 3. Workflow
+wf_m3_s1b2 <- workflow() %>%
+  add_model(spec_m3_s1b2) %>%
+  add_recipe(rec_m3_s1b2)
+
+# 4. Cross-validation
+set.seed(123)
+folds_m3_s1b2 <- vfold_cv(df_m3_s1b2, v = 5, strata = Class)
+
+# 5. Grid of hyperparameters
+grid_m3_s1b2 <- grid_regular(
+  cost_complexity(),
+  tree_depth(),
+  min_n(),
+  levels = 5
+)
+
+# 6. Tune the model
+tune_results_m3_s1b2 <- tune_grid(
+  wf_m3_s1b2,
+  resamples = folds_m3_s1b2,
+  grid = grid_m3_s1b2,
+  metrics = metric_set(roc_auc, accuracy, sens, spec)
+)
+
+# Show the tuning results
+autoplot(tune_results_m3_s1b2) +
+  labs(title = "Tuning Results for Decision Tree",
+       x = "Tuned Parameter") +
+  theme_minimal()
+
+# 7. Select the best parameters
+best_params_m3_s1b2 <- select_best(tune_results_m3_s1b2, metric = "roc_auc")
+
+print(best_params_m3_s1b2)
+
+# 8. Finalize the workflow
+final_wf_m3_s1b2 <- finalize_workflow(wf_m3_s1b2, best_params_m3_s1b2)
+
+# 9. Fit the final model
+fit_m3_s1b2 <- fit(final_wf_m3_s1b2, data = df_s1b2)
+
+# 10. Evaluate the model on the test dataset
+results_m3_s1b2 <- calculate_all_measures(fit_m3_s1b2, df_test, 0.5)
+results_m3_s1b2
+store_results("m3s1b2", results_m3_s1b2, "Decision Tree Model - s1b2")
+
+# Save the results to an RData file
+save(results_storage, file = "results_after_m3_s1b2.RData")
+
+#---- 5-3-3 DONE *****    Model 3 Decision Tree ------------------- m3-s2b1 ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#load("df_s2b1.RData") # nolint
+#load("df_columns_info.RData") # nolint
+#load("df_test.RData") # nolint
+
+# Use Integers
+df_m3_s2b1 <- df_s2b1 %>%
+  select(Class, 
+         matches(paste0("^DETAILED-(",
+                        paste(df_columns_info %>%
+                                filter(variable_type %in%
+                                         c("factor",
+                                           "logical",
+                                           "factor-level")) %>%
+                                pull(column_name),
+                              collapse = "|"), ")_"))) %>%
+  select(-matches("SERIALNO"))
+
+# 1. Model Specification
+spec_m3_s2b1 <- decision_tree(
+  cost_complexity = tune(),
+  tree_depth = tune(),
+  min_n = tune()
+) %>%
+  set_engine("rpart") %>%
+  set_mode("classification")
+
+# 2. Recipe
+rec_m3_s2b1 <- recipe(Class ~ ., data = df_m3_s2b1)
+
+# 3. Workflow
+wf_m3_s2b1 <- workflow() %>%
+  add_model(spec_m3_s2b1) %>%
+  add_recipe(rec_m3_s2b1)
+
+# 4. Cross-validation
+set.seed(123)
+folds_m3_s2b1 <- vfold_cv(df_m3_s2b1, v = 5, strata = Class)
+
+# 5. Grid of hyperparameters
+grid_m3_s2b1 <- grid_regular(
+  cost_complexity(),
+  tree_depth(),
+  min_n(),
+  levels = 5
+)
+
+# 6. Tune the model
+tune_results_m3_s2b1 <- tune_grid(
+  wf_m3_s2b1,
+  resamples = folds_m3_s2b1,
+  grid = grid_m3_s2b1,
+  metrics = metric_set(roc_auc, accuracy, sens, spec)
+)
+
+# Show the tuning results
+autoplot(tune_results_m3_s2b1) +
+  labs(title = "Tuning Results for Decision Tree",
+       x = "Tuned Parameter") +
+  theme_minimal()
+
+# 7. Select the best parameters
+best_params_m3_s2b1 <- select_best(tune_results_m3_s2b1, metric = "roc_auc")
+
+print(best_params_m3_s2b1)
+
+# 8. Finalize the workflow
+final_wf_m3_s2b1 <- finalize_workflow(wf_m3_s2b1, best_params_m3_s2b1)
+
+# 9. Fit the final model
+fit_m3_s2b1 <- fit(final_wf_m3_s2b1, data = df_s2b1)
+
+# 10. Evaluate the model on the test dataset
+results_m3_s2b1 <- calculate_all_measures(fit_m3_s2b1, df_test, 0.5)
+results_m3_s2b1
+store_results("m3s2b1", results_m3_s2b1, "Decision Tree Model - s2b1")
+
+# Save the results to an RData file
+save(results_storage, file = "results_after_m3_s2b1.RData")
+
+#---- 5-3-4 DONE *****    Model 3 Decision Tree ------------------- m3-s2b2 ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#load("df_s2b2.RData") # nolint
+#load("df_columns_info.RData") # nolint
+#load("df_test.RData") # nolint
+
+# Use Integers
+df_m3_s2b2 <- df_s2b2 %>%
+  select(Class, 
+         matches(paste0("^DETAILED-(",
+                        paste(df_columns_info %>%
+                                filter(variable_type %in%
+                                         c("factor",
+                                           "logical",
+                                           "factor-level")) %>%
+                                pull(column_name),
+                              collapse = "|"), ")_"))) %>%
+  select(-matches("SERIALNO"))
+
+# 1. Model Specification
+spec_m3_s2b2 <- decision_tree(
+  cost_complexity = tune(),
+  tree_depth = tune(),
+  min_n = tune()
+) %>%
+  set_engine("rpart") %>%
+  set_mode("classification")
+
+# 2. Recipe
+rec_m3_s2b2 <- recipe(Class ~ ., data = df_m3_s2b2)
+
+# 3. Workflow
+wf_m3_s2b2 <- workflow() %>%
+  add_model(spec_m3_s2b2) %>%
+  add_recipe(rec_m3_s2b2)
+
+# 4. Cross-validation
+set.seed(123)
+folds_m3_s2b2 <- vfold_cv(df_m3_s2b2, v = 5, strata = Class)
+
+# 5. Grid of hyperparameters
+grid_m3_s2b2 <- grid_regular(
+  cost_complexity(),
+  tree_depth(),
+  min_n(),
+  levels = 5
+)
+
+# 6. Tune the model
+tune_results_m3_s2b2 <- tune_grid(
+  wf_m3_s2b2,
+  resamples = folds_m3_s2b2,
+  grid = grid_m3_s2b2,
+  metrics = metric_set(roc_auc, accuracy, sens, spec)
+)
+
+# Show the tuning results
+autoplot(tune_results_m3_s2b2) +
+  labs(title = "Tuning Results for Decision Tree",
+       x = "Tuned Parameter") +
+  theme_minimal()
+
+# 7. Select the best parameters
+best_params_m3_s2b2 <- select_best(tune_results_m3_s2b2, metric = "roc_auc")
+
+print(best_params_m3_s2b2)
+
+# 8. Finalize the workflow
+final_wf_m3_s2b2 <- finalize_workflow(wf_m3_s2b2, best_params_m3_s2b2)
+
+# 9. Fit the final model
+fit_m3_s2b2 <- fit(final_wf_m3_s2b2, data = df_s2b2)
+
+# 10. Evaluate the model on the test dataset
+results_m3_s2b2 <- calculate_all_measures(fit_m3_s2b2, df_test, 0.5)
+results_m3_s2b2
+store_results("m3s2b2", results_m3_s2b2, "Decision Tree Model - s2b2")
+
+# Save the results to an RData file
+save(results_storage, file = "results_after_m3_s2b2.RData")
+
+#---- 5-3-5 DONE *****    Model 3 Decision Tree ------------------- m3-s3b1 ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#load("df_s3b1.RData") # nolint
+#load("df_columns_info.RData") # nolint
+#load("df_test.RData") # nolint
+
+# Use Integers
+df_m3_s3b1 <- df_s3b1 %>%
+  select(Class, 
+         matches(paste0("^DETAILED-(",
+                        paste(df_columns_info %>%
+                                filter(variable_type %in%
+                                         c("factor",
+                                           "logical",
+                                           "factor-level")) %>%
+                                pull(column_name),
+                              collapse = "|"), ")_"))) %>%
+  select(-matches("SERIALNO"))
+
+# 1. Model Specification
+spec_m3_s3b1 <- decision_tree(
+  cost_complexity = tune(),
+  tree_depth = tune(),
+  min_n = tune()
+) %>%
+  set_engine("rpart") %>%
+  set_mode("classification")
+
+# 2. Recipe
+rec_m3_s3b1 <- recipe(Class ~ ., data = df_m3_s3b1)
+
+# 3. Workflow
+wf_m3_s3b1 <- workflow() %>%
+  add_model(spec_m3_s3b1) %>%
+  add_recipe(rec_m3_s3b1)
+
+# 4. Cross-validation
+set.seed(123)
+folds_m3_s3b1 <- vfold_cv(df_m3_s3b1, v = 5, strata = Class)
+
+# 5. Grid of hyperparameters
+grid_m3_s3b1 <- grid_regular(
+  cost_complexity(),
+  tree_depth(),
+  min_n(),
+  levels = 5
+)
+
+# 6. Tune the model
+tune_results_m3_s3b1 <- tune_grid(
+  wf_m3_s3b1,
+  resamples = folds_m3_s3b1,
+  grid = grid_m3_s3b1,
+  metrics = metric_set(roc_auc, accuracy, sens, spec)
+)
+
+# Show the tuning results
+autoplot(tune_results_m3_s3b1) +
+  labs(title = "Tuning Results for Decision Tree",
+       x = "Tuned Parameter") +
+  theme_minimal()
+
+# 7. Select the best parameters
+best_params_m3_s3b1 <- select_best(tune_results_m3_s3b1, metric = "roc_auc")
+
+print(best_params_m3_s3b1)
+
+# 8. Finalize the workflow
+final_wf_m3_s3b1 <- finalize_workflow(wf_m3_s3b1, best_params_m3_s3b1)
+
+# 9. Fit the final model
+fit_m3_s3b1 <- fit(final_wf_m3_s3b1, data = df_s3b1)
+
+# 10. Evaluate the model on the test dataset
+results_m3_s3b1 <- calculate_all_measures(fit_m3_s3b1, df_test, 0.5)
+results_m3_s3b1
+store_results("m3s3b1", results_m3_s3b1, "Decision Tree Model - s3b1")
+
+# Save the results to an RData file
+save(results_storage, file = "results_after_m3_s3b1.RData")
+
+#---- 5-3-6 DONE *****    Model 3 Decision Tree ------------------- m3-s3b2 ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#load("df_s3b2.RData") # nolint
+#load("df_columns_info.RData") # nolint
+#load("df_test.RData") # nolint
+
+# Use Integers
+df_m3_s3b2 <- df_s3b2 %>%
+  select(Class, 
+         matches(paste0("^DETAILED-(",
+                        paste(df_columns_info %>%
+                                filter(variable_type %in%
+                                         c("factor",
+                                           "logical",
+                                           "factor-level")) %>%
+                                pull(column_name),
+                              collapse = "|"), ")_"))) %>%
+  select(-matches("SERIALNO"))
+
+# 1. Model Specification
+spec_m3_s3b2 <- decision_tree(
+  cost_complexity = tune(),
+  tree_depth = tune(),
+  min_n = tune()
+) %>%
+  set_engine("rpart") %>%
+  set_mode("classification")
+
+# 2. Recipe
+rec_m3_s3b2 <- recipe(Class ~ ., data = df_m3_s3b2)
+
+# 3. Workflow
+wf_m3_s3b2 <- workflow() %>%
+  add_model(spec_m3_s3b2) %>%
+  add_recipe(rec_m3_s3b2)
+
+# 4. Cross-validation
+set.seed(123)
+folds_m3_s3b2 <- vfold_cv(df_m3_s3b2, v = 5, strata = Class)
+
+# 5. Grid of hyperparameters
+grid_m3_s3b2 <- grid_regular(
+  cost_complexity(),
+  tree_depth(),
+  min_n(),
+  levels = 5
+)
+
+# 6. Tune the model
+tune_results_m3_s3b2 <- tune_grid(
+  wf_m3_s3b2,
+  resamples = folds_m3_s3b2,
+  grid = grid_m3_s3b2,
+  metrics = metric_set(roc_auc, accuracy, sens, spec)
+)
+
+# Show the tuning results
+autoplot(tune_results_m3_s3b2) +
+  labs(title = "Tuning Results for Decision Tree",
+       x = "Tuned Parameter") +
+  theme_minimal()
+
+# 7. Select the best parameters
+best_params_m3_s3b2 <- select_best(tune_results_m3_s3b2, metric = "roc_auc")
+
+print(best_params_m3_s3b2)
+
+# 8. Finalize the workflow
+final_wf_m3_s3b2 <- finalize_workflow(wf_m3_s3b2, best_params_m3_s3b2)
+
+# 9. Fit the final model
+fit_m3_s3b2 <- fit(final_wf_m3_s3b2, data = df_s3b2)
+
+# 10. Evaluate the model on the test dataset
+results_m3_s3b2 <- calculate_all_measures(fit_m3_s3b2, df_test, 0.5)
+results_m3_s3b2
+store_results("m3s3b2", results_m3_s3b2, "Decision Tree Model - s3b2")
+
+# Save the results to an RData file
+save(results_storage, file = "results_after_m3_s3b2.RData")
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#---- 5-4 DONE *****    Model 4 Random Forest ----------------------------------
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#---- 5-4-1 DONE *****    Model 4 Random Forest ------------------- m4-s1b1 ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#load("df_s1b1.RData") # nolint
+#load("df_columns_info.RData") # nolint
+#load("df_test.RData") # nolint
+
+# Use categorical variables for Random Forest
+df_m4_s1b1 <- df_s1b1 %>%
+  select(Class, 
+         matches(paste0("^DETAILED-(",
+                        paste(df_columns_info %>%
+                                filter(variable_type %in%
+                                         c("factor",
+                                           "logical",
+                                           "factor_levels")) %>%
+                                pull(column_name),
+                              collapse = "|"), ")_"))) %>%
+  select(-matches("SERIALNO"))
+
+# 1. Model Specification
+spec_m4_s1b1 <- rand_forest(
+  mtry = tune(),       # Number of predictors to sample at each split
+  trees = tune(),      # Number of trees
+  min_n = tune()       # Minimum node size
+) %>%
+  set_engine("ranger", importance = "impurity") %>%
+  set_mode("classification")
+
+# 2. Recipe
+rec_m4_s1b1 <- recipe(Class ~ ., data = df_m4_s1b1)
+
+# 3. Workflow
+wf_m4_s1b1 <- workflow() %>%
+  add_model(spec_m4_s1b1) %>%
+  add_recipe(rec_m4_s1b1)
+
+# 4. Cross-validation
+set.seed(123)
+folds_m4_s1b1 <- vfold_cv(df_m4_s1b1, v = 5, strata = Class)
+
+# 5. Grid of hyperparameters
+# For mtry, we'll try different numbers of predictors
+num_predictors <- ncol(df_m4_s1b1) - 1
+mtry_values <- floor(c(0.1, 0.25, 0.5, 0.75) * num_predictors)
+mtry_values <- unique(mtry_values[mtry_values > 0])
+
+grid_m4_s1b1 <- grid_regular(
+  mtry(range = range(mtry_values)),
+  trees(range = c(100, 500)),
+  min_n(range = c(2, 10)),
+  levels = 5
+)
+
+# 6. Tune the model
+tune_results_m4_s1b1 <- tune_grid(
+  wf_m4_s1b1,
+  resamples = folds_m4_s1b1,
+  grid = grid_m4_s1b1,
+  metrics = metric_set(roc_auc, accuracy, sens, spec)
+)
+
+# Show the tuning results
+autoplot(tune_results_m4_s1b1) +
+  labs(title = "Tuning Results for Random Forest",
+       x = "Tuned Parameter") +
+  theme_minimal()
+
+# 7. Select the best parameters
+best_params_m4_s1b1 <- select_best(tune_results_m4_s1b1, metric = "roc_auc")
+
+print(best_params_m4_s1b1)
+
+# 8. Finalize the workflow
+final_wf_m4_s1b1 <- finalize_workflow(wf_m4_s1b1, best_params_m4_s1b1)
+
+# 9. Fit the final model
+fit_m4_s1b1 <- fit(final_wf_m4_s1b1, data = df_m4_s1b1)
+
+# 10. Evaluate the model on the test dataset
+results_m4_s1b1 <- calculate_all_measures(fit_m4_s1b1, df_test, 0.5)
+results_m4_s1b1
+store_results("m4s1b1", results_m4_s1b1, "Random Forest Model - s1b1")
+
+# Save the results to an RData file
+save(results_storage, file = "results_after_m4_s1b1.RData")
+
+# Optional: Extract variable importance
+if (inherits(fit_m4_s1b1$fit$fit$fit, "ranger")) {
+  var_imp <- ranger::importance(fit_m4_s1b1$fit$fit$fit)
+  var_imp_df <- data.frame(Variable = names(var_imp), Importance = var_imp)
+  var_imp_df <- var_imp_df[order(var_imp_df$Importance, decreasing = TRUE), ]
+
+  # Plot top 20 variables by importance
+  ggplot(head(var_imp_df, 20),
+         aes(x = reorder(Variable, Importance), y = Importance)) +
+    geom_bar(stat = "identity", fill = "steelblue") +
+    coord_flip() +
+    labs(title = "Random Forest Variable Importance",
+         x = "",
+         y = "Importance") +
+    theme_minimal()
+
+  ggsave("m4_s1b1_var_importance.png", width = 10, height = 8, dpi = 300)
+
+}
+
+#---- 5-4-2 DONE *****    Model 4 Random Forest ------------------- m4-s1b2 ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#load("df_s1b2.RData") # nolint
+#load("df_columns_info.RData") # nolint
+#load("df_test.RData") # nolint
+
+# Use categorical variables for Random Forest
+df_m4_s1b2 <- df_s1b2 %>%
+  select(Class, 
+         matches(paste0("^DETAILED-(",
+                        paste(df_columns_info %>%
+                                filter(variable_type %in%
+                                         c("factor",
+                                           "logical",
+                                           "factor_levels")) %>%
+                                pull(column_name),
+                              collapse = "|"), ")_"))) %>%
+  select(-matches("SERIALNO"))
+
+# 1. Model Specification
+spec_m4_s1b2 <- rand_forest(
+  mtry = tune(),       # Number of predictors to sample at each split
+  trees = tune(),      # Number of trees
+  min_n = tune()       # Minimum node size
+) %>%
+  set_engine("ranger", importance = "impurity") %>%
+  set_mode("classification")
+
+# 2. Recipe
+rec_m4_s1b2 <- recipe(Class ~ ., data = df_m4_s1b2)
+
+# 3. Workflow
+wf_m4_s1b2 <- workflow() %>%
+  add_model(spec_m4_s1b2) %>%
+  add_recipe(rec_m4_s1b2)
+
+# 4. Cross-validation
+set.seed(123)
+folds_m4_s1b2 <- vfold_cv(df_m4_s1b2, v = 5, strata = Class)
+
+# 5. Grid of hyperparameters
+# For mtry, we'll try different numbers of predictors
+num_predictors <- ncol(df_m4_s1b2) - 1
+mtry_values <- floor(c(0.1, 0.25, 0.5, 0.75) * num_predictors)
+mtry_values <- unique(mtry_values[mtry_values > 0])
+
+grid_m4_s1b2 <- grid_regular(
+  mtry(range = range(mtry_values)),
+  trees(range = c(100, 500)),
+  min_n(range = c(2, 10)),
+  levels = 5
+)
+
+# 6. Tune the model
+tune_results_m4_s1b2 <- tune_grid(
+  wf_m4_s1b2,
+  resamples = folds_m4_s1b2,
+  grid = grid_m4_s1b2,
+  metrics = metric_set(roc_auc, accuracy, sens, spec)
+)
+
+# Show the tuning results
+autoplot(tune_results_m4_s1b2) +
+  labs(title = "Tuning Results for Random Forest",
+       x = "Tuned Parameter") +
+  theme_minimal()
+
+# 7. Select the best parameters
+best_params_m4_s1b2 <- select_best(tune_results_m4_s1b2, metric = "roc_auc")
+
+print(best_params_m4_s1b2)
+
+# 8. Finalize the workflow
+final_wf_m4_s1b2 <- finalize_workflow(wf_m4_s1b2, best_params_m4_s1b2)
+
+# 9. Fit the final model
+fit_m4_s1b2 <- fit(final_wf_m4_s1b2, data = df_s1b2)
+
+# 10. Evaluate the model on the test dataset
+results_m4_s1b2 <- calculate_all_measures(fit_m4_s1b2, df_test, 0.5)
+results_m4_s1b2
+store_results("m4s1b2", results_m4_s1b2, "Random Forest Model - s1b2")
+
+# Save the results to an RData file
+save(results_storage, file = "results_after_m4_s1b2.RData")
+
+# Optional: Extract variable importance
+if (inherits(fit_m4_s1b2$fit$fit$fit, "ranger")) {
+  var_imp <- ranger::importance(fit_m4_s1b2$fit$fit$fit)
+  var_imp_df <- data.frame(Variable = names(var_imp), Importance = var_imp)
+  var_imp_df <- var_imp_df[order(var_imp_df$Importance, decreasing = TRUE), ]
+
+  # Plot top 20 variables by importance
+  ggplot(head(var_imp_df, 20),
+         aes(x = reorder(Variable, Importance), y = Importance)) +
+    geom_bar(stat = "identity", fill = "steelblue") +
+    coord_flip() +
+    labs(title = "Random Forest Variable Importance",
+         x = "",
+         y = "Importance") +
+    theme_minimal()
+
+  ggsave("m4_s1b2_var_importance.png", width = 10, height = 8, dpi = 300)
+
+}
+#---- 5-4-3 DONE *****    Model 4 Random Forest ------------------- m4-s2b1 ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#load("df_s2b1.RData") # nolint
+#load("df_columns_info.RData") # nolint
+#load("df_test.RData") # nolint
+
+# Use categorical variables for Random Forest
+df_m4_s2b1 <- df_s2b1 %>%
+  select(Class, 
+         matches(paste0("^DETAILED-(",
+                        paste(df_columns_info %>%
+                                filter(variable_type %in%
+                                         c("factor",
+                                           "logical",
+                                           "factor_levels")) %>%
+                                pull(column_name),
+                              collapse = "|"), ")_"))) %>%
+  select(-matches("SERIALNO"))
+
+# 1. Model Specification
+spec_m4_s2b1 <- rand_forest(
+  mtry = tune(),       # Number of predictors to sample at each split
+  trees = tune(),      # Number of trees
+  min_n = tune()       # Minimum node size
+) %>%
+  set_engine("ranger", importance = "impurity") %>%
+  set_mode("classification")
+
+# 2. Recipe
+rec_m4_s2b1 <- recipe(Class ~ ., data = df_m4_s2b1)
+
+# 3. Workflow
+wf_m4_s2b1 <- workflow() %>%
+  add_model(spec_m4_s2b1) %>%
+  add_recipe(rec_m4_s2b1)
+
+# 4. Cross-validation
+set.seed(123)
+folds_m4_s2b1 <- vfold_cv(df_m4_s2b1, v = 5, strata = Class)
+
+# 5. Grid of hyperparameters
+# For mtry, we'll try different numbers of predictors
+num_predictors <- ncol(df_m4_s2b1) - 1
+mtry_values <- floor(c(0.1, 0.25, 0.5, 0.75) * num_predictors)
+mtry_values <- unique(mtry_values[mtry_values > 0])
+
+grid_m4_s2b1 <- grid_regular(
+  mtry(range = range(mtry_values)),
+  trees(range = c(100, 500)),
+  min_n(range = c(2, 10)),
+  levels = 5
+)
+
+# 6. Tune the model
+tune_results_m4_s2b1 <- tune_grid(
+  wf_m4_s2b1,
+  resamples = folds_m4_s2b1,
+  grid = grid_m4_s2b1,
+  metrics = metric_set(roc_auc, accuracy, sens, spec)
+)
+
+# Show the tuning results
+autoplot(tune_results_m4_s2b1) +
+  labs(title = "Tuning Results for Random Forest",
+       x = "Tuned Parameter") +
+  theme_minimal()
+
+# 7. Select the best parameters
+best_params_m4_s2b1 <- select_best(tune_results_m4_s2b1, metric = "roc_auc")
+
+print(best_params_m4_s2b1)
+
+# 8. Finalize the workflow
+final_wf_m4_s2b1 <- finalize_workflow(wf_m4_s2b1, best_params_m4_s2b1)
+
+# 9. Fit the final model
+fit_m4_s2b1 <- fit(final_wf_m4_s2b1, data = df_s2b1)
+
+# 10. Evaluate the model on the test dataset
+results_m4_s2b1 <- calculate_all_measures(fit_m4_s2b1, df_test, 0.5)
+results_m4_s2b1
+store_results("m4s2b1", results_m4_s2b1, "Random Forest Model - s2b1")
+
+# Save the results to an RData file
+save(results_storage, file = "results_after_m4_s2b1.RData")
+
+# Optional: Extract variable importance
+if (inherits(fit_m4_s2b1$fit$fit$fit, "ranger")) {
+  var_imp <- ranger::importance(fit_m4_s2b1$fit$fit$fit)
+  var_imp_df <- data.frame(Variable = names(var_imp), Importance = var_imp)
+  var_imp_df <- var_imp_df[order(var_imp_df$Importance, decreasing = TRUE), ]
+
+  # Plot top 20 variables by importance
+  ggplot(head(var_imp_df, 20),
+         aes(x = reorder(Variable, Importance), y = Importance)) +
+    geom_bar(stat = "identity", fill = "steelblue") +
+    coord_flip() +
+    labs(title = "Random Forest Variable Importance",
+         x = "",
+         y = "Importance") +
+    theme_minimal()
+
+  ggsave("m4_s2b1_var_importance.png", width = 10, height = 8, dpi = 300)
+
+}
+#---- 5-4-4 DONE *****    Model 4 Random Forest ------------------- m4-s2b2 ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#load("df_s2b2.RData") # nolint
+#load("df_columns_info.RData") # nolint
+#load("df_test.RData") # nolint
+
+# Use categorical variables for Random Forest
+df_m4_s2b2 <- df_s2b2 %>%
+  select(Class, 
+         matches(paste0("^DETAILED-(",
+                        paste(df_columns_info %>%
+                                filter(variable_type %in%
+                                         c("factor",
+                                           "logical",
+                                           "factor_levels")) %>%
+                                pull(column_name),
+                              collapse = "|"), ")_"))) %>%
+  select(-matches("SERIALNO"))
+
+# 1. Model Specification
+spec_m4_s2b2 <- rand_forest(
+  mtry = tune(),       # Number of predictors to sample at each split
+  trees = tune(),      # Number of trees
+  min_n = tune()       # Minimum node size
+) %>%
+  set_engine("ranger", importance = "impurity") %>%
+  set_mode("classification")
+
+# 2. Recipe
+rec_m4_s2b2 <- recipe(Class ~ ., data = df_m4_s2b2)
+
+# 3. Workflow
+wf_m4_s2b2 <- workflow() %>%
+  add_model(spec_m4_s2b2) %>%
+  add_recipe(rec_m4_s2b2)
+
+# 4. Cross-validation
+set.seed(123)
+folds_m4_s2b2 <- vfold_cv(df_m4_s2b2, v = 5, strata = Class)
+
+# 5. Grid of hyperparameters
+# For mtry, we'll try different numbers of predictors
+num_predictors <- ncol(df_m4_s2b2) - 1
+mtry_values <- floor(c(0.1, 0.25, 0.5, 0.75) * num_predictors)
+mtry_values <- unique(mtry_values[mtry_values > 0])
+
+grid_m4_s2b2 <- grid_regular(
+  mtry(range = range(mtry_values)),
+  trees(range = c(100, 500)),
+  min_n(range = c(2, 10)),
+  levels = 5
+)
+
+# 6. Tune the model
+tune_results_m4_s2b2 <- tune_grid(
+  wf_m4_s2b2,
+  resamples = folds_m4_s2b2,
+  grid = grid_m4_s2b2,
+  metrics = metric_set(roc_auc, accuracy, sens, spec)
+)
+
+# Show the tuning results
+autoplot(tune_results_m4_s2b2) +
+  labs(title = "Tuning Results for Random Forest",
+       x = "Tuned Parameter") +
+  theme_minimal()
+
+# 7. Select the best parameters
+best_params_m4_s2b2 <- select_best(tune_results_m4_s2b2, metric = "roc_auc")
+
+print(best_params_m4_s2b2)
+
+# 8. Finalize the workflow
+final_wf_m4_s2b2 <- finalize_workflow(wf_m4_s2b2, best_params_m4_s2b2)
+
+# 9. Fit the final model
+fit_m4_s2b2 <- fit(final_wf_m4_s2b2, data = df_m4_s2b2)
+
+# 10. Evaluate the model on the test dataset
+results_m4_s2b2 <- calculate_all_measures(fit_m4_s2b2, df_test, 0.5)
+results_m4_s2b2
+store_results("m4s2b2", results_m4_s2b2, "Random Forest Model - s2b2")
+
+# Save the results to an RData file
+save(results_storage, file = "results_after_m4_s2b2.RData")
+
+# Optional: Extract variable importance
+if (inherits(fit_m4_s2b2$fit$fit$fit, "ranger")) {
+  var_imp <- ranger::importance(fit_m4_s2b2$fit$fit$fit)
+  var_imp_df <- data.frame(Variable = names(var_imp), Importance = var_imp)
+  var_imp_df <- var_imp_df[order(var_imp_df$Importance, decreasing = TRUE), ]
+
+  # Plot top 20 variables by importance
+  ggplot(head(var_imp_df, 20),
+         aes(x = reorder(Variable, Importance), y = Importance)) +
+    geom_bar(stat = "identity", fill = "steelblue") +
+    coord_flip() +
+    labs(title = "Random Forest Variable Importance",
+         x = "",
+         y = "Importance") +
+    theme_minimal()
+
+  ggsave("m4_s2b2_var_importance.png", width = 10, height = 8, dpi = 300)
+
+}
+#---- 5-4-5 DONE *****    Model 4 Random Forest ------------------- m4-s3b1 ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#load("df_s3b1.RData") # nolint
+#load("df_columns_info.RData") # nolint
+#load("df_test.RData") # nolint
+
+# Use categorical variables for Random Forest
+df_m4_s3b1 <- df_s3b1 %>%
+  select(Class, 
+         matches(paste0("^DETAILED-(",
+                        paste(df_columns_info %>%
+                                filter(variable_type %in%
+                                         c("factor",
+                                           "logical",
+                                           "factor_levels")) %>%
+                                pull(column_name),
+                              collapse = "|"), ")_"))) %>%
+  select(-matches("SERIALNO"))
+
+# 1. Model Specification
+spec_m4_s3b1 <- rand_forest(
+  mtry = tune(),       # Number of predictors to sample at each split
+  trees = tune(),      # Number of trees
+  min_n = tune()       # Minimum node size
+) %>%
+  set_engine("ranger", importance = "impurity") %>%
+  set_mode("classification")
+
+# 2. Recipe
+rec_m4_s3b1 <- recipe(Class ~ ., data = df_m4_s3b1)
+
+# 3. Workflow
+wf_m4_s3b1 <- workflow() %>%
+  add_model(spec_m4_s3b1) %>%
+  add_recipe(rec_m4_s3b1)
+
+# 4. Cross-validation
+set.seed(123)
+folds_m4_s3b1 <- vfold_cv(df_m4_s3b1, v = 5, strata = Class)
+
+# 5. Grid of hyperparameters
+# For mtry, we'll try different numbers of predictors
+num_predictors <- ncol(df_m4_s3b1) - 1
+mtry_values <- floor(c(0.1, 0.25, 0.5, 0.75) * num_predictors)
+mtry_values <- unique(mtry_values[mtry_values > 0])
+
+grid_m4_s3b1 <- grid_regular(
+  mtry(range = range(mtry_values)),
+  trees(range = c(100, 500)),
+  min_n(range = c(2, 10)),
+  levels = 5
+)
+
+# 6. Tune the model
+tune_results_m4_s3b1 <- tune_grid(
+  wf_m4_s3b1,
+  resamples = folds_m4_s3b1,
+  grid = grid_m4_s3b1,
+  metrics = metric_set(roc_auc, accuracy, sens, spec)
+)
+
+# Show the tuning results
+autoplot(tune_results_m4_s3b1) +
+  labs(title = "Tuning Results for Random Forest",
+       x = "Tuned Parameter") +
+  theme_minimal()
+
+# 7. Select the best parameters
+best_params_m4_s3b1 <- select_best(tune_results_m4_s3b1, metric = "roc_auc")
+
+print(best_params_m4_s3b1)
+
+# 8. Finalize the workflow
+final_wf_m4_s3b1 <- finalize_workflow(wf_m4_s3b1, best_params_m4_s3b1)
+
+# 9. Fit the final model
+fit_m4_s3b1 <- fit(final_wf_m4_s3b1, data = df_s3b1)
+
+# 10. Evaluate the model on the test dataset
+results_m4_s3b1 <- calculate_all_measures(fit_m4_s3b1, df_test, 0.5)
+results_m4_s3b1
+store_results("m4s3b1", results_m4_s3b1, "Random Forest Model - s3b1")
+
+# Save the results to an RData file
+save(results_storage, file = "results_after_m4_s3b1.RData")
+
+# Optional: Extract variable importance
+if (inherits(fit_m4_s3b1$fit$fit$fit, "ranger")) {
+  var_imp <- ranger::importance(fit_m4_s3b1$fit$fit$fit)
+  var_imp_df <- data.frame(Variable = names(var_imp), Importance = var_imp)
+  var_imp_df <- var_imp_df[order(var_imp_df$Importance, decreasing = TRUE), ]
+
+  # Plot top 20 variables by importance
+  ggplot(head(var_imp_df, 20),
+         aes(x = reorder(Variable, Importance), y = Importance)) +
+    geom_bar(stat = "identity", fill = "steelblue") +
+    coord_flip() +
+    labs(title = "Random Forest Variable Importance",
+         x = "",
+         y = "Importance") +
+    theme_minimal()
+
+  ggsave("m4_s3b1_var_importance.png", width = 10, height = 8, dpi = 300)
+
+}
+#---- 5-4-6 DONE *****    Model 4 Random Forest ------------------- m4-s3b2 ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#load("df_s3b2.RData") # nolint
+#load("df_columns_info.RData") # nolint
+#load("df_test.RData") # nolint
+
+# Use categorical variables for Random Forest
+df_m4_s3b2 <- df_s3b2 %>%
+  select(Class, 
+         matches(paste0("^DETAILED-(",
+                        paste(df_columns_info %>%
+                                filter(variable_type %in%
+                                         c("factor",
+                                           "logical",
+                                           "factor_levels")) %>%
+                                pull(column_name),
+                              collapse = "|"), ")_"))) %>%
+  select(-matches("SERIALNO"))
+
+# 1. Model Specification
+spec_m4_s3b2 <- rand_forest(
+  mtry = tune(),       # Number of predictors to sample at each split
+  trees = tune(),      # Number of trees
+  min_n = tune()       # Minimum node size
+) %>%
+  set_engine("ranger", importance = "impurity") %>%
+  set_mode("classification")
+
+# 2. Recipe
+rec_m4_s3b2 <- recipe(Class ~ ., data = df_m4_s3b2)
+
+# 3. Workflow
+wf_m4_s3b2 <- workflow() %>%
+  add_model(spec_m4_s3b2) %>%
+  add_recipe(rec_m4_s3b2)
+
+# 4. Cross-validation
+set.seed(123)
+folds_m4_s3b2 <- vfold_cv(df_m4_s3b2, v = 5, strata = Class)
+
+# 5. Grid of hyperparameters
+# For mtry, we'll try different numbers of predictors
+num_predictors <- ncol(df_m4_s3b2) - 1
+mtry_values <- floor(c(0.1, 0.25, 0.5, 0.75) * num_predictors)
+mtry_values <- unique(mtry_values[mtry_values > 0])
+
+grid_m4_s3b2 <- grid_regular(
+  mtry(range = range(mtry_values)),
+  trees(range = c(100, 500)),
+  min_n(range = c(2, 10)),
+  levels = 5
+)
+
+# 6. Tune the model
+tune_results_m4_s3b2 <- tune_grid(
+  wf_m4_s3b2,
+  resamples = folds_m4_s3b2,
+  grid = grid_m4_s3b2,
+  metrics = metric_set(roc_auc, accuracy, sens, spec)
+)
+
+# Show the tuning results
+autoplot(tune_results_m4_s3b2) +
+  labs(title = "Tuning Results for Random Forest",
+       x = "Tuned Parameter") +
+  theme_minimal()
+
+# 7. Select the best parameters
+best_params_m4_s3b2 <- select_best(tune_results_m4_s3b2, metric = "roc_auc")
+
+print(best_params_m4_s3b2)
+
+# 8. Finalize the workflow
+final_wf_m4_s3b2 <- finalize_workflow(wf_m4_s3b2, best_params_m4_s3b2)
+
+# 9. Fit the final model
+fit_m4_s3b2 <- fit(final_wf_m4_s3b2, data = df_s3b2)
+
+# 10. Evaluate the model on the test dataset
+results_m4_s3b2 <- calculate_all_measures(fit_m4_s3b2, df_test, 0.5)
+results_m4_s3b2
+store_results("m4s3b2", results_m4_s3b2, "Random Forest Model - s3b2")
+
+# Save the results to an RData file
+save(results_storage, file = "results_after_m4_s3b2.RData")
+
+# Optional: Extract variable importance
+if (inherits(fit_m4_s3b2$fit$fit$fit, "ranger")) {
+  var_imp <- ranger::importance(fit_m4_s3b2$fit$fit$fit)
+  var_imp_df <- data.frame(Variable = names(var_imp), Importance = var_imp)
+  var_imp_df <- var_imp_df[order(var_imp_df$Importance, decreasing = TRUE), ]
+
+  # Plot top 20 variables by importance
+  ggplot(head(var_imp_df, 20),
+         aes(x = reorder(Variable, Importance), y = Importance)) +
+    geom_bar(stat = "identity", fill = "steelblue") +
+    coord_flip() +
+    labs(title = "Random Forest Variable Importance",
+         x = "",
+         y = "Importance") +
+    theme_minimal()
+
+  ggsave("m4_s3b2_var_importance.png", width = 10, height = 8, dpi = 300)
+
+}
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #---- 5-5 PEND *****    Model 5 Support Vect Machine ---------------------------
