@@ -30,8 +30,8 @@ library(xgboost)
 
 #---- 0.1 DONE *****    Functions - Full Performance Evaluation ----------------
 
-#results_m2_s1b1 <- calculate_all_measures(fit_m2_s1b1, df_test, best_threshold)
-#results_m1_s1b1 <- calculate_all_measures(final_fit_m1_s1b1, df_test, 0.5)
+#results_m2_s1b1 <- calculate_all_measures(fit_m2_s1b1, df_test, best_threshold) # nolint
+#results_m1_s1b1 <- calculate_all_measures(final_fit_m1_s1b1, df_test, 0.5) # nolint
 
 calculate_all_measures <- function(in_model, in_test_df, threshold) {
   #in_test_df <- df_test # nolint
@@ -1345,7 +1345,7 @@ ggsave("plt_s3b1_corr.png",
        plot = plt_s3b1_corr, width = 10, height = 16, dpi = 300)
 
 # Removing class to avoid duplication.  Class is included in both dfs.
-df_s3b1 <- df_s3b1_allfact %>% select(-Class) %>% # nolint
+df_s3b1 <- df_s3b1_allfact_miss %>% select(-Class) %>% # nolint
   bind_cols(df_s3b1_4integers)
 
 #---- 4-3-1-4 DONE *          Final --------------------------------------------
@@ -4628,15 +4628,530 @@ store_results("m6s1b1", results_m6_s1b1, "Gradient Boosting Model - s1b1")
 # Save the results to an RData file
 save(results_storage, file = "results_after_m6_s1b1.RData")
 
-# Feature importance visualization (if supported by the model)
-if (requires_package("vip", quietly = TRUE)) {
-  library(vip)
-  vip(fit_m6_s1b1, num_features = 20) +
-    labs(title = "Variable Importance for Gradient Boosting Model") +
-    theme_minimal()
-  
-  ggsave("m6_s1b1_var_importance.png", width = 10, height = 8, dpi = 300)
-}
+#---- 5-6-2 DONE ***      Model 6 Gradient Boosting --------------- m6-s1b2 ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#load("df_s1b2.RData") # nolint
+#load("df_columns_info.RData") # nolint
+#load("df_test.RData") # nolint
+
+# Gradient Boosting Model
+
+df_m6_s1b2 <- df_s1b2 %>%
+  select(Class, matches(paste0("^DETAILED-(",
+                               paste(df_columns_info %>%
+                                       filter(variable_type %in%
+                                                c("integer")) %>%
+                                       pull(column_name),
+                                     collapse = "|"), ")_")))
+
+# 1. Model Specification
+spec_m6_s1b2 <- boost_tree(
+  trees = tune(),
+  tree_depth = tune(),
+  learn_rate = tune(),
+  min_n = tune()
+) %>%
+  set_engine("xgboost") %>%
+  set_mode("classification")
+
+# 2. Recipe
+rec_m6_s1b2 <- recipe(Class ~ ., data = df_m6_s1b2) %>%
+  step_zv(all_predictors()) %>%
+  step_impute_median(all_numeric_predictors()) %>%
+  step_normalize(all_predictors()) %>%
+  step_dummy(all_nominal_predictors(), -all_outcomes())
+
+# 3. Workflow
+wf_m6_s1b2 <- workflow() %>%
+  add_model(spec_m6_s1b2) %>%
+  add_recipe(rec_m6_s1b2)
+
+# 4. Cross-validation
+set.seed(123)
+folds_m6_s1b2 <- vfold_cv(df_m6_s1b2, v = 5, strata = Class)
+
+# 5. Grid of hyperparameters
+tune_grid_m6_s1b2 <- grid_regular(
+  trees(range = c(100, 500)),
+  tree_depth(range = c(3, 9)),
+  learn_rate(range = c(-5, -1), trans = log10_trans()),
+  min_n(range = c(2, 10)),
+  levels = 5
+)
+
+# 6. Tune the model
+tune_results_m6_s1b2 <- tune_grid(
+  wf_m6_s1b2,
+  resamples = folds_m6_s1b2,
+  grid = tune_grid_m6_s1b2,
+  metrics = metric_set(roc_auc, accuracy, sens, spec)
+)
+
+# Show the tuning results
+autoplot(tune_results_m6_s1b2) +
+  labs(title = "Tuning Results for Gradient Boosting",
+       x = "Tuned Parameter",
+       y = "Performance") +
+  theme_minimal()
+
+# 7. Select the best parameters
+best_parameters_m6_s1b2 <- select_best(tune_results_m6_s1b2, metric = "roc_auc")
+
+# 8. Finalize the workflow
+final_wf_m6_s1b2 <- finalize_workflow(wf_m6_s1b2, best_parameters_m6_s1b2)
+
+# 9. Fit the final model
+fit_m6_s1b2 <- fit(final_wf_m6_s1b2, data = df_m6_s1b2)
+
+# 10. Evaluate the model on the test dataset
+test_predications_m6_s1b2 <-
+  predict(fit_m6_s1b2, new_data = df_test, type = "prob") %>%
+  bind_cols(predict(fit_m6_s1b2, new_data = df_test, type = "class")) %>%
+  bind_cols(df_test %>% select(Class))
+
+# Generate a confusion matrix
+confusion_matrix_m6_s1b2 <- test_predications_m6_s1b2 %>%
+  conf_mat(truth = Class, estimate = .pred_class)
+
+# Print the confusion matrix
+print(confusion_matrix_m6_s1b2)
+
+# Visualize the confusion matrix
+autoplot(confusion_matrix_m6_s1b2, type = "heatmap") +
+  labs(title = "Confusion Matrix for Gradient Boosting",
+       x = "Predicted Class",
+       y = "Actual Class") +
+  theme_minimal()
+
+results_m6_s1b2 <- calculate_all_measures(fit_m6_s1b2, df_test, 0.5)
+
+results_m6_s1b2
+
+store_results("m6s1b2", results_m6_s1b2, "Gradient Boosting Model - s1b2")
+
+# Save the results to an RData file
+save(results_storage, file = "results_after_m6_s1b2.RData")
+
+#---- 5-6-3 DONE ***      Model 6 Gradient Boosting --------------- m6-s2b1 ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#load("df_s2b1.RData") # nolint
+#load("df_columns_info.RData") # nolint
+#load("df_test.RData") # nolint
+
+# Gradient Boosting Model
+
+df_m6_s2b1 <- df_s2b1 %>%
+  select(Class, matches(paste0("^DETAILED-(",
+                               paste(df_columns_info %>%
+                                       filter(variable_type %in%
+                                                c("integer")) %>%
+                                       pull(column_name),
+                                     collapse = "|"), ")_")))
+
+# 1. Model Specification
+spec_m6_s2b1 <- boost_tree(
+  trees = tune(),
+  tree_depth = tune(),
+  learn_rate = tune(),
+  min_n = tune()
+) %>%
+  set_engine("xgboost") %>%
+  set_mode("classification")
+
+# 2. Recipe
+rec_m6_s2b1 <- recipe(Class ~ ., data = df_m6_s2b1) %>%
+  step_zv(all_predictors()) %>%
+  step_impute_median(all_numeric_predictors()) %>%
+  step_normalize(all_predictors()) %>%
+  step_dummy(all_nominal_predictors(), -all_outcomes())
+
+# 3. Workflow
+wf_m6_s2b1 <- workflow() %>%
+  add_model(spec_m6_s2b1) %>%
+  add_recipe(rec_m6_s2b1)
+
+# 4. Cross-validation
+set.seed(123)
+folds_m6_s2b1 <- vfold_cv(df_m6_s2b1, v = 5, strata = Class)
+
+# 5. Grid of hyperparameters
+tune_grid_m6_s2b1 <- grid_regular(
+  trees(range = c(100, 500)),
+  tree_depth(range = c(3, 9)),
+  learn_rate(range = c(-5, -1), trans = log10_trans()),
+  min_n(range = c(2, 10)),
+  levels = 5
+)
+
+# 6. Tune the model
+tune_results_m6_s2b1 <- tune_grid(
+  wf_m6_s2b1,
+  resamples = folds_m6_s2b1,
+  grid = tune_grid_m6_s2b1,
+  metrics = metric_set(roc_auc, accuracy, sens, spec)
+)
+
+# Show the tuning results
+autoplot(tune_results_m6_s2b1) +
+  labs(title = "Tuning Results for Gradient Boosting",
+       x = "Tuned Parameter",
+       y = "Performance") +
+  theme_minimal()
+
+# 7. Select the best parameters
+best_parameters_m6_s2b1 <- select_best(tune_results_m6_s2b1, metric = "roc_auc")
+
+# 8. Finalize the workflow
+final_wf_m6_s2b1 <- finalize_workflow(wf_m6_s2b1, best_parameters_m6_s2b1)
+
+# 9. Fit the final model
+fit_m6_s2b1 <- fit(final_wf_m6_s2b1, data = df_m6_s2b1)
+
+# 10. Evaluate the model on the test dataset
+test_predications_m6_s2b1 <-
+  predict(fit_m6_s2b1, new_data = df_test, type = "prob") %>%
+  bind_cols(predict(fit_m6_s2b1, new_data = df_test, type = "class")) %>%
+  bind_cols(df_test %>% select(Class))
+
+# Generate a confusion matrix
+confusion_matrix_m6_s2b1 <- test_predications_m6_s2b1 %>%
+  conf_mat(truth = Class, estimate = .pred_class)
+
+# Print the confusion matrix
+print(confusion_matrix_m6_s2b1)
+
+# Visualize the confusion matrix
+autoplot(confusion_matrix_m6_s2b1, type = "heatmap") +
+  labs(title = "Confusion Matrix for Gradient Boosting",
+       x = "Predicted Class",
+       y = "Actual Class") +
+  theme_minimal()
+
+results_m6_s2b1 <- calculate_all_measures(fit_m6_s2b1, df_test, 0.5)
+
+results_m6_s2b1
+
+store_results("m6s2b1", results_m6_s2b1, "Gradient Boosting Model - s2b1")
+
+# Save the results to an RData file
+save(results_storage, file = "results_after_m6_s2b1.RData")
+
+#---- 5-6-4 DONE ***      Model 6 Gradient Boosting --------------- m6-s2b2 ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#load("df_s2b2.RData") # nolint
+#load("df_columns_info.RData") # nolint
+#load("df_test.RData") # nolint
+
+# Gradient Boosting Model
+
+df_m6_s2b2 <- df_s2b2 %>%
+  select(Class, matches(paste0("^DETAILED-(",
+                               paste(df_columns_info %>%
+                                       filter(variable_type %in%
+                                                c("integer")) %>%
+                                       pull(column_name),
+                                     collapse = "|"), ")_")))
+
+# 1. Model Specification
+spec_m6_s2b2 <- boost_tree(
+  trees = tune(),
+  tree_depth = tune(),
+  learn_rate = tune(),
+  min_n = tune()
+) %>%
+  set_engine("xgboost") %>%
+  set_mode("classification")
+
+# 2. Recipe
+rec_m6_s2b2 <- recipe(Class ~ ., data = df_m6_s2b2) %>%
+  step_zv(all_predictors()) %>%
+  step_impute_median(all_numeric_predictors()) %>%
+  step_normalize(all_predictors()) %>%
+  step_dummy(all_nominal_predictors(), -all_outcomes())
+
+# 3. Workflow
+wf_m6_s2b2 <- workflow() %>%
+  add_model(spec_m6_s2b2) %>%
+  add_recipe(rec_m6_s2b2)
+
+# 4. Cross-validation
+set.seed(123)
+folds_m6_s2b2 <- vfold_cv(df_m6_s2b2, v = 5, strata = Class)
+
+# 5. Grid of hyperparameters
+tune_grid_m6_s2b2 <- grid_regular(
+  trees(range = c(100, 500)),
+  tree_depth(range = c(3, 9)),
+  learn_rate(range = c(-5, -1), trans = log10_trans()),
+  min_n(range = c(2, 10)),
+  levels = 5
+)
+
+# 6. Tune the model
+tune_results_m6_s2b2 <- tune_grid(
+  wf_m6_s2b2,
+  resamples = folds_m6_s2b2,
+  grid = tune_grid_m6_s2b2,
+  metrics = metric_set(roc_auc, accuracy, sens, spec)
+)
+
+# Show the tuning results
+autoplot(tune_results_m6_s2b2) +
+  labs(title = "Tuning Results for Gradient Boosting",
+       x = "Tuned Parameter",
+       y = "Performance") +
+  theme_minimal()
+
+# 7. Select the best parameters
+best_parameters_m6_s2b2 <- select_best(tune_results_m6_s2b2, metric = "roc_auc")
+
+# 8. Finalize the workflow
+final_wf_m6_s2b2 <- finalize_workflow(wf_m6_s2b2, best_parameters_m6_s2b2)
+
+# 9. Fit the final model
+fit_m6_s2b2 <- fit(final_wf_m6_s2b2, data = df_m6_s2b2)
+
+# 10. Evaluate the model on the test dataset
+test_predications_m6_s2b2 <-
+  predict(fit_m6_s2b2, new_data = df_test, type = "prob") %>%
+  bind_cols(predict(fit_m6_s2b2, new_data = df_test, type = "class")) %>%
+  bind_cols(df_test %>% select(Class))
+
+# Generate a confusion matrix
+confusion_matrix_m6_s2b2 <- test_predications_m6_s2b2 %>%
+  conf_mat(truth = Class, estimate = .pred_class)
+
+# Print the confusion matrix
+print(confusion_matrix_m6_s2b2)
+
+# Visualize the confusion matrix
+autoplot(confusion_matrix_m6_s2b2, type = "heatmap") +
+  labs(title = "Confusion Matrix for Gradient Boosting",
+       x = "Predicted Class",
+       y = "Actual Class") +
+  theme_minimal()
+
+results_m6_s2b2 <- calculate_all_measures(fit_m6_s2b2, df_test, 0.5)
+
+results_m6_s2b2
+
+store_results("m6s2b2", results_m6_s2b2, "Gradient Boosting Model - s2b2")
+
+# Save the results to an RData file
+save(results_storage, file = "results_after_m6_s2b2.RData")
+
+#---- 5-6-5 DONE ***      Model 6 Gradient Boosting --------------- m6-s3b1 ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#load("df_s3b1.RData") # nolint
+#load("df_columns_info.RData") # nolint
+#load("df_test.RData") # nolint
+
+# Gradient Boosting Model
+
+df_m6_s3b1 <- df_s3b1 %>%
+  select(Class, matches(paste0("^DETAILED-(",
+                               paste(df_columns_info %>%
+                                       filter(variable_type %in%
+                                                c("integer")) %>%
+                                       pull(column_name),
+                                     collapse = "|"), ")_")))
+
+# 1. Model Specification
+spec_m6_s3b1 <- boost_tree(
+  trees = tune(),
+  tree_depth = tune(),
+  learn_rate = tune(),
+  min_n = tune()
+) %>%
+  set_engine("xgboost") %>%
+  set_mode("classification")
+
+# 2. Recipe
+rec_m6_s3b1 <- recipe(Class ~ ., data = df_m6_s3b1) %>%
+  step_zv(all_predictors()) %>%
+  step_impute_median(all_numeric_predictors()) %>%
+  step_normalize(all_predictors()) %>%
+  step_dummy(all_nominal_predictors(), -all_outcomes())
+
+# 3. Workflow
+wf_m6_s3b1 <- workflow() %>%
+  add_model(spec_m6_s3b1) %>%
+  add_recipe(rec_m6_s3b1)
+
+# 4. Cross-validation
+set.seed(123)
+folds_m6_s3b1 <- vfold_cv(df_m6_s3b1, v = 5, strata = Class)
+
+# 5. Grid of hyperparameters
+tune_grid_m6_s3b1 <- grid_regular(
+  trees(range = c(100, 500)),
+  tree_depth(range = c(3, 9)),
+  learn_rate(range = c(-5, -1), trans = log10_trans()),
+  min_n(range = c(2, 10)),
+  levels = 5
+)
+
+# 6. Tune the model
+tune_results_m6_s3b1 <- tune_grid(
+  wf_m6_s3b1,
+  resamples = folds_m6_s3b1,
+  grid = tune_grid_m6_s3b1,
+  metrics = metric_set(roc_auc, accuracy, sens, spec)
+)
+
+# Show the tuning results
+autoplot(tune_results_m6_s3b1) +
+  labs(title = "Tuning Results for Gradient Boosting",
+       x = "Tuned Parameter",
+       y = "Performance") +
+  theme_minimal()
+
+# 7. Select the best parameters
+best_parameters_m6_s3b1 <- select_best(tune_results_m6_s3b1, metric = "roc_auc")
+
+# 8. Finalize the workflow
+final_wf_m6_s3b1 <- finalize_workflow(wf_m6_s3b1, best_parameters_m6_s3b1)
+
+# 9. Fit the final model
+fit_m6_s3b1 <- fit(final_wf_m6_s3b1, data = df_m6_s3b1)
+
+# 10. Evaluate the model on the test dataset
+test_predications_m6_s3b1 <-
+  predict(fit_m6_s3b1, new_data = df_test, type = "prob") %>%
+  bind_cols(predict(fit_m6_s3b1, new_data = df_test, type = "class")) %>%
+  bind_cols(df_test %>% select(Class))
+
+# Generate a confusion matrix
+confusion_matrix_m6_s3b1 <- test_predications_m6_s3b1 %>%
+  conf_mat(truth = Class, estimate = .pred_class)
+
+# Print the confusion matrix
+print(confusion_matrix_m6_s3b1)
+
+# Visualize the confusion matrix
+autoplot(confusion_matrix_m6_s3b1, type = "heatmap") +
+  labs(title = "Confusion Matrix for Gradient Boosting",
+       x = "Predicted Class",
+       y = "Actual Class") +
+  theme_minimal()
+
+results_m6_s3b1 <- calculate_all_measures(fit_m6_s3b1, df_test, 0.5)
+
+results_m6_s3b1
+
+store_results("m6s3b1", results_m6_s3b1, "Gradient Boosting Model - s3b1")
+
+# Save the results to an RData file
+save(results_storage, file = "results_after_m6_s3b1.RData")
+
+#---- 5-6-6 DONE ***      Model 6 Gradient Boosting --------------- m6-s3b2 ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#load("df_s3b2.RData") # nolint
+#load("df_columns_info.RData") # nolint
+#load("df_test.RData") # nolint
+
+# Gradient Boosting Model
+
+df_m6_s3b2 <- df_s3b2 %>%
+  select(Class, matches(paste0("^DETAILED-(",
+                               paste(df_columns_info %>%
+                                       filter(variable_type %in%
+                                                c("integer")) %>%
+                                       pull(column_name),
+                                     collapse = "|"), ")_")))
+
+# 1. Model Specification
+spec_m6_s3b2 <- boost_tree(
+  trees = tune(),
+  tree_depth = tune(),
+  learn_rate = tune(),
+  min_n = tune()
+) %>%
+  set_engine("xgboost") %>%
+  set_mode("classification")
+
+# 2. Recipe
+rec_m6_s3b2 <- recipe(Class ~ ., data = df_m6_s3b2) %>%
+  step_zv(all_predictors()) %>%
+  step_impute_median(all_numeric_predictors()) %>%
+  step_normalize(all_predictors()) %>%
+  step_dummy(all_nominal_predictors(), -all_outcomes())
+
+# 3. Workflow
+wf_m6_s3b2 <- workflow() %>%
+  add_model(spec_m6_s3b2) %>%
+  add_recipe(rec_m6_s3b2)
+
+# 4. Cross-validation
+set.seed(123)
+folds_m6_s3b2 <- vfold_cv(df_m6_s3b2, v = 5, strata = Class)
+
+# 5. Grid of hyperparameters
+tune_grid_m6_s3b2 <- grid_regular(
+  trees(range = c(100, 500)),
+  tree_depth(range = c(3, 9)),
+  learn_rate(range = c(-5, -1), trans = log10_trans()),
+  min_n(range = c(2, 10)),
+  levels = 5
+)
+
+# 6. Tune the model
+tune_results_m6_s3b2 <- tune_grid(
+  wf_m6_s3b2,
+  resamples = folds_m6_s3b2,
+  grid = tune_grid_m6_s3b2,
+  metrics = metric_set(roc_auc, accuracy, sens, spec)
+)
+
+# Show the tuning results
+autoplot(tune_results_m6_s3b2) +
+  labs(title = "Tuning Results for Gradient Boosting",
+       x = "Tuned Parameter",
+       y = "Performance") +
+  theme_minimal()
+
+# 7. Select the best parameters
+best_parameters_m6_s3b2 <- select_best(tune_results_m6_s3b2, metric = "roc_auc")
+
+# 8. Finalize the workflow
+final_wf_m6_s3b2 <- finalize_workflow(wf_m6_s3b2, best_parameters_m6_s3b2)
+
+# 9. Fit the final model
+fit_m6_s3b2 <- fit(final_wf_m6_s3b2, data = df_m6_s3b2)
+
+# 10. Evaluate the model on the test dataset
+test_predications_m6_s3b2 <-
+  predict(fit_m6_s3b2, new_data = df_test, type = "prob") %>%
+  bind_cols(predict(fit_m6_s3b2, new_data = df_test, type = "class")) %>%
+  bind_cols(df_test %>% select(Class))
+
+# Generate a confusion matrix
+confusion_matrix_m6_s3b2 <- test_predications_m6_s3b2 %>%
+  conf_mat(truth = Class, estimate = .pred_class)
+
+# Print the confusion matrix
+print(confusion_matrix_m6_s3b2)
+
+# Visualize the confusion matrix
+autoplot(confusion_matrix_m6_s3b2, type = "heatmap") +
+  labs(title = "Confusion Matrix for Gradient Boosting",
+       x = "Predicted Class",
+       y = "Actual Class") +
+  theme_minimal()
+
+results_m6_s3b2 <- calculate_all_measures(fit_m6_s3b2, df_test, 0.5)
+
+results_m6_s3b2
+
+store_results("m6s3b2", results_m6_s3b2, "Gradient Boosting Model - s3b2")
+
+# Save the results to an RData file
+save(results_storage, file = "results_after_m6_s3b2.RData")
 
 ################################################################################
 #---- 6 PEND ******* Results - Project Step 6 ----------------------------------
