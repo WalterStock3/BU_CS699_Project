@@ -2785,7 +2785,7 @@ save(results_storage, file = "results_after_m2_s3b2.RData")
 
 # Use Integers
 df_m3_s1b1 <- df_s1b1 %>%
-  select(Class, 
+  select(Class,
          matches(paste0("^DETAILED-(",
                         paste(df_columns_info %>%
                                 filter(variable_type %in%
@@ -2867,7 +2867,7 @@ save(results_storage, file = "results_after_m3_s1b1.RData")
 
 # Use Integers
 df_m3_s1b2 <- df_s1b2 %>%
-  select(Class, 
+  select(Class,
          matches(paste0("^DETAILED-(",
                         paste(df_columns_info %>%
                                 filter(variable_type %in%
@@ -2949,7 +2949,7 @@ save(results_storage, file = "results_after_m3_s1b2.RData")
 
 # Use Integers
 df_m3_s2b1 <- df_s2b1 %>%
-  select(Class, 
+  select(Class,
          matches(paste0("^DETAILED-(",
                         paste(df_columns_info %>%
                                 filter(variable_type %in%
@@ -3031,7 +3031,7 @@ save(results_storage, file = "results_after_m3_s2b1.RData")
 
 # Use Integers
 df_m3_s2b2 <- df_s2b2 %>%
-  select(Class, 
+  select(Class,
          matches(paste0("^DETAILED-(",
                         paste(df_columns_info %>%
                                 filter(variable_type %in%
@@ -3113,7 +3113,7 @@ save(results_storage, file = "results_after_m3_s2b2.RData")
 
 # Use Integers
 df_m3_s3b1 <- df_s3b1 %>%
-  select(Class, 
+  select(Class,
          matches(paste0("^DETAILED-(",
                         paste(df_columns_info %>%
                                 filter(variable_type %in%
@@ -3195,7 +3195,7 @@ save(results_storage, file = "results_after_m3_s3b1.RData")
 
 # Use Integers
 df_m3_s3b2 <- df_s3b2 %>%
-  select(Class, 
+  select(Class,
          matches(paste0("^DETAILED-(",
                         paste(df_columns_info %>%
                                 filter(variable_type %in%
@@ -3281,7 +3281,7 @@ save(results_storage, file = "results_after_m3_s3b2.RData")
 
 # Use categorical variables for Random Forest
 df_m4_s1b1 <- df_s1b1 %>%
-  select(Class, 
+  select(Class,
          matches(paste0("^DETAILED-(",
                         paste(df_columns_info %>%
                                 filter(variable_type %in%
@@ -3388,7 +3388,7 @@ if (inherits(fit_m4_s1b1$fit$fit$fit, "ranger")) {
 
 # Use categorical variables for Random Forest
 df_m4_s1b2 <- df_s1b2 %>%
-  select(Class, 
+  select(Class,
          matches(paste0("^DETAILED-(",
                         paste(df_columns_info %>%
                                 filter(variable_type %in%
@@ -3494,7 +3494,7 @@ if (inherits(fit_m4_s1b2$fit$fit$fit, "ranger")) {
 
 # Use categorical variables for Random Forest
 df_m4_s2b1 <- df_s2b1 %>%
-  select(Class, 
+  select(Class,
          matches(paste0("^DETAILED-(",
                         paste(df_columns_info %>%
                                 filter(variable_type %in%
@@ -3600,7 +3600,7 @@ if (inherits(fit_m4_s2b1$fit$fit$fit, "ranger")) {
 
 # Use categorical variables for Random Forest
 df_m4_s2b2 <- df_s2b2 %>%
-  select(Class, 
+  select(Class,
          matches(paste0("^DETAILED-(",
                         paste(df_columns_info %>%
                                 filter(variable_type %in%
@@ -3706,7 +3706,7 @@ if (inherits(fit_m4_s2b2$fit$fit$fit, "ranger")) {
 
 # Use categorical variables for Random Forest
 df_m4_s3b1 <- df_s3b1 %>%
-  select(Class, 
+  select(Class,
          matches(paste0("^DETAILED-(",
                         paste(df_columns_info %>%
                                 filter(variable_type %in%
@@ -3812,7 +3812,7 @@ if (inherits(fit_m4_s3b1$fit$fit$fit, "ranger")) {
 
 # Use categorical variables for Random Forest
 df_m4_s3b2 <- df_s3b2 %>%
-  select(Class, 
+  select(Class,
          matches(paste0("^DETAILED-(",
                         paste(df_columns_info %>%
                                 filter(variable_type %in%
