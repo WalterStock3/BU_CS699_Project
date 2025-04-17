@@ -26,6 +26,7 @@ library(rsample)
 library(ROSE)
 library(pROC)
 library(ranger)
+library(xgboost)
 
 #---- 0.1 DONE *****    Functions - Full Performance Evaluation ----------------
 
@@ -2775,7 +2776,7 @@ save(results_storage, file = "results_after_m2_s3b2.RData")
 #---- 5-3 DONE *****    Model 3 Decision Tree ----------------------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#---- 5-3-1 DONE *****    Model 3 Decision Tree ------------------- m3-s1b1 ----
+#---- 5-3-1 DONE ***      Model 3 Decision Tree ------------------- m3-s1b1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #load("df_s1b1.RData") # nolint
@@ -2857,7 +2858,7 @@ store_results("m3s1b1", results_m3_s1b1, "Decision Tree Model - s1b1")
 # Save the results to an RData file
 save(results_storage, file = "results_after_m3_s1b1.RData")
 
-#---- 5-3-2 DONE *****    Model 3 Decision Tree ------------------- m3-s1b2 ----
+#---- 5-3-2 DONE ***      Model 3 Decision Tree ------------------- m3-s1b2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #load("df_s1b2.RData") # nolint
@@ -2939,7 +2940,7 @@ store_results("m3s1b2", results_m3_s1b2, "Decision Tree Model - s1b2")
 # Save the results to an RData file
 save(results_storage, file = "results_after_m3_s1b2.RData")
 
-#---- 5-3-3 DONE *****    Model 3 Decision Tree ------------------- m3-s2b1 ----
+#---- 5-3-3 DONE ***      Model 3 Decision Tree ------------------- m3-s2b1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #load("df_s2b1.RData") # nolint
@@ -3021,7 +3022,7 @@ store_results("m3s2b1", results_m3_s2b1, "Decision Tree Model - s2b1")
 # Save the results to an RData file
 save(results_storage, file = "results_after_m3_s2b1.RData")
 
-#---- 5-3-4 DONE *****    Model 3 Decision Tree ------------------- m3-s2b2 ----
+#---- 5-3-4 DONE ***      Model 3 Decision Tree ------------------- m3-s2b2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #load("df_s2b2.RData") # nolint
@@ -3103,7 +3104,7 @@ store_results("m3s2b2", results_m3_s2b2, "Decision Tree Model - s2b2")
 # Save the results to an RData file
 save(results_storage, file = "results_after_m3_s2b2.RData")
 
-#---- 5-3-5 DONE *****    Model 3 Decision Tree ------------------- m3-s3b1 ----
+#---- 5-3-5 DONE ***      Model 3 Decision Tree ------------------- m3-s3b1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #load("df_s3b1.RData") # nolint
@@ -3185,7 +3186,7 @@ store_results("m3s3b1", results_m3_s3b1, "Decision Tree Model - s3b1")
 # Save the results to an RData file
 save(results_storage, file = "results_after_m3_s3b1.RData")
 
-#---- 5-3-6 DONE *****    Model 3 Decision Tree ------------------- m3-s3b2 ----
+#---- 5-3-6 DONE ***      Model 3 Decision Tree ------------------- m3-s3b2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #load("df_s3b2.RData") # nolint
@@ -3271,7 +3272,7 @@ save(results_storage, file = "results_after_m3_s3b2.RData")
 #---- 5-4 DONE *****    Model 4 Random Forest ----------------------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#---- 5-4-1 DONE *****    Model 4 Random Forest ------------------- m4-s1b1 ----
+#---- 5-4-1 DONE ***      Model 4 Random Forest ------------------- m4-s1b1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #load("df_s1b1.RData") # nolint
@@ -3378,7 +3379,7 @@ if (inherits(fit_m4_s1b1$fit$fit$fit, "ranger")) {
 
 }
 
-#---- 5-4-2 DONE *****    Model 4 Random Forest ------------------- m4-s1b2 ----
+#---- 5-4-2 DONE ***      Model 4 Random Forest ------------------- m4-s1b2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #load("df_s1b2.RData") # nolint
@@ -3484,7 +3485,7 @@ if (inherits(fit_m4_s1b2$fit$fit$fit, "ranger")) {
   ggsave("m4_s1b2_var_importance.png", width = 10, height = 8, dpi = 300)
 
 }
-#---- 5-4-3 DONE *****    Model 4 Random Forest ------------------- m4-s2b1 ----
+#---- 5-4-3 DONE ***      Model 4 Random Forest ------------------- m4-s2b1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #load("df_s2b1.RData") # nolint
@@ -3590,7 +3591,7 @@ if (inherits(fit_m4_s2b1$fit$fit$fit, "ranger")) {
   ggsave("m4_s2b1_var_importance.png", width = 10, height = 8, dpi = 300)
 
 }
-#---- 5-4-4 DONE *****    Model 4 Random Forest ------------------- m4-s2b2 ----
+#---- 5-4-4 DONE ***      Model 4 Random Forest ------------------- m4-s2b2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #load("df_s2b2.RData") # nolint
@@ -3696,7 +3697,7 @@ if (inherits(fit_m4_s2b2$fit$fit$fit, "ranger")) {
   ggsave("m4_s2b2_var_importance.png", width = 10, height = 8, dpi = 300)
 
 }
-#---- 5-4-5 DONE *****    Model 4 Random Forest ------------------- m4-s3b1 ----
+#---- 5-4-5 DONE ***      Model 4 Random Forest ------------------- m4-s3b1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #load("df_s3b1.RData") # nolint
@@ -3802,7 +3803,7 @@ if (inherits(fit_m4_s3b1$fit$fit$fit, "ranger")) {
   ggsave("m4_s3b1_var_importance.png", width = 10, height = 8, dpi = 300)
 
 }
-#---- 5-4-6 DONE *****    Model 4 Random Forest ------------------- m4-s3b2 ----
+#---- 5-4-6 DONE ***      Model 4 Random Forest ------------------- m4-s3b2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #load("df_s3b2.RData") # nolint
@@ -3910,14 +3911,734 @@ if (inherits(fit_m4_s3b2$fit$fit$fit, "ranger")) {
 }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#---- 5-5 PEND *****    Model 5 Support Vect Machine ---------------------------
+#---- 5-5 DONE *****    Model 5 Support Vect Machine ---------------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#---- 5-5-1 DONE ***      Model 5 Support Vector Machine ---------- m5-s1b1 ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#load("df_s1b1.RData") # nolint
+#load("df_columns_info.RData") # nolint
+#load("df_test.RData") # nolint
+
+# Support Vector Machine Model
+
+df_m5_s1b1 <- df_s1b1 %>%
+  select(Class, matches(paste0("^DETAILED-(",
+                               paste(df_columns_info %>%
+                                       filter(variable_type %in%
+                                                c("integer")) %>%
+                                       pull(column_name),
+                                     collapse = "|"), ")_")))
+
+# 1. Model Specification
+spec_m5_s1b1 <- svm_rbf(
+  cost = tune(),
+  rbf_sigma = tune()
+) %>%
+  set_engine("kernlab") %>%
+  set_mode("classification")
+
+# 2. Recipe
+rec_m5_s1b1 <- recipe(Class ~ ., data = df_m5_s1b1) %>%
+  step_zv(all_predictors()) %>%
+  step_impute_median(all_numeric_predictors()) %>%
+  step_normalize(all_predictors()) %>%
+  step_dummy(all_nominal_predictors(), -all_outcomes())
+
+# 3. Workflow
+wf_m5_s1b1 <- workflow() %>%
+  add_model(spec_m5_s1b1) %>%
+  add_recipe(rec_m5_s1b1)
+
+# 4. Cross-validation
+set.seed(123)
+folds_m5_s1b1 <- vfold_cv(df_m5_s1b1, v = 5, strata = Class)
+
+# 5. Grid of hyperparameters
+tune_grid_m5_s1b1 <- grid_regular(
+  cost(),
+  rbf_sigma(),
+  levels = 5
+)
+
+# 6. Tune the model
+tune_results_m5_s1b1 <- tune_grid(
+  wf_m5_s1b1,
+  resamples = folds_m5_s1b1,
+  grid = tune_grid_m5_s1b1,
+  metrics = metric_set(roc_auc, accuracy, sens, spec)
+)
+
+# Show the tuning results
+autoplot(tune_results_m5_s1b1) +
+  labs(title = "Tuning Results for Support Vector Machine",
+       x = "Tuned Parameter",
+       y = "Performance") +
+  theme_minimal()
+
+# 7. Select the best parameters
+best_parameters_m5_s1b1 <- select_best(tune_results_m5_s1b1, metric = "roc_auc")
+
+# 8. Finalize the workflow
+final_wf_m5_s1b1 <- finalize_workflow(wf_m5_s1b1, best_parameters_m5_s1b1)
+
+# 9. Fit the final model
+fit_m5_s1b1 <- fit(final_wf_m5_s1b1, data = df_m5_s1b1)
+
+# 10. Evaluate the model on the test dataset
+test_predications_m5_s1b1 <-
+  predict(fit_m5_s1b1, new_data = df_test, type = "prob") %>%
+  bind_cols(predict(fit_m5_s1b1, new_data = df_test, type = "class")) %>%
+  bind_cols(df_test %>% select(Class))
+
+# Generate a confusion matrix
+confusion_matrix_m5_s1b1 <- test_predications_m5_s1b1 %>%
+  conf_mat(truth = Class, estimate = .pred_class)
+
+# Print the confusion matrix
+print(confusion_matrix_m5_s1b1)
+
+# Visualize the confusion matrix
+autoplot(confusion_matrix_m5_s1b1, type = "heatmap") +
+  labs(title = "Confusion Matrix for Support Vector Machine",
+       x = "Predicted Class",
+       y = "Actual Class") +
+  theme_minimal()
+
+results_m5_s1b1 <- calculate_all_measures(fit_m5_s1b1, df_test, 0.5)
+
+results_m5_s1b1
+
+store_results("m5s1b1", results_m5_s1b1, "Support Vector Machine Model - s1b1")
+
+# Save the results to an RData file
+save(results_storage, file = "results_after_m5_s1b1.RData")
+
+#---- 5-5-2 DONE ***      Model 5 Support Vector Machine ---------- m5-s1b2 ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#load("df_s1b2.RData") # nolint
+#load("df_columns_info.RData") # nolint
+#load("df_test.RData") # nolint
+
+# Support Vector Machine Model
+
+df_m5_s1b2 <- df_s1b2 %>%
+  select(Class, matches(paste0("^DETAILED-(",
+                               paste(df_columns_info %>%
+                                       filter(variable_type %in%
+                                                c("integer")) %>%
+                                       pull(column_name),
+                                     collapse = "|"), ")_")))
+
+# 1. Model Specification
+spec_m5_s1b2 <- svm_rbf(
+  cost = tune(),
+  rbf_sigma = tune()
+) %>%
+  set_engine("kernlab") %>%
+  set_mode("classification")
+
+# 2. Recipe
+rec_m5_s1b2 <- recipe(Class ~ ., data = df_m5_s1b2) %>%
+  step_zv(all_predictors()) %>%
+  step_impute_median(all_numeric_predictors()) %>%
+  step_normalize(all_predictors()) %>%
+  step_dummy(all_nominal_predictors(), -all_outcomes())
+
+# 3. Workflow
+wf_m5_s1b2 <- workflow() %>%
+  add_model(spec_m5_s1b2) %>%
+  add_recipe(rec_m5_s1b2)
+
+# 4. Cross-validation
+set.seed(123)
+folds_m5_s1b2 <- vfold_cv(df_m5_s1b2, v = 5, strata = Class)
+
+# 5. Grid of hyperparameters
+tune_grid_m5_s1b2 <- grid_regular(
+  cost(),
+  rbf_sigma(),
+  levels = 5
+)
+
+# 6. Tune the model
+tune_results_m5_s1b2 <- tune_grid(
+  wf_m5_s1b2,
+  resamples = folds_m5_s1b2,
+  grid = tune_grid_m5_s1b2,
+  metrics = metric_set(roc_auc, accuracy, sens, spec)
+)
+
+# Show the tuning results
+autoplot(tune_results_m5_s1b2) +
+  labs(title = "Tuning Results for Support Vector Machine",
+       x = "Tuned Parameter",
+       y = "Performance") +
+  theme_minimal()
+
+# 7. Select the best parameters
+best_parameters_m5_s1b2 <- select_best(tune_results_m5_s1b2, metric = "roc_auc")
+
+# 8. Finalize the workflow
+final_wf_m5_s1b2 <- finalize_workflow(wf_m5_s1b2, best_parameters_m5_s1b2)
+
+# 9. Fit the final model
+fit_m5_s1b2 <- fit(final_wf_m5_s1b2, data = df_m5_s1b2)
+
+# 10. Evaluate the model on the test dataset
+test_predications_m5_s1b2 <-
+  predict(fit_m5_s1b2, new_data = df_test, type = "prob") %>%
+  bind_cols(predict(fit_m5_s1b2, new_data = df_test, type = "class")) %>%
+  bind_cols(df_test %>% select(Class))
+
+# Generate a confusion matrix
+confusion_matrix_m5_s1b2 <- test_predications_m5_s1b2 %>%
+  conf_mat(truth = Class, estimate = .pred_class)
+
+# Print the confusion matrix
+print(confusion_matrix_m5_s1b2)
+
+# Visualize the confusion matrix
+autoplot(confusion_matrix_m5_s1b2, type = "heatmap") +
+  labs(title = "Confusion Matrix for Support Vector Machine",
+       x = "Predicted Class",
+       y = "Actual Class") +
+  theme_minimal()
+
+results_m5_s1b2 <- calculate_all_measures(fit_m5_s1b2, df_test, 0.5)
+
+results_m5_s1b2
+
+store_results("m5s1b2", results_m5_s1b2, "Support Vector Machine Model - s1b2")
+
+# Save the results to an RData file
+save(results_storage, file = "results_after_m5_s1b2.RData")
+
+#---- 5-5-3 DONE ***      Model 5 Support Vector Machine ---------- m5-s2b1 ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#load("df_s2b1.RData") # nolint
+#load("df_columns_info.RData") # nolint
+#load("df_test.RData") # nolint
+
+# Support Vector Machine Model
+
+df_m5_s2b1 <- df_s2b1 %>%
+  select(Class, matches(paste0("^DETAILED-(",
+                               paste(df_columns_info %>%
+                                       filter(variable_type %in%
+                                                c("integer")) %>%
+                                       pull(column_name),
+                                     collapse = "|"), ")_")))
+
+# 1. Model Specification
+spec_m5_s2b1 <- svm_rbf(
+  cost = tune(),
+  rbf_sigma = tune()
+) %>%
+  set_engine("kernlab") %>%
+  set_mode("classification")
+
+# 2. Recipe
+rec_m5_s2b1 <- recipe(Class ~ ., data = df_m5_s2b1) %>%
+  step_zv(all_predictors()) %>%
+  step_impute_median(all_numeric_predictors()) %>%
+  step_normalize(all_predictors()) %>%
+  step_dummy(all_nominal_predictors(), -all_outcomes())
+
+# 3. Workflow
+wf_m5_s2b1 <- workflow() %>%
+  add_model(spec_m5_s2b1) %>%
+  add_recipe(rec_m5_s2b1)
+
+# 4. Cross-validation
+set.seed(123)
+folds_m5_s2b1 <- vfold_cv(df_m5_s2b1, v = 5, strata = Class)
+
+# 5. Grid of hyperparameters
+tune_grid_m5_s2b1 <- grid_regular(
+  cost(),
+  rbf_sigma(),
+  levels = 5
+)
+
+# 6. Tune the model
+tune_results_m5_s2b1 <- tune_grid(
+  wf_m5_s2b1,
+  resamples = folds_m5_s2b1,
+  grid = tune_grid_m5_s2b1,
+  metrics = metric_set(roc_auc, accuracy, sens, spec)
+)
+
+# Show the tuning results
+autoplot(tune_results_m5_s2b1) +
+  labs(title = "Tuning Results for Support Vector Machine",
+       x = "Tuned Parameter",
+       y = "Performance") +
+  theme_minimal()
+
+# 7. Select the best parameters
+best_parameters_m5_s2b1 <- select_best(tune_results_m5_s2b1, metric = "roc_auc")
+
+# 8. Finalize the workflow
+final_wf_m5_s2b1 <- finalize_workflow(wf_m5_s2b1, best_parameters_m5_s2b1)
+
+# 9. Fit the final model
+fit_m5_s2b1 <- fit(final_wf_m5_s2b1, data = df_m5_s2b1)
+
+# 10. Evaluate the model on the test dataset
+test_predications_m5_s2b1 <-
+  predict(fit_m5_s2b1, new_data = df_test, type = "prob") %>%
+  bind_cols(predict(fit_m5_s2b1, new_data = df_test, type = "class")) %>%
+  bind_cols(df_test %>% select(Class))
+
+# Generate a confusion matrix
+confusion_matrix_m5_s2b1 <- test_predications_m5_s2b1 %>%
+  conf_mat(truth = Class, estimate = .pred_class)
+
+# Print the confusion matrix
+print(confusion_matrix_m5_s2b1)
+
+# Visualize the confusion matrix
+autoplot(confusion_matrix_m5_s2b1, type = "heatmap") +
+  labs(title = "Confusion Matrix for Support Vector Machine",
+       x = "Predicted Class",
+       y = "Actual Class") +
+  theme_minimal()
+
+results_m5_s2b1 <- calculate_all_measures(fit_m5_s2b1, df_test, 0.5)
+
+results_m5_s2b1
+
+store_results("m5s2b1", results_m5_s2b1, "Support Vector Machine Model - s2b1")
+
+# Save the results to an RData file
+save(results_storage, file = "results_after_m5_s2b1.RData")
+
+#---- 5-5-4 DONE ***      Model 5 Support Vector Machine ---------- m5-s2b2 ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#load("df_s2b2.RData") # nolint
+#load("df_columns_info.RData") # nolint
+#load("df_test.RData") # nolint
+
+# Support Vector Machine Model
+
+df_m5_s2b2 <- df_s2b2 %>%
+  select(Class, matches(paste0("^DETAILED-(",
+                               paste(df_columns_info %>%
+                                       filter(variable_type %in%
+                                                c("integer")) %>%
+                                       pull(column_name),
+                                     collapse = "|"), ")_")))
+
+# 1. Model Specification
+spec_m5_s2b2 <- svm_rbf(
+  cost = tune(),
+  rbf_sigma = tune()
+) %>%
+  set_engine("kernlab") %>%
+  set_mode("classification")
+
+# 2. Recipe
+rec_m5_s2b2 <- recipe(Class ~ ., data = df_m5_s2b2) %>%
+  step_zv(all_predictors()) %>%
+  step_impute_median(all_numeric_predictors()) %>%
+  step_normalize(all_predictors()) %>%
+  step_dummy(all_nominal_predictors(), -all_outcomes())
+
+# 3. Workflow
+wf_m5_s2b2 <- workflow() %>%
+  add_model(spec_m5_s2b2) %>%
+  add_recipe(rec_m5_s2b2)
+
+# 4. Cross-validation
+set.seed(123)
+folds_m5_s2b2 <- vfold_cv(df_m5_s2b2, v = 5, strata = Class)
+
+# 5. Grid of hyperparameters
+tune_grid_m5_s2b2 <- grid_regular(
+  cost(),
+  rbf_sigma(),
+  levels = 5
+)
+
+# 6. Tune the model
+tune_results_m5_s2b2 <- tune_grid(
+  wf_m5_s2b2,
+  resamples = folds_m5_s2b2,
+  grid = tune_grid_m5_s2b2,
+  metrics = metric_set(roc_auc, accuracy, sens, spec)
+)
+
+# Show the tuning results
+autoplot(tune_results_m5_s2b2) +
+  labs(title = "Tuning Results for Support Vector Machine",
+       x = "Tuned Parameter",
+       y = "Performance") +
+  theme_minimal()
+
+# 7. Select the best parameters
+best_parameters_m5_s2b2 <- select_best(tune_results_m5_s2b2, metric = "roc_auc")
+
+# 8. Finalize the workflow
+final_wf_m5_s2b2 <- finalize_workflow(wf_m5_s2b2, best_parameters_m5_s2b2)
+
+# 9. Fit the final model
+fit_m5_s2b2 <- fit(final_wf_m5_s2b2, data = df_m5_s2b2)
+
+# 10. Evaluate the model on the test dataset
+test_predications_m5_s2b2 <-
+  predict(fit_m5_s2b2, new_data = df_test, type = "prob") %>%
+  bind_cols(predict(fit_m5_s2b2, new_data = df_test, type = "class")) %>%
+  bind_cols(df_test %>% select(Class))
+
+# Generate a confusion matrix
+confusion_matrix_m5_s2b2 <- test_predications_m5_s2b2 %>%
+  conf_mat(truth = Class, estimate = .pred_class)
+
+# Print the confusion matrix
+print(confusion_matrix_m5_s2b2)
+
+# Visualize the confusion matrix
+autoplot(confusion_matrix_m5_s2b2, type = "heatmap") +
+  labs(title = "Confusion Matrix for Support Vector Machine",
+       x = "Predicted Class",
+       y = "Actual Class") +
+  theme_minimal()
+
+results_m5_s2b2 <- calculate_all_measures(fit_m5_s2b2, df_test, 0.5)
+
+results_m5_s2b2
+
+store_results("m5s2b2", results_m5_s2b2, "Support Vector Machine Model - s2b2")
+
+# Save the results to an RData file
+save(results_storage, file = "results_after_m5_s2b2.RData")
+
+#---- 5-5-5 DONE ***      Model 5 Support Vector Machine ---------- m5-s3b1 ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#load("df_s3b1.RData") # nolint
+#load("df_columns_info.RData") # nolint
+#load("df_test.RData") # nolint
+
+# Support Vector Machine Model
+
+df_m5_s3b1 <- df_s3b1 %>%
+  select(Class, matches(paste0("^DETAILED-(",
+                               paste(df_columns_info %>%
+                                       filter(variable_type %in%
+                                                c("integer")) %>%
+                                       pull(column_name),
+                                     collapse = "|"), ")_")))
+
+# 1. Model Specification
+spec_m5_s3b1 <- svm_rbf(
+  cost = tune(),
+  rbf_sigma = tune()
+) %>%
+  set_engine("kernlab") %>%
+  set_mode("classification")
+
+# 2. Recipe
+rec_m5_s3b1 <- recipe(Class ~ ., data = df_m5_s3b1) %>%
+  step_zv(all_predictors()) %>%
+  step_impute_median(all_numeric_predictors()) %>%
+  step_normalize(all_predictors()) %>%
+  step_dummy(all_nominal_predictors(), -all_outcomes())
+
+# 3. Workflow
+wf_m5_s3b1 <- workflow() %>%
+  add_model(spec_m5_s3b1) %>%
+  add_recipe(rec_m5_s3b1)
+
+# 4. Cross-validation
+set.seed(123)
+folds_m5_s3b1 <- vfold_cv(df_m5_s3b1, v = 5, strata = Class)
+
+# 5. Grid of hyperparameters
+tune_grid_m5_s3b1 <- grid_regular(
+  cost(),
+  rbf_sigma(),
+  levels = 5
+)
+
+# 6. Tune the model
+tune_results_m5_s3b1 <- tune_grid(
+  wf_m5_s3b1,
+  resamples = folds_m5_s3b1,
+  grid = tune_grid_m5_s3b1,
+  metrics = metric_set(roc_auc, accuracy, sens, spec)
+)
+
+# Show the tuning results
+autoplot(tune_results_m5_s3b1) +
+  labs(title = "Tuning Results for Support Vector Machine",
+       x = "Tuned Parameter",
+       y = "Performance") +
+  theme_minimal()
+
+# 7. Select the best parameters
+best_parameters_m5_s3b1 <- select_best(tune_results_m5_s3b1, metric = "roc_auc")
+
+# 8. Finalize the workflow
+final_wf_m5_s3b1 <- finalize_workflow(wf_m5_s3b1, best_parameters_m5_s3b1)
+
+# 9. Fit the final model
+fit_m5_s3b1 <- fit(final_wf_m5_s3b1, data = df_m5_s3b1)
+
+# 10. Evaluate the model on the test dataset
+test_predications_m5_s3b1 <-
+  predict(fit_m5_s3b1, new_data = df_test, type = "prob") %>%
+  bind_cols(predict(fit_m5_s3b1, new_data = df_test, type = "class")) %>%
+  bind_cols(df_test %>% select(Class))
+
+# Generate a confusion matrix
+confusion_matrix_m5_s3b1 <- test_predications_m5_s3b1 %>%
+  conf_mat(truth = Class, estimate = .pred_class)
+
+# Print the confusion matrix
+print(confusion_matrix_m5_s3b1)
+
+# Visualize the confusion matrix
+autoplot(confusion_matrix_m5_s3b1, type = "heatmap") +
+  labs(title = "Confusion Matrix for Support Vector Machine",
+       x = "Predicted Class",
+       y = "Actual Class") +
+  theme_minimal()
+
+results_m5_s3b1 <- calculate_all_measures(fit_m5_s3b1, df_test, 0.5)
+
+results_m5_s3b1
+
+store_results("m5s3b1", results_m5_s3b1, "Support Vector Machine Model - s3b1")
+
+# Save the results to an RData file
+save(results_storage, file = "results_after_m5_s3b1.RData")
+
+#---- 5-5-6 DONE ***      Model 5 Support Vector Machine ---------- m5-s3b2 ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#load("df_s3b2.RData") # nolint
+#load("df_columns_info.RData") # nolint
+#load("df_test.RData") # nolint
+
+# Support Vector Machine Model
+
+df_m5_s3b2 <- df_s3b2 %>%
+  select(Class, matches(paste0("^DETAILED-(",
+                               paste(df_columns_info %>%
+                                       filter(variable_type %in%
+                                                c("integer")) %>%
+                                       pull(column_name),
+                                     collapse = "|"), ")_")))
+
+# 1. Model Specification
+spec_m5_s3b2 <- svm_rbf(
+  cost = tune(),
+  rbf_sigma = tune()
+) %>%
+  set_engine("kernlab") %>%
+  set_mode("classification")
+
+# 2. Recipe
+rec_m5_s3b2 <- recipe(Class ~ ., data = df_m5_s3b2) %>%
+  step_zv(all_predictors()) %>%
+  step_impute_median(all_numeric_predictors()) %>%
+  step_normalize(all_predictors()) %>%
+  step_dummy(all_nominal_predictors(), -all_outcomes())
+
+# 3. Workflow
+wf_m5_s3b2 <- workflow() %>%
+  add_model(spec_m5_s3b2) %>%
+  add_recipe(rec_m5_s3b2)
+
+# 4. Cross-validation
+set.seed(123)
+folds_m5_s3b2 <- vfold_cv(df_m5_s3b2, v = 5, strata = Class)
+
+# 5. Grid of hyperparameters
+tune_grid_m5_s3b2 <- grid_regular(
+  cost(),
+  rbf_sigma(),
+  levels = 5
+)
+
+# 6. Tune the model
+tune_results_m5_s3b2 <- tune_grid(
+  wf_m5_s3b2,
+  resamples = folds_m5_s3b2,
+  grid = tune_grid_m5_s3b2,
+  metrics = metric_set(roc_auc, accuracy, sens, spec)
+)
+
+# Show the tuning results
+autoplot(tune_results_m5_s3b2) +
+  labs(title = "Tuning Results for Support Vector Machine",
+       x = "Tuned Parameter",
+       y = "Performance") +
+  theme_minimal()
+
+# 7. Select the best parameters
+best_parameters_m5_s3b2 <- select_best(tune_results_m5_s3b2, metric = "roc_auc")
+
+# 8. Finalize the workflow
+final_wf_m5_s3b2 <- finalize_workflow(wf_m5_s3b2, best_parameters_m5_s3b2)
+
+# 9. Fit the final model
+fit_m5_s3b2 <- fit(final_wf_m5_s3b2, data = df_m5_s3b2)
+
+# 10. Evaluate the model on the test dataset
+test_predications_m5_s3b2 <-
+  predict(fit_m5_s3b2, new_data = df_test, type = "prob") %>%
+  bind_cols(predict(fit_m5_s3b2, new_data = df_test, type = "class")) %>%
+  bind_cols(df_test %>% select(Class))
+
+# Generate a confusion matrix
+confusion_matrix_m5_s3b2 <- test_predications_m5_s3b2 %>%
+  conf_mat(truth = Class, estimate = .pred_class)
+
+# Print the confusion matrix
+print(confusion_matrix_m5_s3b2)
+
+# Visualize the confusion matrix
+autoplot(confusion_matrix_m5_s3b2, type = "heatmap") +
+  labs(title = "Confusion Matrix for Support Vector Machine",
+       x = "Predicted Class",
+       y = "Actual Class") +
+  theme_minimal()
+
+results_m5_s3b2 <- calculate_all_measures(fit_m5_s3b2, df_test, 0.5)
+
+results_m5_s3b2
+
+store_results("m5s3b2", results_m5_s3b2, "Support Vector Machine Model - s3b2")
+
+# Save the results to an RData file
+save(results_storage, file = "results_after_m5_s3b2.RData")
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #---- 5-6 PEND *****    Model 6 Gradient Boosting ------------------------------
 
-################################################################################
+#---- 5-6-1 DONE ***      Model 6 Gradient Boosting --------------- m6-s1b1 ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+#load("df_s1b1.RData") # nolint
+#load("df_columns_info.RData") # nolint
+#load("df_test.RData") # nolint
+
+# Gradient Boosting Model
+
+df_m6_s1b1 <- df_s1b1 %>%
+  select(Class, matches(paste0("^DETAILED-(",
+                               paste(df_columns_info %>%
+                                       filter(variable_type %in%
+                                                c("integer")) %>%
+                                       pull(column_name),
+                                     collapse = "|"), ")_")))
+
+# 1. Model Specification
+spec_m6_s1b1 <- boost_tree(
+  trees = tune(),
+  tree_depth = tune(),
+  learn_rate = tune(),
+  min_n = tune()
+) %>%
+  set_engine("xgboost") %>%
+  set_mode("classification")
+
+# 2. Recipe
+rec_m6_s1b1 <- recipe(Class ~ ., data = df_m6_s1b1) %>%
+  step_zv(all_predictors()) %>%
+  step_impute_median(all_numeric_predictors()) %>%
+  step_normalize(all_predictors()) %>%
+  step_dummy(all_nominal_predictors(), -all_outcomes())
+
+# 3. Workflow
+wf_m6_s1b1 <- workflow() %>%
+  add_model(spec_m6_s1b1) %>%
+  add_recipe(rec_m6_s1b1)
+
+# 4. Cross-validation
+set.seed(123)
+folds_m6_s1b1 <- vfold_cv(df_m6_s1b1, v = 5, strata = Class)
+
+# 5. Grid of hyperparameters
+tune_grid_m6_s1b1 <- grid_regular(
+  trees(range = c(100, 500)),
+  tree_depth(range = c(3, 9)),
+  learn_rate(range = c(-5, -1), trans = log10_trans()),
+  min_n(range = c(2, 10)),
+  levels = 5
+)
+
+# 6. Tune the model
+tune_results_m6_s1b1 <- tune_grid(
+  wf_m6_s1b1,
+  resamples = folds_m6_s1b1,
+  grid = tune_grid_m6_s1b1,
+  metrics = metric_set(roc_auc, accuracy, sens, spec)
+)
+
+# Show the tuning results
+autoplot(tune_results_m6_s1b1) +
+  labs(title = "Tuning Results for Gradient Boosting",
+       x = "Tuned Parameter",
+       y = "Performance") +
+  theme_minimal()
+
+# 7. Select the best parameters
+best_parameters_m6_s1b1 <- select_best(tune_results_m6_s1b1, metric = "roc_auc")
+
+# 8. Finalize the workflow
+final_wf_m6_s1b1 <- finalize_workflow(wf_m6_s1b1, best_parameters_m6_s1b1)
+
+# 9. Fit the final model
+fit_m6_s1b1 <- fit(final_wf_m6_s1b1, data = df_m6_s1b1)
+
+# 10. Evaluate the model on the test dataset
+test_predications_m6_s1b1 <-
+  predict(fit_m6_s1b1, new_data = df_test, type = "prob") %>%
+  bind_cols(predict(fit_m6_s1b1, new_data = df_test, type = "class")) %>%
+  bind_cols(df_test %>% select(Class))
+
+# Generate a confusion matrix
+confusion_matrix_m6_s1b1 <- test_predications_m6_s1b1 %>%
+  conf_mat(truth = Class, estimate = .pred_class)
+
+# Print the confusion matrix
+print(confusion_matrix_m6_s1b1)
+
+# Visualize the confusion matrix
+autoplot(confusion_matrix_m6_s1b1, type = "heatmap") +
+  labs(title = "Confusion Matrix for Gradient Boosting",
+       x = "Predicted Class",
+       y = "Actual Class") +
+  theme_minimal()
+
+results_m6_s1b1 <- calculate_all_measures(fit_m6_s1b1, df_test, 0.5)
+
+results_m6_s1b1
+
+store_results("m6s1b1", results_m6_s1b1, "Gradient Boosting Model - s1b1")
+
+# Save the results to an RData file
+save(results_storage, file = "results_after_m6_s1b1.RData")
+
+# Feature importance visualization (if supported by the model)
+if (requires_package("vip", quietly = TRUE)) {
+  library(vip)
+  vip(fit_m6_s1b1, num_features = 20) +
+    labs(title = "Variable Importance for Gradient Boosting Model") +
+    theme_minimal()
+  
+  ggsave("m6_s1b1_var_importance.png", width = 10, height = 8, dpi = 300)
+}
+
+################################################################################
 #---- 6 PEND ******* Results - Project Step 6 ----------------------------------
 ################################################################################
 # Results - Project Step 6
