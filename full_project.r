@@ -1674,6 +1674,8 @@ results_m1_s1b1
 
 store_results("m1s1b1", results_m1_s1b1, "Logistic Regression Model 1 - s1b1")
 
+save(results_storage, file = "results_after_m1_s1b1.RData")
+
 #---- 5-1-2 DONE ***       Model 1 Logistic Regression ------------ m1_s1b2 ----
 
 #load("df_s1b2.RData") # nolint
@@ -1764,6 +1766,8 @@ results_m1_s1b2 <- calculate_all_measures(final_fit_m1_s1b2, df_test, 0.5)
 results_m1_s1b2
 
 store_results("m1s1b2", results_m1_s1b2, "Logistic Regression Model 1 - s1b2")
+
+save(results_storage, file = "results_after_m2_s1b1.RData")
 
 #---- 5-1-3 DONE ***       Model 1 Logistic Regression ------------ m1_s2b1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1857,6 +1861,8 @@ results_m1_s2b1
 
 store_results("m1s2b1", results_m1_s2b1, "Logistic Regression Model 1 - s2b1")
 
+save(results_storage, file = "results_after_m1_s2b1.RData")
+
 #---- 5-1-4 DONE ***       Model 1 Logistic Regression ------------ m1_s2b2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -1948,6 +1954,8 @@ results_m1_s2b2 <- calculate_all_measures(final_fit_m1_s2b2, df_test, 0.5)
 results_m1_s2b2
 
 store_results("m1s2b2", results_m1_s2b2, "Logistic Regression Model 1 - s2b2")
+
+save(results_storage, file = "results_after_m1_s2b2.RData")
 
 #---- 5-1-5 DONE ***       Model 1 Logistic Regression ------------ m1_s3b1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2041,6 +2049,8 @@ results_m1_s3b1
 
 store_results("m1s3b1", results_m1_s3b1, "Logistic Regression Model 1 - s3b1")
 
+save(results_storage, file = "results_after_m1_s3b1.RData")
+
 #---- 5-1-6 DONE ***       Model 1 Logistic Regression ------------ m1_s3b2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -2132,6 +2142,8 @@ results_m1_s3b2 <- calculate_all_measures(final_fit_m1_s3b2, df_test, 0.5)
 results_m1_s3b2
 
 store_results("m1s3b2", results_m1_s3b2, "Logistic Regression Model 1 - s3b2")
+
+save(results_storage, file = "results_after_m1_s3b2.RData")
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #---- 5-2 DONE *****    Model 2 K-Nearest Neighbors ----------------------------
@@ -2559,7 +2571,7 @@ results_m2_s2b2
 store_results("m2s2b2", results_m2_s2b2, "KNN Model - s2b2")
 
 # Save the results to an RData file
-save(results_storage, file = "results_after_m2_s3b1.RData")
+save(results_storage, file = "results_after_m2_s2b2.RData")
 
 #---- 5-2-5 DONE ***       Model 2 KNN - s3b1 --------------------- m2-s3b1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
