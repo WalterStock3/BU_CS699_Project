@@ -5419,6 +5419,167 @@ store_results("m6s3b2", results_m6_s3b2, "Gradient Boosting Model - s3b2")
 # Save the results to an RData file
 save(results_storage, file = "results_after_m6_s3b2.RData")
 
+#---- 5-6-7 DONE ***      Model 6 Gradient Boosting --------------- m6-s4b3 ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+load("df_s4b3.RData") # nolint
+load("df_columns_info.RData") # nolint
+load("df_test.RData") # nolint
+
+# Gradient Boosting Model
+
+df_m6_s4b3 <- df_s4b3 %>%
+  select(Class, matches(paste0("^DETAILED-(",
+                               paste(df_columns_info %>%
+                                       filter(variable_type %in%
+                                                c("integer")) %>%
+                                       pull(column_name),
+                                     collapse = "|"), ")_")),
+                         "DETAILED-PUBCOV_Public health coverage recode")#,
+                         #"DETAILED-WRK_Worked last week") #,
+#                         "DETAILED-INDP_Industry recode for 2023 and later based on 2022 IND codes",
+#                         "DETAILED-ESR_Employment status recode")
+
+# 1. Model Specification
+spec_m6_s4b3 <- boost_tree(
+  trees = tune(),
+  tree_depth = tune(),
+  learn_rate = tune(),
+  min_n = tune()
+) %>%
+  set_engine("xgboost", scale_pos_weight = 0.1) %>%
+  set_mode("classification")
+
+# 2. Recipe
+rec_m6_s4b3 <- recipe(Class ~ ., data = df_m6_s4b3) %>%
+  # Remove zero-variance predictors
+  step_zv(all_predictors()) %>%
+  # Handle missing values
+  step_impute_median(all_numeric_predictors()) %>%
+  step_unknown(all_nominal_predictors(), new_level = "Missing") %>%
+  # Transform skewed numeric features
+  step_YeoJohnson(all_numeric_predictors()) %>%
+  # Normalize numeric features
+  step_normalize(all_numeric_predictors()) %>%
+  # Proper encoding for categorical variables
+  step_dummy(all_nominal_predictors()) %>%
+  # Remove highly correlated features
+  step_corr(all_numeric_predictors(), threshold = 0.5)
+
+# 3. Workflow
+wf_m6_s4b3 <- workflow() %>%
+  add_model(spec_m6_s4b3) %>%
+  add_recipe(rec_m6_s4b3)
+
+# 4. Cross-validation
+set.seed(123)
+folds_m6_s4b3 <- vfold_cv(df_m6_s4b3, v = 5, strata = Class)
+
+# 5. Grid of hyperparameters
+tune_grid_m6_s4b3 <- grid_regular(
+  trees(range = c(100, 500)),
+  tree_depth(range = c(3, 9)),
+  learn_rate(range = c(-5, -1), trans = log10_trans()),
+  min_n(range = c(2, 10)),
+  levels = 5
+)
+
+# Determine number of cores to use (leave one core free)
+n_cores <- parallel::detectCores() - 1
+n_cores <- max(n_cores, 1)  # Ensure at least one core
+
+# Set the parallel plan - this activates parallel processing
+# plan(multisession, workers = n_cores)  # For Windows # nolint
+plan(multicore, workers = n_cores)   # For Unix/Linux/Mac
+
+# Display information about parallel processing
+cat("Using", n_cores, "cores for parallel processing\n")
+
+# 6. Tune the model
+tune_results_m6_s4b3 <- tune_grid(
+  wf_m6_s4b3,
+  resamples = folds_m6_s4b3,
+  grid = tune_grid_m6_s4b3,
+  metrics = metric_set(spec, sens, roc_auc))
+
+# Reset the future plan to sequential
+plan(sequential)
+# Unregister the parallel backend
+registerDoSEQ()  # Switch back to sequential processing
+# Display information about stopping parallel processing
+cat("Stopped parallel processing\n")
+
+# Extract metrics in a readable format
+tune_metrics <- collect_metrics(tune_results_m6_s4b3) %>%
+  arrange(desc(mean))
+
+# Display summary of top 10 best performing parameter combinations
+cat("Top 10 Parameter Combinations by Performance:\n")
+tune_metrics %>%
+  select(trees, tree_depth, learn_rate, min_n, .metric, mean, std_err) %>%
+  mutate(
+    learn_rate = sprintf("%.5f", learn_rate),
+    mean = sprintf("%.4f", mean),
+    std_err = sprintf("%.4f", std_err)
+  ) %>%
+  head(10) %>%
+  print(width = Inf)
+
+# Summarize best parameters for each metric
+cat("\nBest Parameters by Metric:\n")
+tune_metrics %>%
+  group_by(.metric) %>%
+  slice_max(mean, n = 1) %>%
+  ungroup() %>%
+  select(trees, tree_depth, learn_rate, min_n, .metric, mean) %>%
+  mutate(
+    learn_rate = sprintf("%.5f", learn_rate),
+    mean = sprintf("%.4f", mean)
+  ) %>%
+  print(width = Inf)
+
+# Show the tuning results
+autoplot(tune_results_m6_s4b3) +
+  labs(title = "Tuning Results for Gradient Boosting",
+       x = "Tuned Parameter",
+       y = "Performance") +
+  theme_minimal()
+
+# 7. Select the best parameters
+best_parameters_m6_s4b3 <- select_best(tune_results_m6_s4b3, metric = "spec")
+
+print(best_parameters_m6_s4b3)
+
+# 8. Finalize the workflow
+final_wf_m6_s4b3 <- finalize_workflow(wf_m6_s4b3, best_parameters_m6_s4b3)
+
+# 9. Fit the final model
+fit_m6_s4b3 <- fit(final_wf_m6_s4b3, data = df_m6_s4b3)
+
+# 10. Evaluate the model on the test dataset
+test_predications_m6_s4b3 <-
+  predict(fit_m6_s4b3, new_data = df_test, type = "prob") %>%
+  bind_cols(predict(fit_m6_s4b3, new_data = df_test, type = "class")) %>%
+  bind_cols(df_test %>% select(Class))
+
+# Generate a confusion matrix
+confusion_matrix_m6_s4b3 <- test_predications_m6_s4b3 %>%
+  conf_mat(truth = Class, estimate = .pred_class)
+
+# Print the confusion matrix
+print(confusion_matrix_m6_s4b3)
+
+results_m6_s4b3 <- calculate_all_measures(fit_m6_s4b3, df_test, 0.5)
+
+results_m6_s4b3
+
+store_results("m6s4b3", results_m6_s4b3, "Gradient Boosting Model - s4b3")
+
+# Save the results to an RData file
+save(results_storage, file = "results_after_m6_s4b3.RData")
+
+
+
 ################################################################################
 #---- 6 PEND ******* Results - Project Step 6 ----------------------------------
 ################################################################################
