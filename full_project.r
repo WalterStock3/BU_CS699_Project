@@ -3505,17 +3505,7 @@ if (inherits(fit_m4_s1b2$fit$fit$fit, "ranger")) {
 #load("df_test.RData") # nolint
 
 # Use categorical variables for Random Forest
-df_m4_s2b1 <- df_s2b1 %>%
-  select(Class,
-         matches(paste0("^DETAILED-(",
-                        paste(df_columns_info %>%
-                                filter(variable_type %in%
-                                         c("factor",
-                                           "logical",
-                                           "factor_levels")) %>%
-                                pull(column_name),
-                              collapse = "|"), ")_"))) %>%
-  select(-matches("SERIALNO"))
+df_m4_s2b1 <- df_s2b1 %>% select(-matches("SERIALNO"))
 
 # 1. Model Specification
 spec_m4_s2b1 <- rand_forest(
@@ -3527,7 +3517,9 @@ spec_m4_s2b1 <- rand_forest(
   set_mode("classification")
 
 # 2. Recipe
-rec_m4_s2b1 <- recipe(Class ~ ., data = df_m4_s2b1)
+rec_m4_s2b1 <- recipe(Class ~ ., data = df_m4_s2b1) %>%
+  step_impute_median(all_numeric_predictors()) %>%
+  step_impute_mode(all_nominal_predictors()) 
 
 # 3. Workflow
 wf_m4_s2b1 <- workflow() %>%
@@ -3601,8 +3593,8 @@ if (inherits(fit_m4_s2b1$fit$fit$fit, "ranger")) {
     theme_minimal()
 
   ggsave("m4_s2b1_var_importance.png", width = 10, height = 8, dpi = 300)
-
 }
+
 #---- 5-4-4 DONE ***      Model 4 Random Forest ------------------- m4-s2b2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
