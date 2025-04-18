@@ -3323,7 +3323,7 @@ wf_m4_s1b1 <- workflow() %>%
 
 # 4. Cross-validation
 set.seed(123)
-folds_m4_s1b1 <- vfold_cv(df_m4_s1b1, v = 5, strata = Class)
+folds_m4_s1b1 <- vfold_cv(df_m4_s1b1, v = 20, strata = Class)
 
 # 5. Grid of hyperparameters
 # For mtry, we'll try different numbers of predictors
@@ -3380,6 +3380,31 @@ final_wf_m4_s1b1 <- finalize_workflow(wf_m4_s1b1, best_params_m4_s1b1)
 
 # 9. Fit the final model
 fit_m4_s1b1 <- fit(final_wf_m4_s1b1, data = df_m4_s1b1)
+
+for (thresh in thresholds) {
+  results <- calculate_all_measures(fit_m4_s1b1, df_m4_s1b1, thresh)
+  tpr_1 <- results$values[results$measures == "TPR_1"]
+  tpr_0 <- results$values[results$measures == "TPR_0"]
+
+  threshold_results[[as.character(thresh)]] <- data.frame(
+    threshold = thresh,
+    TPR_1 = tpr_1,
+    TPR_0 = tpr_0,
+    diff_from_target =
+      ifelse(tpr_1 - 0.81 > 0,
+             (tpr_1 - 0.81) / 100,
+             tpr_1 - 0.81) +
+      ifelse(tpr_0 - 0.79 > 0,
+             (tpr_0 - 0.79) / 100,
+             tpr_0 - 0.79)
+  )
+}
+
+threshold_df <- do.call(rbind, threshold_results)
+best_threshold <-
+  threshold_df[which.max(threshold_df$diff_from_target), "threshold"]
+
+cat("Best threshold:", best_threshold, "\n")
 
 # 10. Evaluate the model on the test dataset
 results_m4_s1b1 <- calculate_all_measures(fit_m4_s1b1, df_test, 0.5)
@@ -3439,7 +3464,7 @@ wf_m4_s1b2 <- workflow() %>%
 
 # 4. Cross-validation
 set.seed(123)
-folds_m4_s1b2 <- vfold_cv(df_m4_s1b2, v = 5, strata = Class)
+folds_m4_s1b2 <- vfold_cv(df_m4_s1b2, v = 20, strata = Class)
 
 # 5. Grid of hyperparameters
 # For mtry, we'll try different numbers of predictors
@@ -3497,10 +3522,6 @@ final_wf_m4_s1b2 <- finalize_workflow(wf_m4_s1b2, best_params_m4_s1b2)
 # 9. Fit the final model
 fit_m4_s1b2 <- fit(final_wf_m4_s1b2, data = df_m4_s1b2)
 
-# Try different thresholds to achieve the target TPR and TNR
-thresholds <- seq(0.1, 0.9, by = 0.05)
-threshold_results <- list()
-
 for (thresh in thresholds) {
   results <- calculate_all_measures(fit_m4_s1b2, df_m4_s1b2, thresh)
   tpr_1 <- results$values[results$measures == "TPR_1"]
@@ -3510,17 +3531,24 @@ for (thresh in thresholds) {
     threshold = thresh,
     TPR_1 = tpr_1,
     TPR_0 = tpr_0,
-    diff_from_target = (tpr_1 - 0.81) + (tpr_0 - 0.79)
+    diff_from_target =
+      ifelse(tpr_1 - 0.81 > 0,
+             (tpr_1 - 0.81) / 100,
+             tpr_1 - 0.81) +
+      ifelse(tpr_0 - 0.79 > 0,
+             (tpr_0 - 0.79) / 100,
+             tpr_0 - 0.79)
   )
 }
 
 threshold_df <- do.call(rbind, threshold_results)
-best_threshold <- threshold_df[which.max(threshold_df$diff_from_target), "threshold"]
+best_threshold <-
+  threshold_df[which.max(threshold_df$diff_from_target), "threshold"]
 
 cat("Best threshold:", best_threshold, "\n")
 
 # 10. Evaluate the model on the test dataset
-results_m4_s1b2 <- calculate_all_measures(fit_m4_s1b2, df_test, best_threshold)
+results_m4_s1b2 <- calculate_all_measures(fit_m4_s1b2, df_test, 0.5)
 results_m4_s1b2
 store_results("m4s1b2", results_m4_s1b2, "Random Forest Model - s1b2")
 
@@ -3578,7 +3606,7 @@ wf_m4_s2b1 <- workflow() %>%
 
 # 4. Cross-validation
 set.seed(123)
-folds_m4_s2b1 <- vfold_cv(df_m4_s2b1, v = 5, strata = Class)
+folds_m4_s2b1 <- vfold_cv(df_m4_s2b1, v = 20, strata = Class)
 
 # 5. Grid of hyperparameters
 # For mtry, we'll try different numbers of predictors
@@ -3605,10 +3633,10 @@ plan(multicore, workers = n_cores)   # For Unix/Linux/Mac
 cat("Using", n_cores, "cores for parallel processing\n")
 
 # 6. Tune the model
-tune_results_m4_s1b2 <- tune_grid(
-  wf_m4_s1b2,
-  resamples = folds_m4_s1b2,
-  grid = grid_m4_s1b2,
+tune_results_m4_s2b1 <- tune_grid(
+  wf_m4_s2b1,
+  resamples = folds_m4_s2b1,
+  grid = grid_m4_s2b1,
   metrics = metric_set(roc_auc, accuracy, sens, spec)
 )
 
@@ -3635,6 +3663,31 @@ final_wf_m4_s2b1 <- finalize_workflow(wf_m4_s2b1, best_params_m4_s2b1)
 
 # 9. Fit the final model
 fit_m4_s2b1 <- fit(final_wf_m4_s2b1, data = df_m4_s2b1)
+
+for (thresh in thresholds) {
+  results <- calculate_all_measures(fit_m4_s2b1, df_m4_s2b1, thresh)
+  tpr_1 <- results$values[results$measures == "TPR_1"]
+  tpr_0 <- results$values[results$measures == "TPR_0"]
+
+  threshold_results[[as.character(thresh)]] <- data.frame(
+    threshold = thresh,
+    TPR_1 = tpr_1,
+    TPR_0 = tpr_0,
+    diff_from_target =
+      ifelse(tpr_1 - 0.81 > 0,
+             (tpr_1 - 0.81) / 100,
+             tpr_1 - 0.81) +
+      ifelse(tpr_0 - 0.79 > 0,
+             (tpr_0 - 0.79) / 100,
+             tpr_0 - 0.79)
+  )
+}
+
+threshold_df <- do.call(rbind, threshold_results)
+best_threshold <-
+  threshold_df[which.max(threshold_df$diff_from_target), "threshold"]
+
+cat("Best threshold:", best_threshold, "\n")
 
 # 10. Evaluate the model on the test dataset
 results_m4_s2b1 <- calculate_all_measures(fit_m4_s2b1, df_test, 0.5)
@@ -3694,7 +3747,7 @@ wf_m4_s2b2 <- workflow() %>%
 
 # 4. Cross-validation
 set.seed(123)
-folds_m4_s2b2 <- vfold_cv(df_m4_s2b2, v = 5, strata = Class)
+folds_m4_s2b2 <- vfold_cv(df_m4_s2b2, v = 20, strata = Class)
 
 # 5. Grid of hyperparameters
 # For mtry, we'll try different numbers of predictors
@@ -3709,6 +3762,17 @@ grid_m4_s2b2 <- grid_regular(
   levels = 5
 )
 
+# Determine number of cores to use (leave one core free)
+n_cores <- parallel::detectCores() - 1
+n_cores <- max(n_cores, 1)  # Ensure at least one core
+
+# Set the parallel plan - this activates parallel processing
+# plan(multisession, workers = n_cores)  # For Windows # nolint
+plan(multicore, workers = n_cores)   # For Unix/Linux/Mac
+
+# Display information about parallel processing
+cat("Using", n_cores, "cores for parallel processing\n")
+
 # 6. Tune the model
 tune_results_m4_s2b2 <- tune_grid(
   wf_m4_s2b2,
@@ -3716,6 +3780,13 @@ tune_results_m4_s2b2 <- tune_grid(
   grid = grid_m4_s2b2,
   metrics = metric_set(roc_auc, accuracy, sens, spec)
 )
+
+# Reset the future plan to sequential
+plan(sequential)
+# Unregister the parallel backend
+registerDoSEQ()  # Switch back to sequential processing
+# Display information about stopping parallel processing
+cat("Stopped parallel processing\n")
 
 # Show the tuning results
 autoplot(tune_results_m4_s2b2) +
@@ -3733,6 +3804,31 @@ final_wf_m4_s2b2 <- finalize_workflow(wf_m4_s2b2, best_params_m4_s2b2)
 
 # 9. Fit the final model
 fit_m4_s2b2 <- fit(final_wf_m4_s2b2, data = df_m4_s2b2)
+
+for (thresh in thresholds) {
+  results <- calculate_all_measures(fit_m4_s2b2, df_m4_s2b2, thresh)
+  tpr_1 <- results$values[results$measures == "TPR_1"]
+  tpr_0 <- results$values[results$measures == "TPR_0"]
+
+  threshold_results[[as.character(thresh)]] <- data.frame(
+    threshold = thresh,
+    TPR_1 = tpr_1,
+    TPR_0 = tpr_0,
+    diff_from_target =
+      ifelse(tpr_1 - 0.81 > 0,
+             (tpr_1 - 0.81) / 100,
+             tpr_1 - 0.81) +
+      ifelse(tpr_0 - 0.79 > 0,
+             (tpr_0 - 0.79) / 100,
+             tpr_0 - 0.79)
+  )
+}
+
+threshold_df <- do.call(rbind, threshold_results)
+best_threshold <-
+  threshold_df[which.max(threshold_df$diff_from_target), "threshold"]
+
+cat("Best threshold:", best_threshold, "\n")
 
 # 10. Evaluate the model on the test dataset
 results_m4_s2b2 <- calculate_all_measures(fit_m4_s2b2, df_test, 0.5)
@@ -3792,7 +3888,7 @@ wf_m4_s3b1 <- workflow() %>%
 
 # 4. Cross-validation
 set.seed(123)
-folds_m4_s3b1 <- vfold_cv(df_m4_s3b1, v = 5, strata = Class)
+folds_m4_s3b1 <- vfold_cv(df_m4_s3b1, v = 20, strata = Class)
 
 # 5. Grid of hyperparameters
 # For mtry, we'll try different numbers of predictors
@@ -3807,6 +3903,17 @@ grid_m4_s3b1 <- grid_regular(
   levels = 5
 )
 
+# Determine number of cores to use (leave one core free)
+n_cores <- parallel::detectCores() - 1
+n_cores <- max(n_cores, 1)  # Ensure at least one core
+
+# Set the parallel plan - this activates parallel processing
+# plan(multisession, workers = n_cores)  # For Windows # nolint
+plan(multicore, workers = n_cores)   # For Unix/Linux/Mac
+
+# Display information about parallel processing
+cat("Using", n_cores, "cores for parallel processing\n")
+
 # 6. Tune the model
 tune_results_m4_s3b1 <- tune_grid(
   wf_m4_s3b1,
@@ -3814,6 +3921,13 @@ tune_results_m4_s3b1 <- tune_grid(
   grid = grid_m4_s3b1,
   metrics = metric_set(roc_auc, accuracy, sens, spec)
 )
+
+# Reset the future plan to sequential
+plan(sequential)
+# Unregister the parallel backend
+registerDoSEQ()  # Switch back to sequential processing
+# Display information about stopping parallel processing
+cat("Stopped parallel processing\n")
 
 # Show the tuning results
 autoplot(tune_results_m4_s3b1) +
@@ -3831,6 +3945,31 @@ final_wf_m4_s3b1 <- finalize_workflow(wf_m4_s3b1, best_params_m4_s3b1)
 
 # 9. Fit the final model
 fit_m4_s3b1 <- fit(final_wf_m4_s3b1, data = df_m4_s3b1)
+
+for (thresh in thresholds) {
+  results <- calculate_all_measures(fit_m4_s3b1, df_m4_s3b1, thresh)
+  tpr_1 <- results$values[results$measures == "TPR_1"]
+  tpr_0 <- results$values[results$measures == "TPR_0"]
+
+  threshold_results[[as.character(thresh)]] <- data.frame(
+    threshold = thresh,
+    TPR_1 = tpr_1,
+    TPR_0 = tpr_0,
+    diff_from_target =
+      ifelse(tpr_1 - 0.81 > 0,
+             (tpr_1 - 0.81) / 100,
+             tpr_1 - 0.81) +
+      ifelse(tpr_0 - 0.79 > 0,
+             (tpr_0 - 0.79) / 100,
+             tpr_0 - 0.79)
+  )
+}
+
+threshold_df <- do.call(rbind, threshold_results)
+best_threshold <-
+  threshold_df[which.max(threshold_df$diff_from_target), "threshold"]
+
+cat("Best threshold:", best_threshold, "\n")
 
 # 10. Evaluate the model on the test dataset
 results_m4_s3b1 <- calculate_all_measures(fit_m4_s3b1, df_test, 0.5)
@@ -3891,7 +4030,7 @@ wf_m4_s3b2 <- workflow() %>%
 
 # 4. Cross-validation
 set.seed(123)
-folds_m4_s3b2 <- vfold_cv(df_m4_s3b2, v = 5, strata = Class)
+folds_m4_s3b2 <- vfold_cv(df_m4_s3b2, v = 20, strata = Class)
 
 # 5. Grid of hyperparameters
 # For mtry, we'll try different numbers of predictors
@@ -3906,6 +4045,17 @@ grid_m4_s3b2 <- grid_regular(
   levels = 5
 )
 
+# Determine number of cores to use (leave one core free)
+n_cores <- parallel::detectCores() - 1
+n_cores <- max(n_cores, 1)  # Ensure at least one core
+
+# Set the parallel plan - this activates parallel processing
+# plan(multisession, workers = n_cores)  # For Windows # nolint
+plan(multicore, workers = n_cores)   # For Unix/Linux/Mac
+
+# Display information about parallel processing
+cat("Using", n_cores, "cores for parallel processing\n")
+
 # 6. Tune the model
 tune_results_m4_s3b2 <- tune_grid(
   wf_m4_s3b2,
@@ -3913,6 +4063,13 @@ tune_results_m4_s3b2 <- tune_grid(
   grid = grid_m4_s3b2,
   metrics = metric_set(roc_auc, accuracy, sens, spec)
 )
+
+# Reset the future plan to sequential
+plan(sequential)
+# Unregister the parallel backend
+registerDoSEQ()  # Switch back to sequential processing
+# Display information about stopping parallel processing
+cat("Stopped parallel processing\n")
 
 # Show the tuning results
 autoplot(tune_results_m4_s3b2) +
@@ -3930,6 +4087,31 @@ final_wf_m4_s3b2 <- finalize_workflow(wf_m4_s3b2, best_params_m4_s3b2)
 
 # 9. Fit the final model
 fit_m4_s3b2 <- fit(final_wf_m4_s3b2, data = df_m4_s3b2)
+
+for (thresh in thresholds) {
+  results <- calculate_all_measures(fit_m4_s3b2, df_m4_s3b2, thresh)
+  tpr_1 <- results$values[results$measures == "TPR_1"]
+  tpr_0 <- results$values[results$measures == "TPR_0"]
+
+  threshold_results[[as.character(thresh)]] <- data.frame(
+    threshold = thresh,
+    TPR_1 = tpr_1,
+    TPR_0 = tpr_0,
+    diff_from_target =
+      ifelse(tpr_1 - 0.81 > 0,
+             (tpr_1 - 0.81) / 100,
+             tpr_1 - 0.81) +
+      ifelse(tpr_0 - 0.79 > 0,
+             (tpr_0 - 0.79) / 100,
+             tpr_0 - 0.79)
+  )
+}
+
+threshold_df <- do.call(rbind, threshold_results)
+best_threshold <-
+  threshold_df[which.max(threshold_df$diff_from_target), "threshold"]
+
+cat("Best threshold:", best_threshold, "\n")
 
 # 10. Evaluate the model on the test dataset
 results_m4_s3b2 <- calculate_all_measures(fit_m4_s3b2, df_test, 0.5)
