@@ -28,6 +28,15 @@ library(pROC)
 library(ranger)
 library(xgboost)
 
+# Set up parallel processing - do this once at the start of your script
+library(future)
+library(future.apply)
+library(doFuture)
+
+# Register doFuture as the parallel backend
+registerDoFuture()
+
+
 #---- 0.1 DONE *****    Functions - Full Performance Evaluation ----------------
 
 #results_m2_s1b1 <- calculate_all_measures(fit_m2_s1b1, df_test, best_threshold) # nolint
@@ -3283,7 +3292,6 @@ save(results_storage, file = "results_after_m3_s3b2.RData")
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #---- 5-4 DONE *****    Model 4 Random Forest ----------------------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 #---- 5-4-1 DONE ***      Model 4 Random Forest ------------------- m4-s1b1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -3292,17 +3300,7 @@ save(results_storage, file = "results_after_m3_s3b2.RData")
 #load("df_test.RData") # nolint
 
 # Use categorical variables for Random Forest
-df_m4_s1b1 <- df_s1b1 %>%
-  select(Class,
-         matches(paste0("^DETAILED-(",
-                        paste(df_columns_info %>%
-                                filter(variable_type %in%
-                                         c("factor",
-                                           "logical",
-                                           "factor_levels")) %>%
-                                pull(column_name),
-                              collapse = "|"), ")_"))) %>%
-  select(-matches("SERIALNO"))
+df_m4_s1b1 <- df_s1b1 %>% select(-matches("SERIALNO"))
 
 # 1. Model Specification
 spec_m4_s1b1 <- rand_forest(
@@ -3314,7 +3312,9 @@ spec_m4_s1b1 <- rand_forest(
   set_mode("classification")
 
 # 2. Recipe
-rec_m4_s1b1 <- recipe(Class ~ ., data = df_m4_s1b1)
+rec_m4_s1b1 <- recipe(Class ~ ., data = df_m4_s1b1) %>%
+  step_impute_median(all_numeric_predictors()) %>%
+  step_impute_mode(all_nominal_predictors()) 
 
 # 3. Workflow
 wf_m4_s1b1 <- workflow() %>%
@@ -3328,7 +3328,7 @@ folds_m4_s1b1 <- vfold_cv(df_m4_s1b1, v = 5, strata = Class)
 # 5. Grid of hyperparameters
 # For mtry, we'll try different numbers of predictors
 num_predictors <- ncol(df_m4_s1b1) - 1
-mtry_values <- floor(c(0.1, 0.25, 0.5, 0.75) * num_predictors)
+mtry_values <- floor(c(0.025, 0.05, 0.1, 0.25, 0.5, 0.75) * num_predictors)
 mtry_values <- unique(mtry_values[mtry_values > 0])
 
 grid_m4_s1b1 <- grid_regular(
@@ -3338,6 +3338,17 @@ grid_m4_s1b1 <- grid_regular(
   levels = 5
 )
 
+# Determine number of cores to use (leave one core free)
+n_cores <- parallel::detectCores() - 1
+n_cores <- max(n_cores, 1)  # Ensure at least one core
+
+# Set the parallel plan - this activates parallel processing
+# plan(multisession, workers = n_cores)  # For Windows # nolint
+plan(multicore, workers = n_cores)   # For Unix/Linux/Mac
+
+# Display information about parallel processing
+cat("Using", n_cores, "cores for parallel processing\n")
+
 # 6. Tune the model
 tune_results_m4_s1b1 <- tune_grid(
   wf_m4_s1b1,
@@ -3345,6 +3356,13 @@ tune_results_m4_s1b1 <- tune_grid(
   grid = grid_m4_s1b1,
   metrics = metric_set(roc_auc, accuracy, sens, spec)
 )
+
+# Reset the future plan to sequential
+plan(sequential)
+# Unregister the parallel backend
+registerDoSEQ()  # Switch back to sequential processing
+# Display information about stopping parallel processing
+cat("Stopped parallel processing\n")
 
 # Show the tuning results
 autoplot(tune_results_m4_s1b1) +
@@ -3361,7 +3379,7 @@ print(best_params_m4_s1b1)
 final_wf_m4_s1b1 <- finalize_workflow(wf_m4_s1b1, best_params_m4_s1b1)
 
 # 9. Fit the final model
-fit_m4_s1b1 <- fit(final_wf_m4_s1b1, data = df_m4_s1b1)
+fit_m4_s1b1 <- fit(final_wf_m4_s1b1, data = df_s1b1)
 
 # 10. Evaluate the model on the test dataset
 results_m4_s1b1 <- calculate_all_measures(fit_m4_s1b1, df_test, 0.5)
@@ -3390,7 +3408,6 @@ if (inherits(fit_m4_s1b1$fit$fit$fit, "ranger")) {
   ggsave("m4_s1b1_var_importance.png", width = 10, height = 8, dpi = 300)
 
 }
-
 #---- 5-4-2 DONE ***      Model 4 Random Forest ------------------- m4-s1b2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -3399,17 +3416,7 @@ if (inherits(fit_m4_s1b1$fit$fit$fit, "ranger")) {
 #load("df_test.RData") # nolint
 
 # Use categorical variables for Random Forest
-df_m4_s1b2 <- df_s1b2 %>%
-  select(Class,
-         matches(paste0("^DETAILED-(",
-                        paste(df_columns_info %>%
-                                filter(variable_type %in%
-                                         c("factor",
-                                           "logical",
-                                           "factor_levels")) %>%
-                                pull(column_name),
-                              collapse = "|"), ")_"))) %>%
-  select(-matches("SERIALNO"))
+df_m4_s1b2 <- df_s1b2 %>% select(-matches("SERIALNO"))
 
 # 1. Model Specification
 spec_m4_s1b2 <- rand_forest(
@@ -3421,7 +3428,9 @@ spec_m4_s1b2 <- rand_forest(
   set_mode("classification")
 
 # 2. Recipe
-rec_m4_s1b2 <- recipe(Class ~ ., data = df_m4_s1b2)
+rec_m4_s1b2 <- recipe(Class ~ ., data = df_m4_s1b2) %>%
+  step_impute_median(all_numeric_predictors()) %>%
+  step_impute_mode(all_nominal_predictors()) 
 
 # 3. Workflow
 wf_m4_s1b2 <- workflow() %>%
@@ -3435,7 +3444,7 @@ folds_m4_s1b2 <- vfold_cv(df_m4_s1b2, v = 5, strata = Class)
 # 5. Grid of hyperparameters
 # For mtry, we'll try different numbers of predictors
 num_predictors <- ncol(df_m4_s1b2) - 1
-mtry_values <- floor(c(0.1, 0.25, 0.5, 0.75) * num_predictors)
+mtry_values <- floor(c(0.025, 0.05, 0.1, 0.25, 0.5, 0.75) * num_predictors)
 mtry_values <- unique(mtry_values[mtry_values > 0])
 
 grid_m4_s1b2 <- grid_regular(
@@ -3445,6 +3454,17 @@ grid_m4_s1b2 <- grid_regular(
   levels = 5
 )
 
+# Determine number of cores to use (leave one core free)
+n_cores <- parallel::detectCores() - 1
+n_cores <- max(n_cores, 1)  # Ensure at least one core
+
+# Set the parallel plan - this activates parallel processing
+# plan(multisession, workers = n_cores)  # For Windows # nolint
+plan(multicore, workers = n_cores)   # For Unix/Linux/Mac
+
+# Display information about parallel processing
+cat("Using", n_cores, "cores for parallel processing\n")
+
 # 6. Tune the model
 tune_results_m4_s1b2 <- tune_grid(
   wf_m4_s1b2,
@@ -3452,6 +3472,13 @@ tune_results_m4_s1b2 <- tune_grid(
   grid = grid_m4_s1b2,
   metrics = metric_set(roc_auc, accuracy, sens, spec)
 )
+
+# Reset the future plan to sequential
+plan(sequential)
+# Unregister the parallel backend
+registerDoSEQ()  # Switch back to sequential processing
+# Display information about stopping parallel processing
+cat("Stopped parallel processing\n")
 
 # Show the tuning results
 autoplot(tune_results_m4_s1b2) +
@@ -3497,6 +3524,7 @@ if (inherits(fit_m4_s1b2$fit$fit$fit, "ranger")) {
   ggsave("m4_s1b2_var_importance.png", width = 10, height = 8, dpi = 300)
 
 }
+
 #---- 5-4-3 DONE ***      Model 4 Random Forest ------------------- m4-s2b1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -3533,7 +3561,7 @@ folds_m4_s2b1 <- vfold_cv(df_m4_s2b1, v = 5, strata = Class)
 # 5. Grid of hyperparameters
 # For mtry, we'll try different numbers of predictors
 num_predictors <- ncol(df_m4_s2b1) - 1
-mtry_values <- floor(c(0.1, 0.25, 0.5, 0.75) * num_predictors)
+mtry_values <- floor(c(0.025, 0.05, 0.1, 0.25, 0.5, 0.75) * num_predictors)
 mtry_values <- unique(mtry_values[mtry_values > 0])
 
 grid_m4_s2b1 <- grid_regular(
@@ -3543,13 +3571,31 @@ grid_m4_s2b1 <- grid_regular(
   levels = 5
 )
 
+# Determine number of cores to use (leave one core free)
+n_cores <- parallel::detectCores() - 1
+n_cores <- max(n_cores, 1)  # Ensure at least one core
+
+# Set the parallel plan - this activates parallel processing
+# plan(multisession, workers = n_cores)  # For Windows # nolint
+plan(multicore, workers = n_cores)   # For Unix/Linux/Mac
+
+# Display information about parallel processing
+cat("Using", n_cores, "cores for parallel processing\n")
+
 # 6. Tune the model
-tune_results_m4_s2b1 <- tune_grid(
-  wf_m4_s2b1,
-  resamples = folds_m4_s2b1,
-  grid = grid_m4_s2b1,
+tune_results_m4_s1b2 <- tune_grid(
+  wf_m4_s1b2,
+  resamples = folds_m4_s1b2,
+  grid = grid_m4_s1b2,
   metrics = metric_set(roc_auc, accuracy, sens, spec)
 )
+
+# Reset the future plan to sequential
+plan(sequential)
+# Unregister the parallel backend
+registerDoSEQ()  # Switch back to sequential processing
+# Display information about stopping parallel processing
+cat("Stopped parallel processing\n")
 
 # Show the tuning results
 autoplot(tune_results_m4_s2b1) +
@@ -3593,8 +3639,8 @@ if (inherits(fit_m4_s2b1$fit$fit$fit, "ranger")) {
     theme_minimal()
 
   ggsave("m4_s2b1_var_importance.png", width = 10, height = 8, dpi = 300)
-}
 
+}
 #---- 5-4-4 DONE ***      Model 4 Random Forest ------------------- m4-s2b2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -3603,17 +3649,7 @@ if (inherits(fit_m4_s2b1$fit$fit$fit, "ranger")) {
 #load("df_test.RData") # nolint
 
 # Use categorical variables for Random Forest
-df_m4_s2b2 <- df_s2b2 %>%
-  select(Class,
-         matches(paste0("^DETAILED-(",
-                        paste(df_columns_info %>%
-                                filter(variable_type %in%
-                                         c("factor",
-                                           "logical",
-                                           "factor_levels")) %>%
-                                pull(column_name),
-                              collapse = "|"), ")_"))) %>%
-  select(-matches("SERIALNO"))
+df_m4_s2b2 <- df_s2b2 %>% select(-matches("SERIALNO"))
 
 # 1. Model Specification
 spec_m4_s2b2 <- rand_forest(
@@ -3625,7 +3661,9 @@ spec_m4_s2b2 <- rand_forest(
   set_mode("classification")
 
 # 2. Recipe
-rec_m4_s2b2 <- recipe(Class ~ ., data = df_m4_s2b2)
+rec_m4_s2b2 <- recipe(Class ~ ., data = df_m4_s2b2) %>%
+  step_impute_median(all_numeric_predictors()) %>%
+  step_impute_mode(all_nominal_predictors()) 
 
 # 3. Workflow
 wf_m4_s2b2 <- workflow() %>%
@@ -3639,7 +3677,7 @@ folds_m4_s2b2 <- vfold_cv(df_m4_s2b2, v = 5, strata = Class)
 # 5. Grid of hyperparameters
 # For mtry, we'll try different numbers of predictors
 num_predictors <- ncol(df_m4_s2b2) - 1
-mtry_values <- floor(c(0.1, 0.25, 0.5, 0.75) * num_predictors)
+mtry_values <- floor(c(0.025, 0.05, 0.1, 0.25, 0.5, 0.75) * num_predictors)
 mtry_values <- unique(mtry_values[mtry_values > 0])
 
 grid_m4_s2b2 <- grid_regular(
@@ -3672,7 +3710,7 @@ print(best_params_m4_s2b2)
 final_wf_m4_s2b2 <- finalize_workflow(wf_m4_s2b2, best_params_m4_s2b2)
 
 # 9. Fit the final model
-fit_m4_s2b2 <- fit(final_wf_m4_s2b2, data = df_m4_s2b2)
+fit_m4_s2b2 <- fit(final_wf_m4_s2b2, data = df_s2b2)
 
 # 10. Evaluate the model on the test dataset
 results_m4_s2b2 <- calculate_all_measures(fit_m4_s2b2, df_test, 0.5)
@@ -3709,17 +3747,7 @@ if (inherits(fit_m4_s2b2$fit$fit$fit, "ranger")) {
 #load("df_test.RData") # nolint
 
 # Use categorical variables for Random Forest
-df_m4_s3b1 <- df_s3b1 %>%
-  select(Class,
-         matches(paste0("^DETAILED-(",
-                        paste(df_columns_info %>%
-                                filter(variable_type %in%
-                                         c("factor",
-                                           "logical",
-                                           "factor_levels")) %>%
-                                pull(column_name),
-                              collapse = "|"), ")_"))) %>%
-  select(-matches("SERIALNO"))
+df_m4_s3b1 <- df_s3b1 %>% select(-matches("SERIALNO"))
 
 # 1. Model Specification
 spec_m4_s3b1 <- rand_forest(
@@ -3731,7 +3759,9 @@ spec_m4_s3b1 <- rand_forest(
   set_mode("classification")
 
 # 2. Recipe
-rec_m4_s3b1 <- recipe(Class ~ ., data = df_m4_s3b1)
+rec_m4_s3b1 <- recipe(Class ~ ., data = df_m4_s3b1) %>%
+  step_impute_median(all_numeric_predictors()) %>%
+  step_impute_mode(all_nominal_predictors()) 
 
 # 3. Workflow
 wf_m4_s3b1 <- workflow() %>%
@@ -3745,7 +3775,7 @@ folds_m4_s3b1 <- vfold_cv(df_m4_s3b1, v = 5, strata = Class)
 # 5. Grid of hyperparameters
 # For mtry, we'll try different numbers of predictors
 num_predictors <- ncol(df_m4_s3b1) - 1
-mtry_values <- floor(c(0.1, 0.25, 0.5, 0.75) * num_predictors)
+mtry_values <- floor(c(0.025, 0.05, 0.1, 0.25, 0.5, 0.75) * num_predictors)
 mtry_values <- unique(mtry_values[mtry_values > 0])
 
 grid_m4_s3b1 <- grid_regular(
@@ -3807,6 +3837,7 @@ if (inherits(fit_m4_s3b1$fit$fit$fit, "ranger")) {
   ggsave("m4_s3b1_var_importance.png", width = 10, height = 8, dpi = 300)
 
 }
+
 #---- 5-4-6 DONE ***      Model 4 Random Forest ------------------- m4-s3b2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -3815,17 +3846,7 @@ if (inherits(fit_m4_s3b1$fit$fit$fit, "ranger")) {
 #load("df_test.RData") # nolint
 
 # Use categorical variables for Random Forest
-df_m4_s3b2 <- df_s3b2 %>%
-  select(Class,
-         matches(paste0("^DETAILED-(",
-                        paste(df_columns_info %>%
-                                filter(variable_type %in%
-                                         c("factor",
-                                           "logical",
-                                           "factor_levels")) %>%
-                                pull(column_name),
-                              collapse = "|"), ")_"))) %>%
-  select(-matches("SERIALNO"))
+df_m4_s3b2 <- df_s3b2 %>% select(-matches("SERIALNO"))
 
 # 1. Model Specification
 spec_m4_s3b2 <- rand_forest(
@@ -3837,7 +3858,9 @@ spec_m4_s3b2 <- rand_forest(
   set_mode("classification")
 
 # 2. Recipe
-rec_m4_s3b2 <- recipe(Class ~ ., data = df_m4_s3b2)
+rec_m4_s3b2 <- recipe(Class ~ ., data = df_m4_s3b2) %>%
+  step_impute_median(all_numeric_predictors()) %>%
+  step_impute_mode(all_nominal_predictors()) 
 
 # 3. Workflow
 wf_m4_s3b2 <- workflow() %>%
@@ -3851,7 +3874,7 @@ folds_m4_s3b2 <- vfold_cv(df_m4_s3b2, v = 5, strata = Class)
 # 5. Grid of hyperparameters
 # For mtry, we'll try different numbers of predictors
 num_predictors <- ncol(df_m4_s3b2) - 1
-mtry_values <- floor(c(0.1, 0.25, 0.5, 0.75) * num_predictors)
+mtry_values <- floor(c(0.025, 0.05, 0.1, 0.25, 0.5, 0.75) * num_predictors)
 mtry_values <- unique(mtry_values[mtry_values > 0])
 
 grid_m4_s3b2 <- grid_regular(
@@ -3914,7 +3937,6 @@ if (inherits(fit_m4_s3b2$fit$fit$fit, "ranger")) {
 
 }
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #---- 5-5 DONE *****    Model 5 Support Vect Machine ---------------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
