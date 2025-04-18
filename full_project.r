@@ -589,6 +589,18 @@ print(paste("training balanced 2 dataset - class distribution:",
 
 save(df_balanced2, file = "df_balanced2.RData")
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#---- 3.3 DONE *****    Balance - Method 3 - No Balance ------ df_balanced3 ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# Upsampling
+df_balanced3 <- df_train
+
+print(paste("training balanced 3 dataset - dim:", dim(df_balanced3)[1],
+            ",", dim(df_balanced3)[2]))
+
+save(df_balanced3, file = "df_balanced3.RData")
+
 ################################################################################
 #---- 4 PROG ******* Select - Project Step 4 ------------------ df_s#b# --------
 ################################################################################
@@ -1571,6 +1583,14 @@ df_s3b2 <- df_s3b2_allfact_miss %>% select(-Class) %>% # nolint
 #---- 4-3-2-4 DONE *          Final --------------------------------------------
 
 save(df_s3b2, file = "df_s3b2.RData")
+
+#---- 4-4 DONE *****    Select 4 - All Included ----------------- df_s4b3 ------
+
+df_s4b3 <- df_balanced3
+
+#---- 4-4-4-4 DONE *          Final --------------------------------------------
+
+save(df_s4b3, file = "df_s4b3.RData")
 
 ################################################################################
 #---- 5 PROG ******* Models - Project Step 5 ------------------ m#_s#b# --------
@@ -3455,7 +3475,7 @@ spec_m4_s1b2 <- rand_forest(
 # 2. Recipe
 rec_m4_s1b2 <- recipe(Class ~ ., data = df_m4_s1b2) %>%
   step_impute_median(all_numeric_predictors()) %>%
-  step_impute_mode(all_nominal_predictors()) 
+  step_impute_mode(all_nominal_predictors())
 
 # 3. Workflow
 wf_m4_s1b2 <- workflow() %>%
@@ -3747,12 +3767,12 @@ wf_m4_s2b2 <- workflow() %>%
 
 # 4. Cross-validation
 set.seed(123)
-folds_m4_s2b2 <- vfold_cv(df_m4_s2b2, v = 20, strata = Class)
+folds_m4_s2b2 <- vfold_cv(df_m4_s2b2, v = 5, strata = Class)
 
 # 5. Grid of hyperparameters
 # For mtry, we'll try different numbers of predictors
 num_predictors <- ncol(df_m4_s2b2) - 1
-mtry_values <- floor(c(0.025, 0.05, 0.1, 0.25, 0.5, 0.75) * num_predictors)
+mtry_values <- floor(c(0.05, 0.1, 0.25, 0.5, 0.75) * num_predictors)
 mtry_values <- unique(mtry_values[mtry_values > 0])
 
 grid_m4_s2b2 <- grid_regular(
@@ -4978,7 +4998,7 @@ df_m6_s2b1 <- df_s2b1 %>%
                                        filter(variable_type %in%
                                                 c("integer")) %>%
                                        pull(column_name),
-                                     collapse = "|"), ")_")))
+                                     collapse = "|"), ")_"))) %>% select(-matches("SERIALNO"))
 
 # 1. Model Specification
 spec_m6_s2b1 <- boost_tree(
@@ -4992,9 +5012,7 @@ spec_m6_s2b1 <- boost_tree(
 
 # 2. Recipe
 rec_m6_s2b1 <- recipe(Class ~ ., data = df_m6_s2b1) %>%
-  step_zv(all_predictors()) %>%
   step_impute_median(all_numeric_predictors()) %>%
-  step_normalize(all_predictors()) %>%
   step_dummy(all_nominal_predictors(), -all_outcomes())
 
 # 3. Workflow
@@ -5012,8 +5030,26 @@ tune_grid_m6_s2b1 <- grid_regular(
   tree_depth(range = c(3, 9)),
   learn_rate(range = c(-5, -1), trans = log10_trans()),
   min_n(range = c(2, 10)),
-  levels = 5
-)
+  levels = 5)
+
+#tune_grid_m6_s2b1 <- grid_latin_hypercube(
+#  trees(range = c(100, 500)),
+#  tree_depth(range = c(3, 9)),
+#  learn_rate(range = c(-5, -1), trans = log10_trans()),
+#  min_n(range = c(2, 10)),
+#  levels = 5
+#)
+
+# Determine number of cores to use (leave one core free)
+n_cores <- parallel::detectCores() - 1
+n_cores <- max(n_cores, 1)  # Ensure at least one core
+
+# Set the parallel plan - this activates parallel processing
+# plan(multisession, workers = n_cores)  # For Windows # nolint
+plan(multicore, workers = n_cores)   # For Unix/Linux/Mac
+
+# Display information about parallel processing
+cat("Using", n_cores, "cores for parallel processing\n")
 
 # 6. Tune the model
 tune_results_m6_s2b1 <- tune_grid(
@@ -5022,6 +5058,13 @@ tune_results_m6_s2b1 <- tune_grid(
   grid = tune_grid_m6_s2b1,
   metrics = metric_set(roc_auc, accuracy, sens, spec)
 )
+
+# Reset the future plan to sequential
+plan(sequential)
+# Unregister the parallel backend
+registerDoSEQ()  # Switch back to sequential processing
+# Display information about stopping parallel processing
+cat("Stopped parallel processing\n")
 
 # Show the tuning results
 autoplot(tune_results_m6_s2b1) +
@@ -5051,13 +5094,6 @@ confusion_matrix_m6_s2b1 <- test_predications_m6_s2b1 %>%
 
 # Print the confusion matrix
 print(confusion_matrix_m6_s2b1)
-
-# Visualize the confusion matrix
-autoplot(confusion_matrix_m6_s2b1, type = "heatmap") +
-  labs(title = "Confusion Matrix for Gradient Boosting",
-       x = "Predicted Class",
-       y = "Actual Class") +
-  theme_minimal()
 
 results_m6_s2b1 <- calculate_all_measures(fit_m6_s2b1, df_test, 0.5)
 
