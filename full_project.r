@@ -2233,14 +2233,14 @@ print(best_params_m2_s1b1)
 final_wf_m2_s1b1 <- finalize_workflow(wf_m2_s1b1, best_params_m2_s1b1)
 
 # 9. Fit the final model
-fit_m2_s1b1 <- fit(final_wf_m2_s1b1, data = df_s1b1)
+fit_m2_s1b1 <- fit(final_wf_m2_s1b1, data = df_m2_s1b1)
 
 # Try different thresholds to achieve the target TPR and TNR
 thresholds <- seq(0.3, 0.7, by = 0.05)
 threshold_results <- list()
 
 for (thresh in thresholds) {
-  results <- calculate_all_measures(fit_m2_s1b1, df_s1b1, thresh)
+  results <- calculate_all_measures(fit_m2_s1b1, df_m2_s1b1, thresh)
   tpr_1 <- results$values[results$measures == "TPR_1"]
   tpr_0 <- results$values[results$measures == "TPR_0"]
 
@@ -2339,14 +2339,14 @@ print(best_params_m2_s1b2)
 final_wf_m2_s1b2 <- finalize_workflow(wf_m2_s1b2, best_params_m2_s1b2)
 
 # 9. Fit the final model
-fit_m2_s1b2 <- fit(final_wf_m2_s1b2, data = df_s1b2)
+fit_m2_s1b2 <- fit(final_wf_m2_s1b2, data = df_m2_s1b2)
 
 # Try different thresholds to achieve the target TPR and TNR
 thresholds <- seq(0.3, 0.7, by = 0.05)
 threshold_results <- list()
 
 for (thresh in thresholds) {
-  results <- calculate_all_measures(fit_m2_s1b2, df_s1b2, thresh)
+  results <- calculate_all_measures(fit_m2_s1b2, df_m2_s1b2, thresh)
   tpr_1 <- results$values[results$measures == "TPR_1"]
   tpr_0 <- results$values[results$measures == "TPR_0"]
 
@@ -2445,14 +2445,14 @@ print(best_params_m2_s2b1)
 final_wf_m2_s2b1 <- finalize_workflow(wf_m2_s2b1, best_params_m2_s2b1)
 
 # 9. Fit the final model
-fit_m2_s2b1 <- fit(final_wf_m2_s2b1, data = df_s2b1)
+fit_m2_s2b1 <- fit(final_wf_m2_s2b1, data = df_m2_s2b1)
 
 # Try different thresholds to achieve the target TPR and TNR
 thresholds <- seq(0.3, 0.7, by = 0.05)
 threshold_results <- list()
 
 for (thresh in thresholds) {
-  results <- calculate_all_measures(fit_m2_s2b1, df_s2b1, thresh)
+  results <- calculate_all_measures(fit_m2_s2b1, df_m2_s2b1, thresh)
   tpr_1 <- results$values[results$measures == "TPR_1"]
   tpr_0 <- results$values[results$measures == "TPR_0"]
 
@@ -2551,14 +2551,14 @@ print(best_params_m2_s2b2)
 final_wf_m2_s2b2 <- finalize_workflow(wf_m2_s2b2, best_params_m2_s2b2)
 
 # 9. Fit the final model
-fit_m2_s2b2 <- fit(final_wf_m2_s2b2, data = df_s2b2)
+fit_m2_s2b2 <- fit(final_wf_m2_s2b2, data = df_m2_s2b2)
 
 # Try different thresholds to achieve the target TPR and TNR
 thresholds <- seq(0.3, 0.7, by = 0.05)
 threshold_results <- list()
 
 for (thresh in thresholds) {
-  results <- calculate_all_measures(fit_m2_s2b2, df_s2b2, thresh)
+  results <- calculate_all_measures(fit_m2_s2b2, df_m2_s2b2, thresh)
   tpr_1 <- results$values[results$measures == "TPR_1"]
   tpr_0 <- results$values[results$measures == "TPR_0"]
 
@@ -2657,14 +2657,14 @@ print(best_params_m2_s3b1)
 final_wf_m2_s3b1 <- finalize_workflow(wf_m2_s3b1, best_params_m2_s3b1)
 
 # 9. Fit the final model
-fit_m2_s3b1 <- fit(final_wf_m2_s3b1, data = df_s3b1)
+fit_m2_s3b1 <- fit(final_wf_m2_s3b1, data = df_m2_s3b1)
 
 # Try different thresholds to achieve the target TPR and TNR
 thresholds <- seq(0.3, 0.7, by = 0.05)
 threshold_results <- list()
 
 for (thresh in thresholds) {
-  results <- calculate_all_measures(fit_m2_s3b1, df_s3b1, thresh)
+  results <- calculate_all_measures(fit_m2_s3b1, df_m2_s3b1, thresh)
   tpr_1 <- results$values[results$measures == "TPR_1"]
   tpr_0 <- results$values[results$measures == "TPR_0"]
 
@@ -2763,14 +2763,14 @@ print(best_params_m2_s3b2)
 final_wf_m2_s3b2 <- finalize_workflow(wf_m2_s3b2, best_params_m2_s3b2)
 
 # 9. Fit the final model
-fit_m2_s3b2 <- fit(final_wf_m2_s3b2, data = df_s3b2)
+fit_m2_s3b2 <- fit(final_wf_m2_s3b2, data = df_m2_s3b2)
 
 # Try different thresholds to achieve the target TPR and TNR
 thresholds <- seq(0.3, 0.7, by = 0.05)
 threshold_results <- list()
 
 for (thresh in thresholds) {
-  results <- calculate_all_measures(fit_m2_s3b2, df_s3b2, thresh)
+  results <- calculate_all_measures(fit_m2_s3b2, df_m2_s3b2, thresh)
   tpr_1 <- results$values[results$measures == "TPR_1"]
   tpr_0 <- results$values[results$measures == "TPR_0"]
 
@@ -2869,7 +2869,7 @@ print(best_params_m3_s1b1)
 final_wf_m3_s1b1 <- finalize_workflow(wf_m3_s1b1, best_params_m3_s1b1)
 
 # 9. Fit the final model
-fit_m3_s1b1 <- fit(final_wf_m3_s1b1, data = df_s1b1)
+fit_m3_s1b1 <- fit(final_wf_m3_s1b1, data = df_m2_s1b1)
 
 # 10. Evaluate the model on the test dataset
 results_m3_s1b1 <- calculate_all_measures(fit_m3_s1b1, df_test, 0.5)
@@ -2951,7 +2951,7 @@ print(best_params_m3_s1b2)
 final_wf_m3_s1b2 <- finalize_workflow(wf_m3_s1b2, best_params_m3_s1b2)
 
 # 9. Fit the final model
-fit_m3_s1b2 <- fit(final_wf_m3_s1b2, data = df_s1b2)
+fit_m3_s1b2 <- fit(final_wf_m3_s1b2, data = df_m3_s1b2)
 
 # 10. Evaluate the model on the test dataset
 results_m3_s1b2 <- calculate_all_measures(fit_m3_s1b2, df_test, 0.5)
@@ -3033,7 +3033,7 @@ print(best_params_m3_s2b1)
 final_wf_m3_s2b1 <- finalize_workflow(wf_m3_s2b1, best_params_m3_s2b1)
 
 # 9. Fit the final model
-fit_m3_s2b1 <- fit(final_wf_m3_s2b1, data = df_s2b1)
+fit_m3_s2b1 <- fit(final_wf_m3_s2b1, data = df_m3_s2b1)
 
 # 10. Evaluate the model on the test dataset
 results_m3_s2b1 <- calculate_all_measures(fit_m3_s2b1, df_test, 0.5)
@@ -3115,7 +3115,7 @@ print(best_params_m3_s2b2)
 final_wf_m3_s2b2 <- finalize_workflow(wf_m3_s2b2, best_params_m3_s2b2)
 
 # 9. Fit the final model
-fit_m3_s2b2 <- fit(final_wf_m3_s2b2, data = df_s2b2)
+fit_m3_s2b2 <- fit(final_wf_m3_s2b2, data = df_m3_s2b2)
 
 # 10. Evaluate the model on the test dataset
 results_m3_s2b2 <- calculate_all_measures(fit_m3_s2b2, df_test, 0.5)
@@ -3197,7 +3197,7 @@ print(best_params_m3_s3b1)
 final_wf_m3_s3b1 <- finalize_workflow(wf_m3_s3b1, best_params_m3_s3b1)
 
 # 9. Fit the final model
-fit_m3_s3b1 <- fit(final_wf_m3_s3b1, data = df_s3b1)
+fit_m3_s3b1 <- fit(final_wf_m3_s3b1, data = df_m3_s3b1)
 
 # 10. Evaluate the model on the test dataset
 results_m3_s3b1 <- calculate_all_measures(fit_m3_s3b1, df_test, 0.5)
@@ -3279,7 +3279,7 @@ print(best_params_m3_s3b2)
 final_wf_m3_s3b2 <- finalize_workflow(wf_m3_s3b2, best_params_m3_s3b2)
 
 # 9. Fit the final model
-fit_m3_s3b2 <- fit(final_wf_m3_s3b2, data = df_s3b2)
+fit_m3_s3b2 <- fit(final_wf_m3_s3b2, data = df_m3_s3b2)
 
 # 10. Evaluate the model on the test dataset
 results_m3_s3b2 <- calculate_all_measures(fit_m3_s3b2, df_test, 0.5)
@@ -3379,7 +3379,7 @@ print(best_params_m4_s1b1)
 final_wf_m4_s1b1 <- finalize_workflow(wf_m4_s1b1, best_params_m4_s1b1)
 
 # 9. Fit the final model
-fit_m4_s1b1 <- fit(final_wf_m4_s1b1, data = df_s1b1)
+fit_m4_s1b1 <- fit(final_wf_m4_s1b1, data = df_m4_s1b1)
 
 # 10. Evaluate the model on the test dataset
 results_m4_s1b1 <- calculate_all_measures(fit_m4_s1b1, df_test, 0.5)
@@ -3495,10 +3495,32 @@ print(best_params_m4_s1b2)
 final_wf_m4_s1b2 <- finalize_workflow(wf_m4_s1b2, best_params_m4_s1b2)
 
 # 9. Fit the final model
-fit_m4_s1b2 <- fit(final_wf_m4_s1b2, data = df_s1b2)
+fit_m4_s1b2 <- fit(final_wf_m4_s1b2, data = df_m4_s1b2)
+
+# Try different thresholds to achieve the target TPR and TNR
+thresholds <- seq(0.1, 0.9, by = 0.05)
+threshold_results <- list()
+
+for (thresh in thresholds) {
+  results <- calculate_all_measures(fit_m4_s1b2, df_m4_s1b2, thresh)
+  tpr_1 <- results$values[results$measures == "TPR_1"]
+  tpr_0 <- results$values[results$measures == "TPR_0"]
+
+  threshold_results[[as.character(thresh)]] <- data.frame(
+    threshold = thresh,
+    TPR_1 = tpr_1,
+    TPR_0 = tpr_0,
+    diff_from_target = (tpr_1 - 0.81) + (tpr_0 - 0.79)
+  )
+}
+
+threshold_df <- do.call(rbind, threshold_results)
+best_threshold <- threshold_df[which.max(threshold_df$diff_from_target), "threshold"]
+
+cat("Best threshold:", best_threshold, "\n")
 
 # 10. Evaluate the model on the test dataset
-results_m4_s1b2 <- calculate_all_measures(fit_m4_s1b2, df_test, 0.5)
+results_m4_s1b2 <- calculate_all_measures(fit_m4_s1b2, df_test, best_threshold)
 results_m4_s1b2
 store_results("m4s1b2", results_m4_s1b2, "Random Forest Model - s1b2")
 
@@ -3612,7 +3634,7 @@ print(best_params_m4_s2b1)
 final_wf_m4_s2b1 <- finalize_workflow(wf_m4_s2b1, best_params_m4_s2b1)
 
 # 9. Fit the final model
-fit_m4_s2b1 <- fit(final_wf_m4_s2b1, data = df_s2b1)
+fit_m4_s2b1 <- fit(final_wf_m4_s2b1, data = df_m4_s2b1)
 
 # 10. Evaluate the model on the test dataset
 results_m4_s2b1 <- calculate_all_measures(fit_m4_s2b1, df_test, 0.5)
@@ -3710,7 +3732,7 @@ print(best_params_m4_s2b2)
 final_wf_m4_s2b2 <- finalize_workflow(wf_m4_s2b2, best_params_m4_s2b2)
 
 # 9. Fit the final model
-fit_m4_s2b2 <- fit(final_wf_m4_s2b2, data = df_s2b2)
+fit_m4_s2b2 <- fit(final_wf_m4_s2b2, data = df_m4_s2b2)
 
 # 10. Evaluate the model on the test dataset
 results_m4_s2b2 <- calculate_all_measures(fit_m4_s2b2, df_test, 0.5)
@@ -3808,7 +3830,7 @@ print(best_params_m4_s3b1)
 final_wf_m4_s3b1 <- finalize_workflow(wf_m4_s3b1, best_params_m4_s3b1)
 
 # 9. Fit the final model
-fit_m4_s3b1 <- fit(final_wf_m4_s3b1, data = df_s3b1)
+fit_m4_s3b1 <- fit(final_wf_m4_s3b1, data = df_m4_s3b1)
 
 # 10. Evaluate the model on the test dataset
 results_m4_s3b1 <- calculate_all_measures(fit_m4_s3b1, df_test, 0.5)
@@ -3907,7 +3929,7 @@ print(best_params_m4_s3b2)
 final_wf_m4_s3b2 <- finalize_workflow(wf_m4_s3b2, best_params_m4_s3b2)
 
 # 9. Fit the final model
-fit_m4_s3b2 <- fit(final_wf_m4_s3b2, data = df_s3b2)
+fit_m4_s3b2 <- fit(final_wf_m4_s3b2, data = df_m4_s3b2)
 
 # 10. Evaluate the model on the test dataset
 results_m4_s3b2 <- calculate_all_measures(fit_m4_s3b2, df_test, 0.5)
