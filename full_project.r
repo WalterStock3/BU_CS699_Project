@@ -5446,7 +5446,7 @@ df_m6_s4b3 <- df_s4b3 %>% select(Class, matches(paste0("^DETAILED-(",
                                        filter(variable_type %in%
                                                 c("integer")) %>%
                                        pull(column_name),
-                                     collapse = "|"), ")_"))
+                                     collapse = "|"), ")_")))
 #"DETAILED-PUBCOV_Public health coverage recode",
 #"DETAILED-WRK_Worked last week") #,
 #"DETAILED-INDP_Industry recode for 2023 and later based on 2022 IND codes")
