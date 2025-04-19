@@ -559,6 +559,8 @@ save(df_test, file = "df_test.RData")
 #---- 3.1 DONE *****    Balance - Method 1 - Down Sample ----- df_balanced1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+#load("df_train.RData")
+
 # Undersampling
 df_balanced1 <- downSample(x = df_train[, -which(names(df_train) %in% "Class")],
                            y = df_train$Class)
@@ -575,6 +577,8 @@ save(df_balanced1, file = "df_balanced1.RData")
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #---- 3.2 DONE *****    Balance - Method 2 - Up Sample ------- df_balanced2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#load("df_train.RData")
 
 # Upsampling
 df_balanced2 <- upSample(x = df_train[, -which(names(df_train) %in% "Class")],
@@ -1155,6 +1159,224 @@ df_s2b2 <- df_s2b2_allfact %>% select(-Class) %>% # nolint
 
 save(df_s2b2, file = "df_s2b2.RData")
 
+#---- 4-2-3 DONE ***       Select 2 - balanced 3 ------------------ df_s2b3 ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#load("df_balanced3.RData") # nolint
+#load("df_columns_info.RData") # nolint
+
+df_s2b3 <- df_balanced3
+
+#---- 4-2-2-1 DONE *          Factor and Logical Variables ---------------------
+
+df_s2b3_1factors <- df_balanced3 %>%
+  select(Class, matches(paste0("^DETAILED-(",
+                               paste(df_columns_info %>%
+                                       filter(variable_type %in%
+                                                c("factor")) %>%
+                                       pull(column_name),
+                                     collapse = "|"), ")_")))
+
+df_s2b3_2logical <- df_balanced3 %>%
+  select(Class, matches(paste0("^DETAILED-(",
+                               paste(df_columns_info %>%
+                                       filter(variable_type %in%
+                                                c("logical")) %>%
+                                       pull(column_name),
+                                     collapse = "|"), ")_")))
+
+df_s2b3_3levels <- df_balanced3 %>%
+  select(Class, matches(paste0("^DETAILED-(",
+                               paste(df_columns_info %>%
+                                       filter(variable_type %in%
+                                                c("factor_levels")) %>%
+                                       pull(column_name),
+                                     collapse = "|"), ")_")))
+
+df_s2b3_allfact <- cbind(
+  df_s2b3_1factors,
+  df_s2b3_2logical %>% select(-Class),
+  df_s2b3_3levels %>% select(-Class)
+)
+
+##### Will use Fisher test over Chi-square to handle sparse data.
+
+fisher_not_possible <- c("Class", "RACNH", "DETAILED-RACNH_")
+
+s2b3_fisher_results <- list()
+
+# Simulation-based Fisher test
+for (col in names(df_s2b3_allfact)) {
+  print(paste(Sys.time(), "- Processing column:", col))
+  if (any(startsWith(col, fisher_not_possible))) {
+    print(paste("Skipping column:", col))
+    next
+  }
+  tryCatch({
+    table_data <- table(df_s2b3_allfact[[col]],
+                        df_s2b3_allfact$Class)
+    fisher_test <- fisher.test(table_data, workspace = 1e9,
+                               simulate.p.value = TRUE, B = 2000000)
+    s2b3_fisher_results[[col]] <-
+      list(column = col, p_value = fisher_test$p.value)
+    print(paste(Sys.time(),
+                "- Fisher test column:", col, "p-value:", fisher_test$p.value))
+  }, error = function(e) {
+    message(paste("Error processing column:", col, "-", e$message))
+    s2b3_fisher_results[[col]] <- list(column = col, p_value = NA)
+  })
+}
+
+# Convert results to a data frame for easier interpretation
+df_s2b3_fisher_results <-
+  do.call(rbind, lapply(s2b3_fisher_results, as.data.frame))
+
+names(df_s2b3_fisher_results) <- c("Column", "P_value")
+
+df_s2b3_fisher_results$neg_log10_P_value <-
+  -log10(df_s2b3_fisher_results$P_value)
+
+# Create a bar plot for Fisher scores
+df_s2b3_fisher_plt <- df_s2b3_fisher_results %>%
+  mutate(P_value = as.numeric(as.character(P_value))) %>%
+  arrange(P_value)
+
+plt_s2b3_fisher <-
+  ggplot(df_s2b3_fisher_plt,
+         aes(x = reorder(substr(Column, 10, 60), -P_value),
+             y = -log10(P_value))) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  geom_hline(yintercept = -log10(0.05), color = "red", linetype = "dashed") +
+  coord_flip() +
+  labs(title = "Fisher Scores for Categorical and Logical Variables 
+       with Missing Included",
+       subtitle = "Select 2 - Balanced 2",
+       caption = "Red line indicates p-value threshold of 0.01",
+       x = "",
+       y = "-log10(P-value)") +
+  theme_minimal()
+
+plt_s2b3_fisher
+
+ggsave("plt_s2b3_fisher.png", plot = plt_s2b3_fisher,
+       width = 10, height = 12, dpi = 300)
+
+neg_log10_P_cutoff <- 50
+
+# Identify the columns to keep
+select_cols <- df_s2b3_fisher_results %>%
+  filter(-log10(P_value) > neg_log10_P_cutoff) %>%
+  arrange(desc(neg_log10_P_value)) %>%
+  pull(Column)
+
+# Create a new dataframe with those columns
+df_s2b3_allfact <- df_s2b3_allfact %>%
+  select(Class, all_of(select_cols))
+
+#---- 4-2-2-2 DONE *          Integer Variables --------------------------------
+
+df_s2b3_4integers <- df_balanced3 %>%
+  select(Class, matches(paste0("^DETAILED-(",
+                               paste(df_columns_info %>%
+                                       filter(variable_type %in%
+                                                c("integer")) %>%
+                                       pull(column_name),
+                                     collapse = "|"), ")_")))
+
+in_select2_cor_threshold <- 0.01
+
+repeat {
+  df_numeric <- df_s2b3_4integers %>%
+    mutate(across(where(is.integer), as.numeric))
+
+  # Check for collinearity using a correlation matrix
+  correlation_matrix_full <- cor(df_numeric %>% select(-Class))
+  correlation_matrix <- correlation_matrix_full
+
+  # Identify the two variables that are most correlated
+  correlation_matrix[upper.tri(correlation_matrix, diag = TRUE)] <- NA
+  most_correlated_location <- which(abs(correlation_matrix) ==
+                                      max(abs(correlation_matrix),
+                                          na.rm = TRUE), arr.ind = TRUE)
+  most_correlated_vars <- colnames(correlation_matrix)[most_correlated_location]
+  most_correlated_correlation <- correlation_matrix[most_correlated_location]
+
+  # Break the loop if the highest correlation is less than a threshold.
+  if (abs(most_correlated_correlation) <= in_select2_cor_threshold) {
+    break
+  }
+
+  print(paste("Most correlated:", most_correlated_vars[1],
+              "and", most_correlated_vars[2],
+              "at", most_correlated_correlation))
+
+  # Sum the correlations to decide which one to remove
+  row_to_sum1 <- abs(correlation_matrix_full[most_correlated_vars[1],
+                                             , drop = FALSE])
+  row_sum1 <- sum(row_to_sum1, na.rm = TRUE)
+
+  row_to_sum2 <- abs(correlation_matrix_full[most_correlated_vars[2],
+                                             , drop = FALSE])
+  row_sum2 <- sum(row_to_sum2, na.rm = TRUE)
+
+  print(paste("Variable:", most_correlated_vars[1], "Row Sum:", row_sum1))
+  print(paste("Variable:", most_correlated_vars[2], "Row Sum:", row_sum2))
+
+  # Remove the variable with the highest sum of correlations
+  highly_correlated <- ifelse(row_sum1 > row_sum2, most_correlated_vars[1],
+                              most_correlated_vars[2])
+
+  df_s2b3_4integers <- df_numeric %>%
+    select(-all_of(highly_correlated))
+
+  print(paste("Removed variable:", highly_correlated))
+}
+
+#---- 4-2-2-3 DONE *          Outliers -----------------------------------------
+# Create boxplots for each numeric variable in the dataset
+
+# Generate boxplots dynamically for all numeric columns
+boxplots <- lapply(df_s2b3_4integers, function(col) {
+  ggplot(df_s2b3_4integers, aes(x = "", y = .data[[col]])) +
+    geom_boxplot() +
+    theme(axis.title.x = element_blank(),
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank())
+})
+
+plt_list <- lapply(names(df_s2b3_4integers)
+                   [names(df_s2b3_4integers) != "Class"],
+                   function(col_name) {
+                     ggplot(df_s2b3_4integers,
+                            aes(x = "", y = .data[[col_name]])) +
+                       geom_boxplot() +
+                       labs(title =
+                              substr(col_name, 10, regexpr("_", col_name) - 1),
+                            y = substr(col_name, regexpr("_", col_name) + 1,
+                                       regexpr("_", col_name) + 60)) +
+                       theme(plot.title = element_text(hjust = .9)) +
+                       theme_minimal() +
+                       theme(
+                             axis.title.x = element_blank(),
+                             axis.text.x  = element_blank(),
+                             axis.ticks.x = element_blank(),
+                             axis.text.y  = element_blank(),
+                             axis.ticks.y = element_blank())
+                   })
+
+plt_s2b3_corr <- grid.arrange(grobs = plt_list, ncol = 7)
+
+ggsave("plt_s2b3_corr.png",
+       plot = plt_s2b3_corr, width = 10, height = 16, dpi = 300)
+
+# Removing class to avoid duplication.  Class is included in both dfs.
+df_s2b3 <- df_s2b3_allfact %>% select(-Class) %>% # nolint
+  bind_cols(df_s2b3_4integers)
+
+#---- 4-2-2-4 DONE *          Final --------------------------------------------
+
+save(df_s2b3, file = "df_s2b3.RData")
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #---- 4-3 DONE *****    Select 3 - Missing Added ---------------- df_s3b# ------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1584,7 +1806,7 @@ df_s3b2 <- df_s3b2_allfact_miss %>% select(-Class) %>% # nolint
 
 save(df_s3b2, file = "df_s3b2.RData")
 
-#---- 4-4 DONE *****    Select 4 - All Included -------------------- df_s4b3 ----
+#---- 4-4 DONE *****    Select 4 - All Included ------------------- df_s4b3 ----
 
 df_s4b3 <- df_balanced3
 
@@ -4860,7 +5082,7 @@ autoplot(tune_results_m6_s1b1) +
 
 # 7. Select the best parameters
 best_parameters_m6_s1b1 <- select_best(tune_results_m6_s1b1,
- metric = "bal_accuracy")
+                                       metric = "bal_accuracy")
 
 print(best_parameters_m6_s1b1)
 
@@ -5582,3 +5804,122 @@ store_results("m6s4b3", results_m6_s4b3, "Gradient Boosting Model - s4b3")
 
 # Save the results to an RData file
 save(results_storage, file = "results_after_m6_s4b3.RData")
+
+#---- 5-6-8 DONE ***      Model 6 Gradient Boosting --------------- m6-s2b3 ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#load("df_s2b3.RData") # nolint
+#load("df_columns_info.RData") # nolint
+#load("df_test.RData") # nolint
+
+# Gradient Boosting Model
+
+df_m6_s2b3 <- df_s2b3 %>%
+  select(Class, matches(paste0("^DETAILED-(",
+                               paste(df_columns_info %>%
+                                       filter(variable_type %in%
+                                                c("integer")) %>%
+                                       pull(column_name),
+                                     collapse = "|"), ")_")))
+
+# 1. Model Specification
+spec_m6_s2b3 <- boost_tree(
+  trees = tune(),
+  tree_depth = tune(),
+  learn_rate = tune(),
+  min_n = tune()
+) %>%
+  set_engine("xgboost") %>%
+  set_mode("classification")
+
+# 2. Recipe
+rec_m6_s2b3 <- recipe(Class ~ ., data = df_m6_s2b3) %>%
+  step_zv(all_predictors()) %>%
+  step_impute_median(all_numeric_predictors()) %>%
+  step_normalize(all_predictors()) %>%
+  step_dummy(all_nominal_predictors(), -all_outcomes())
+
+# 3. Workflow
+wf_m6_s2b3 <- workflow() %>%
+  add_model(spec_m6_s2b3) %>%
+  add_recipe(rec_m6_s2b3)
+
+# 4. Cross-validation
+set.seed(123)
+folds_m6_s2b3 <- vfold_cv(df_m6_s2b3, v = 5, strata = Class)
+
+# 5. Grid of hyperparameters
+tune_grid_m6_s2b3 <- grid_regular(
+  trees(range = c(2000, 6000)),
+  tree_depth(range = c(2, 4)),
+  learn_rate(range = c(-5, -1), trans = log10_trans()),
+  min_n(range = c(2, 10)),
+  levels = 3
+)
+
+# Determine number of cores to use (leave one core free)
+n_cores <- parallel::detectCores() - 1
+n_cores <- max(n_cores, 1)  # Ensure at least one core
+
+# Set the parallel plan - this activates parallel processing
+# plan(multisession, workers = n_cores)  # For Windows # nolint
+plan(multicore, workers = n_cores)   # For Unix/Linux/Mac
+
+# Display information about parallel processing
+cat("Using", n_cores, "cores for parallel processing\n")
+
+# 6. Tune the model
+tune_results_m6_s2b3 <- tune_grid(
+  wf_m6_s2b3,
+  resamples = folds_m6_s2b3,
+  grid = tune_grid_m6_s2b3,
+  metrics = metric_set(roc_auc, bal_accuracy, sens, yardstick::specificity)
+)
+
+# Reset the future plan to sequential
+plan(sequential)
+# Unregister the parallel backend
+registerDoSEQ()  # Switch back to sequential processing
+# Display information about stopping parallel processing
+cat("Stopped parallel processing\n")
+
+# Show the tuning results
+autoplot(tune_results_m6_s2b3) +
+  labs(title = "Tuning Results for Gradient Boosting",
+       x = "Tuned Parameter",
+       y = "Performance") +
+  theme_minimal()
+
+# 7. Select the best parameters
+best_parameters_m6_s2b3 <- select_best(tune_results_m6_s2b3,
+                                       metric = "bal_accuracy")
+
+print(best_parameters_m6_s2b3)
+
+# 8. Finalize the workflow
+final_wf_m6_s2b3 <- finalize_workflow(wf_m6_s2b3, best_parameters_m6_s2b3)
+
+# 9. Fit the final model
+fit_m6_s2b3 <- fit(final_wf_m6_s2b3, data = df_m6_s2b3)
+
+# 10. Evaluate the model on the test dataset
+test_predications_m6_s2b3 <-
+  predict(fit_m6_s2b3, new_data = df_test, type = "prob") %>%
+  bind_cols(predict(fit_m6_s2b3, new_data = df_test, type = "class")) %>%
+  bind_cols(df_test %>% select(Class))
+
+# Generate a confusion matrix
+confusion_matrix_m6_s2b3 <- test_predications_m6_s2b3 %>%
+  conf_mat(truth = Class, estimate = .pred_class)
+
+# Print the confusion matrix
+print(confusion_matrix_m6_s2b3)
+
+results_m6_s2b3 <- calculate_all_measures(fit_m6_s2b3, df_test, 0.5)
+
+results_m6_s2b3
+
+store_results("m6s2b3", results_m6_s2b3, "Gradient Boosting Model - s2b3")
+
+# Save the results to an RData file
+save(results_storage, file = "results_after_m6_s2b3.RData")
