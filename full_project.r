@@ -1066,7 +1066,7 @@ df_s2b2_4integers <- df_balanced2 %>%
                                        pull(column_name),
                                      collapse = "|"), ")_")))
 
-in_select2_cor_threshold <- 0.05
+in_select2_cor_threshold <- 0.8
 
 repeat {
   df_numeric <- df_s2b2_4integers %>%
@@ -1261,7 +1261,7 @@ plt_s2b3_fisher
 ggsave("plt_s2b3_fisher.png", plot = plt_s2b3_fisher,
        width = 10, height = 12, dpi = 300)
 
-neg_log10_P_cutoff <- 50
+neg_log10_P_cutoff <- 100
 
 # Identify the columns to keep
 select_cols <- df_s2b3_fisher_results %>%
@@ -1283,7 +1283,7 @@ df_s2b3_4integers <- df_balanced3 %>%
                                        pull(column_name),
                                      collapse = "|"), ")_")))
 
-in_select2_cor_threshold <- 0.01
+in_select2_cor_threshold <- 0.5
 
 repeat {
   df_numeric <- df_s2b3_4integers %>%
@@ -2123,6 +2123,7 @@ save(results_storage, file = "results_after_m1_s2b1.RData")
 
 # Logistic Regression Model
 
+# Starting with itegers only.
 df_m1_s2b2 <- df_s2b2 %>%
   select(Class, matches(paste0("^DETAILED-(",
                                paste(df_columns_info %>%
@@ -2130,6 +2131,8 @@ df_m1_s2b2 <- df_s2b2 %>%
                                                 c("integer")) %>%
                                        pull(column_name),
                                      collapse = "|"), ")_")))
+
+df_m1_s2b2 %>% str()
 
 # 1. Model Specification
 spec_m1_s2b2 <- logistic_reg(penalty = tune(), mixture = tune()) %>%
@@ -2153,14 +2156,20 @@ set.seed(123)
 folds_m1_s2b2 <- vfold_cv(df_m1_s2b2, v = 5, strata = Class)
 
 # 5. Grid of hyperparameters
-tune_grid_m1_s2b2 <- grid_regular(penalty(), mixture(), levels = 5)
+tune_grid_m1_s2b2 <- grid_regular(
+  penalty(range = c(-10, -2)),
+  mixture(range = c(0.01, 0.05)),
+  levels = 5
+)
+
+tune_grid_m1_s2b2 |> view()
 
 # 6. Tune the model
 tune_results_m1_s2b2 <- tune_grid(
   wf_m1_s2b2,
   resamples = folds_m1_s2b2,
   grid = tune_grid_m1_s2b2,
-  metrics = metric_set(roc_auc, accuracy, sens, spec)
+  metrics = metric_set(roc_auc, bal_accuracy, sens, spec)
 )
 
 # Show the tuning results
@@ -2171,7 +2180,8 @@ autoplot(tune_results_m1_s2b2) +
   theme_minimal()
 
 # 7. Select the best parameters
-best_parameters_m1_s2b2 <- select_best(tune_results_m1_s2b2, metric = "roc_auc")
+best_parameters_m1_s2b2 <- select_best(tune_results_m1_s2b2, metric = "bal_accuracy")
+best_parameters_m1_s2b2
 
 # 8. Finalize the workflow
 final_wf_m1_s2b2 <- finalize_workflow(wf_m1_s2b2, best_parameters_m1_s2b2)
@@ -2192,13 +2202,6 @@ confusion_matrix_m1_s2b2 <- test_predications_m1_s2b2 %>%
 
 # Print the confusion matrix
 print(confusion_matrix_m1_s2b2)
-
-# Visualize the confusion matrix
-autoplot(confusion_matrix_m1_s2b2, type = "heatmap") +
-  labs(title = "Confusion Matrix for Logistic Regression",
-       x = "Predicted Class",
-       y = "Actual Class") +
-  theme_minimal()
 
 results_m1_s2b2 <- calculate_all_measures(final_fit_m1_s2b2, df_test, 0.5)
 
@@ -3111,7 +3114,7 @@ print(best_params_m3_s1b1)
 final_wf_m3_s1b1 <- finalize_workflow(wf_m3_s1b1, best_params_m3_s1b1)
 
 # 9. Fit the final model
-fit_m3_s1b1 <- fit(final_wf_m3_s1b1, data = df_m2_s1b1)
+fit_m3_s1b1 <- fit(final_wf_m3_s1b1, data = df_m3_s1b1)
 
 # 10. Evaluate the model on the test dataset
 results_m3_s1b1 <- calculate_all_measures(fit_m3_s1b1, df_test, 0.5)
@@ -5814,13 +5817,7 @@ save(results_storage, file = "results_after_m6_s4b3.RData")
 
 # Gradient Boosting Model
 
-df_m6_s2b3 <- df_s2b3 %>%
-  select(Class, matches(paste0("^DETAILED-(",
-                               paste(df_columns_info %>%
-                                       filter(variable_type %in%
-                                                c("integer")) %>%
-                                       pull(column_name),
-                                     collapse = "|"), ")_")))
+df_m6_s2b3 <- df_s2b3
 
 # 1. Model Specification
 spec_m6_s2b3 <- boost_tree(
@@ -5829,15 +5826,15 @@ spec_m6_s2b3 <- boost_tree(
   learn_rate = tune(),
   min_n = tune()
 ) %>%
-  set_engine("xgboost") %>%
+  set_engine("xgboost", scale_pos_weight = .1) %>%
   set_mode("classification")
 
 # 2. Recipe
 rec_m6_s2b3 <- recipe(Class ~ ., data = df_m6_s2b3) %>%
+  step_dummy(all_nominal_predictors(), -all_outcomes()) %>%
   step_zv(all_predictors()) %>%
-  step_impute_median(all_numeric_predictors()) %>%
-  step_normalize(all_predictors()) %>%
-  step_dummy(all_nominal_predictors(), -all_outcomes())
+  step_impute_median(all_numeric_predictors()) #%>%
+  #step_normalize(all_predictors())
 
 # 3. Workflow
 wf_m6_s2b3 <- workflow() %>%
@@ -5849,11 +5846,22 @@ set.seed(123)
 folds_m6_s2b3 <- vfold_cv(df_m6_s2b3, v = 5, strata = Class)
 
 # 5. Grid of hyperparameters
+# 5. Grid of hyperparameters
+
+#.789, .758
+#tune_grid_m6_s2b3 <- grid_regular(
+#  trees(range = c(100, 500)),
+#  tree_depth(range = c(2, 6)),
+#  learn_rate(range = c(-4, -1.5), trans = log10_trans()),
+#  min_n(range = c(2, 6)),
+#  levels = 3
+#)
+
 tune_grid_m6_s2b3 <- grid_regular(
-  trees(range = c(2000, 6000)),
+  trees(range = c(10, 200)),
   tree_depth(range = c(2, 4)),
-  learn_rate(range = c(-5, -1), trans = log10_trans()),
-  min_n(range = c(2, 10)),
+  learn_rate(range = c(-2.5, -1), trans = log10_trans()),
+  min_n(range = c(2, 6)),
   levels = 3
 )
 
@@ -5923,3 +5931,11 @@ store_results("m6s2b3", results_m6_s2b3, "Gradient Boosting Model - s2b3")
 
 # Save the results to an RData file
 save(results_storage, file = "results_after_m6_s2b3.RData")
+
+#---- 6 DONE *******      Final Steps ------------------------------------------
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# Export the results to a CSV file
+results_storage %>%
+  bind_rows() %>%
+  write_csv("results_storage.csv")
