@@ -597,8 +597,42 @@ save(df_balanced2, file = "df_balanced2.RData")
 #---- 3.3 DONE *****    Balance - Method 3 - No Balance ------ df_balanced3 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-# Upsampling
+# No Balancing
 df_balanced3 <- df_train
+
+print(paste("training balanced 3 dataset - dim:", dim(df_balanced3)[1],
+            ",", dim(df_balanced3)[2]))
+
+save(df_balanced3, file = "df_balanced3.RData")
+
+#---- 3.4 DONE *****    Balance - Method 4 - SMOTE ----------- df_balanced4 ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# SMOTE
+
+# Apply SMOTE (Synthetic Minority Oversampling Technique)
+df_balanced4 <- df_train %>% 
+  select(-starts_with("DETAILED-"))
+
+# Get the count of each class
+class_counts <- table(df_balanced4$Class)
+print(paste("Original class distribution:", class_counts[1], class_counts[2]))
+
+# Create a formula with Class as the target
+formula <- as.formula("Class ~ .")
+
+# Apply SMOTE using the ROSE package
+set.seed(123) # For reproducibility
+smote_result <- ROSE(formula, data = df_balanced4, N = 2 * min(class_counts), p = 0.5)$data
+
+# Update df_balanced4 with the balanced data
+df_balanced4 <- smote_result
+
+# Check the new class distribution
+new_class_counts <- table(df_balanced4$Class)
+print(paste("Balanced class distribution after SMOTE:", 
+      new_class_counts[1], new_class_counts[2]))
+
 
 print(paste("training balanced 3 dataset - dim:", dim(df_balanced3)[1],
             ",", dim(df_balanced3)[2]))
@@ -2130,7 +2164,7 @@ df_m1_s2b2 <- df_s2b2 %>%
 df_m1_s2b2 %>% str()
 
 # 1. Model Specification
-spec_m1_s2b2 <- logistic_reg(penalty = tune(), mixture = tune()) %>%
+spec_m1_s2b2 <- logistic_reg(penalty = tune(), mixture = 1) %>%
   set_engine("glmnet") %>%
   set_mode("classification")
 
@@ -2159,7 +2193,6 @@ folds_m1_s2b2 <- vfold_cv(df_m1_s2b2, v = 5, strata = Class)
 #)
 tune_grid_m1_s2b2 <- grid_regular(
   penalty(),
-  mixture(),
   levels = 5
 )
 
@@ -2182,7 +2215,7 @@ autoplot(tune_results_m1_s2b2) +
 
 # 7. Select the best parameters
 best_parameters_m1_s2b2 <- select_best(tune_results_m1_s2b2,
-            metric = "roc_auc")
+                                       metric = "roc_auc")
 
 best_parameters_m1_s2b2
 
@@ -2200,8 +2233,8 @@ for (thresh in thresholds) {
     TPR_1 = tpr_1,
     TPR_0 = tpr_0,
     # Heavily penalize being below the targets
-    diff_from_target = ifelse(tpr_1 < 0.81, 0.81 - tpr_1, 0) +
-      ifelse(tpr_0 < 0.79, 0.79 - tpr_0, 0)
+    diff_from_target = ifelse(tpr_1 < 0.81, 0.81 - tpr_1, (0.81 - tpr_1)/10) +
+      ifelse(tpr_0 < 0.79, 0.79 - tpr_0, (0.79 - tpr_0)/10)
   )
 }
 
@@ -2238,8 +2271,8 @@ confusion_matrix_m1_s2b2 <- test_predications_m1_s2b2 %>%
 # Print the confusion matrix
 print(confusion_matrix_m1_s2b2)
 
-results_m1_s2b2 <- calculate_all_measures(final_fit_m1_s2b2, df_test, threshold = #.5)
-                                           best_threshold)
+results_m1_s2b2 <- calculate_all_measures(final_fit_m1_s2b2, df_test, threshold = .5)
+                                           #best_threshold)
 
 results_m1_s2b2
 
@@ -4695,6 +4728,7 @@ folds_m5_s2b1 <- vfold_cv(df_m5_s2b1, v = 5, strata = Class)
 # 5. Grid of hyperparameters
 tune_grid_m5_s2b1 <- grid_regular(
   cost(),
+  #cost(range = c(0.1, 50)),
   rbf_sigma(),
   levels = 5
 )
@@ -4716,12 +4750,42 @@ autoplot(tune_results_m5_s2b1) +
 
 # 7. Select the best parameters
 best_parameters_m5_s2b1 <- select_best(tune_results_m5_s2b1, metric = "roc_auc")
+print(best_parameters_m5_s2b1)
 
 # 8. Finalize the workflow
 final_wf_m5_s2b1 <- finalize_workflow(wf_m5_s2b1, best_parameters_m5_s2b1)
 
 # 9. Fit the final model
 fit_m5_s2b1 <- fit(final_wf_m5_s2b1, data = df_m5_s2b1)
+
+# Try different thresholds to achieve target TPR and TNR
+thresholds <- seq(0.2, 0.8, by = 0.01)
+threshold_results <- list()
+
+for (thresh in thresholds) {
+  results <- calculate_all_measures(fit_m5_s2b1, df_m5_s2b1, thresh)
+  tpr_1 <- results$values[results$measures == "TPR_1"]
+  tpr_0 <- results$values[results$measures == "TPR_0"]
+
+  threshold_results[[as.character(thresh)]] <- data.frame(
+    threshold = thresh,
+    TPR_1 = tpr_1,
+    TPR_0 = tpr_0,
+    # Heavily penalize being below the targets
+    diff_from_target = ifelse(tpr_1 < 0.81, 0.81 - tpr_1, (0.81 - tpr_1)/10) +
+      ifelse(tpr_0 < 0.79, 0.79 - tpr_0, (0.79 - tpr_0)/10)
+  )
+}
+
+threshold_df <- do.call(rbind, threshold_results)
+best_threshold <- threshold_df[which.min(threshold_df$diff_from_target),
+ "threshold"]
+
+# Print results for the best threshold
+best_row <- threshold_df[threshold_df$threshold == best_threshold, ]
+cat("Best threshold:", best_threshold, 
+    "\nTPR_1 (Sensitivity):", best_row$TPR_1, 
+    "\nTPR_0 (Specificity):", best_row$TPR_0)
 
 # 10. Evaluate the model on the test dataset
 test_predications_m5_s2b1 <-
@@ -4736,14 +4800,8 @@ confusion_matrix_m5_s2b1 <- test_predications_m5_s2b1 %>%
 # Print the confusion matrix
 print(confusion_matrix_m5_s2b1)
 
-# Visualize the confusion matrix
-autoplot(confusion_matrix_m5_s2b1, type = "heatmap") +
-  labs(title = "Confusion Matrix for Support Vector Machine",
-       x = "Predicted Class",
-       y = "Actual Class") +
-  theme_minimal()
-
-results_m5_s2b1 <- calculate_all_measures(fit_m5_s2b1, df_test, 0.5)
+results_m5_s2b1 <- calculate_all_measures(fit_m5_s2b1, df_test, #0.5)
+best_threshold)
 
 results_m5_s2b1
 
