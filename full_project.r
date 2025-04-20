@@ -2238,8 +2238,8 @@ confusion_matrix_m1_s2b2 <- test_predications_m1_s2b2 %>%
 # Print the confusion matrix
 print(confusion_matrix_m1_s2b2)
 
-results_m1_s2b2 <- calculate_all_measures(final_fit_m1_s2b2, df_test, threshold = .5)
-                                           #best_threshold)
+results_m1_s2b2 <- calculate_all_measures(final_fit_m1_s2b2, df_test, threshold = #.5)
+                                           best_threshold)
 
 results_m1_s2b2
 
@@ -2344,7 +2344,7 @@ save(results_storage, file = "results_after_m1_s3b1.RData")
 #---- 5-1-6 DONE ***       Model 1 Logistic Regression ------------ m1_s3b2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#load("df_s3b2.RData") # nolint
+load("df_s3b2.RData") # nolint
 #load("df_columns_info.RData") # nolint
 #load("df_test.RData") # nolint
 
@@ -2400,6 +2400,37 @@ autoplot(tune_results_m1_s3b2) +
 # 7. Select the best parameters
 best_parameters_m1_s3b2 <- select_best(tune_results_m1_s3b2, metric = "roc_auc")
 
+# Try different thresholds to achieve target TPR and TNR
+thresholds <- seq(0.2, 0.8, by = 0.01)
+threshold_results <- list()
+
+for (thresh in thresholds) {
+  results <- calculate_all_measures(final_fit_m1_s3b2, df_m1_s3b2, thresh)
+  tpr_1 <- results$values[results$measures == "TPR_1"]
+  tpr_0 <- results$values[results$measures == "TPR_0"]
+
+  threshold_results[[as.character(thresh)]] <- data.frame(
+    threshold = thresh,
+    TPR_1 = tpr_1,
+    TPR_0 = tpr_0,
+    # Heavily penalize being below the targets
+    diff_from_target = ifelse(tpr_1 < 0.81, 0.81 - tpr_1, 0) +
+      ifelse(tpr_0 < 0.79, 0.79 - tpr_0, 0)
+  )
+}
+
+threshold_df <- do.call(rbind, threshold_results)
+best_threshold <- threshold_df[which.min(threshold_df$diff_from_target),
+ "threshold"]
+
+best_threshold
+
+# Print results for the best threshold
+best_row <- threshold_df[threshold_df$threshold == best_threshold, ]
+cat("Best threshold:", best_threshold, 
+    "\nTPR_1 (Sensitivity):", best_row$TPR_1, 
+    "\nTPR_0 (Specificity):", best_row$TPR_0)
+
 # 8. Finalize the workflow
 final_wf_m1_s3b2 <- finalize_workflow(wf_m1_s3b2, best_parameters_m1_s3b2)
 
@@ -2420,14 +2451,7 @@ confusion_matrix_m1_s3b2 <- test_predications_m1_s3b2 %>%
 # Print the confusion matrix
 print(confusion_matrix_m1_s3b2)
 
-# Visualize the confusion matrix
-autoplot(confusion_matrix_m1_s3b2, type = "heatmap") +
-  labs(title = "Confusion Matrix for Logistic Regression",
-       x = "Predicted Class",
-       y = "Actual Class") +
-  theme_minimal()
-
-results_m1_s3b2 <- calculate_all_measures(final_fit_m1_s3b2, df_test, 0.5)
+results_m1_s3b2 <- calculate_all_measures(final_fit_m1_s3b2, df_test, best_threshold)
 
 results_m1_s3b2
 
