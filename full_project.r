@@ -2099,13 +2099,6 @@ confusion_matrix_m1_s2b1 <- test_predications_m1_s2b1 %>%
 # Print the confusion matrix
 print(confusion_matrix_m1_s2b1)
 
-# Visualize the confusion matrix
-autoplot(confusion_matrix_m1_s2b1, type = "heatmap") +
-  labs(title = "Confusion Matrix for Logistic Regression",
-       x = "Predicted Class",
-       y = "Actual Class") +
-  theme_minimal()
-
 results_m1_s2b1 <- calculate_all_measures(final_fit_m1_s2b1, df_test, 0.5)
 
 results_m1_s2b1
@@ -2125,12 +2118,14 @@ save(results_storage, file = "results_after_m1_s2b1.RData")
 
 # Starting with itegers only.
 df_m1_s2b2 <- df_s2b2 %>%
-  select(Class, matches(paste0("^DETAILED-(",
-                               paste(df_columns_info %>%
-                                       filter(variable_type %in%
-                                                c("integer")) %>%
-                                       pull(column_name),
-                                     collapse = "|"), ")_")))
+  select(-where(~is.factor(.) && length(levels(.)) > 20))
+#%>%
+#  select(Class, matches(paste0("^DETAILED-(",
+#                               paste(df_columns_info %>%
+#                                       filter(variable_type %in%
+#                                                c("integer")) %>%
+#                                       pull(column_name),
+#                                     collapse = "|"), ")_")))
 
 df_m1_s2b2 %>% str()
 
@@ -2143,7 +2138,8 @@ spec_m1_s2b2 <- logistic_reg(penalty = tune(), mixture = tune()) %>%
 rec_m1_s2b2 <- recipe(Class ~ ., data = df_m1_s2b2) %>%
   step_zv(all_predictors()) %>%
   step_impute_median(all_numeric_predictors()) %>%
-  step_normalize(all_predictors()) %>%
+  step_normalize(all_numeric_predictors()) %>%
+  step_unknown(all_nominal_predictors(), new_level = "unknown") %>%
   step_dummy(all_nominal_predictors(), -all_outcomes())
 
 # 3. Workflow
@@ -2156,13 +2152,18 @@ set.seed(123)
 folds_m1_s2b2 <- vfold_cv(df_m1_s2b2, v = 5, strata = Class)
 
 # 5. Grid of hyperparameters
+#tune_grid_m1_s2b2 <- grid_regular(
+#  penalty(range = c(-10, -2)),
+#  mixture(range = c(0.01, 0.05)),
+#  levels = 5
+#)
 tune_grid_m1_s2b2 <- grid_regular(
-  penalty(range = c(-10, -2)),
-  mixture(range = c(0.01, 0.05)),
+  penalty(),
+  mixture(),
   levels = 5
 )
 
-tune_grid_m1_s2b2 |> view()
+#tune_grid_m1_s2b2 |> view()
 
 # 6. Tune the model
 tune_results_m1_s2b2 <- tune_grid(
@@ -2180,8 +2181,41 @@ autoplot(tune_results_m1_s2b2) +
   theme_minimal()
 
 # 7. Select the best parameters
-best_parameters_m1_s2b2 <- select_best(tune_results_m1_s2b2, metric = "bal_accuracy")
+best_parameters_m1_s2b2 <- select_best(tune_results_m1_s2b2,
+            metric = "roc_auc")
+
 best_parameters_m1_s2b2
+
+# Try different thresholds to achieve target TPR and TNR
+thresholds <- seq(0.2, 0.8, by = 0.01)
+threshold_results <- list()
+
+for (thresh in thresholds) {
+  results <- calculate_all_measures(final_fit_m1_s2b2, df_m1_s2b2, thresh)
+  tpr_1 <- results$values[results$measures == "TPR_1"]
+  tpr_0 <- results$values[results$measures == "TPR_0"]
+
+  threshold_results[[as.character(thresh)]] <- data.frame(
+    threshold = thresh,
+    TPR_1 = tpr_1,
+    TPR_0 = tpr_0,
+    # Heavily penalize being below the targets
+    diff_from_target = ifelse(tpr_1 < 0.81, 0.81 - tpr_1, 0) +
+      ifelse(tpr_0 < 0.79, 0.79 - tpr_0, 0)
+  )
+}
+
+threshold_df <- do.call(rbind, threshold_results)
+best_threshold <- threshold_df[which.min(threshold_df$diff_from_target),
+ "threshold"]
+
+best_threshold
+
+# Print results for the best threshold
+best_row <- threshold_df[threshold_df$threshold == best_threshold, ]
+cat("Best threshold:", best_threshold, 
+    "\nTPR_1 (Sensitivity):", best_row$TPR_1, 
+    "\nTPR_0 (Specificity):", best_row$TPR_0)
 
 # 8. Finalize the workflow
 final_wf_m1_s2b2 <- finalize_workflow(wf_m1_s2b2, best_parameters_m1_s2b2)
@@ -2191,7 +2225,8 @@ final_fit_m1_s2b2 <- fit(final_wf_m1_s2b2, data = df_m1_s2b2)
 
 # 10. Evaluate the model on the test dataset
 # Evaluate the model on the test dataset
-test_predications_m1_s2b2 <-
+# Get probability predictions
+test_predictions_prob_m1_s2b2 <- 
   predict(final_fit_m1_s2b2, new_data = df_test, type = "prob") %>%
   bind_cols(predict(final_fit_m1_s2b2, new_data = df_test, type = "class")) %>%
   bind_cols(df_test %>% select(Class))
@@ -2203,7 +2238,8 @@ confusion_matrix_m1_s2b2 <- test_predications_m1_s2b2 %>%
 # Print the confusion matrix
 print(confusion_matrix_m1_s2b2)
 
-results_m1_s2b2 <- calculate_all_measures(final_fit_m1_s2b2, df_test, 0.5)
+results_m1_s2b2 <- calculate_all_measures(final_fit_m1_s2b2, df_test, threshold = .5)
+                                           #best_threshold)
 
 results_m1_s2b2
 
