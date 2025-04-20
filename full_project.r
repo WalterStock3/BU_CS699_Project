@@ -238,9 +238,20 @@ store_results <- function(combination_key, results_df, description) {
   return(results_storage) # nolint
 }
 
+#---- 0.4 DONE *****    Functions - Logging --------------------------------
+# Function to log messages with timestamps
+log_message <- function(message) {
+  timestamp <- format(Sys.time(), "%Y-%m-%d %H:%M:%S")
+  log_entry <- paste(timestamp, "-", message)
+  cat(log_entry, "\n", file = "log.txt", append = TRUE)
+  cat(log_entry, "\n")  # Also print to console
+}
+
 ################################################################################
 #---- 1 DONE ******* Preprocess - Project Step 1 ---------- df_preprocessed ----
 ################################################################################
+
+log_message("Starting Step 1 - Preprocess - Project Step 1")
 
 # Load the dataset
 loc <- "~/Source/BU_CS699_Project/CS699_Provided_Artifacts/"
@@ -517,9 +528,13 @@ write.csv(df_preprocessed, file = "df_preprocessed.csv", row.names = FALSE)
 save(df_preprocessed, file = "df_preprocessed.RData")
 save(df_columns_info, file = "df_columns_info.RData")
 
+log_message("Finished Step 1 - Preprocess - Project Step 1")
+
 ################################################################################
 #---- 2 DONE ******* Split - Project Step 2 ------------- df_train, df_test ----
 ################################################################################
+
+log_message("Starting Step 2 - Split - Project Step 2")
 
 # Optional - Load the preprocessed dataset
 # load("df_preprocessed.RData") # nolint
@@ -541,9 +556,13 @@ print(paste("testing dataset - class distribution:",
 save(df_train, file = "df_train.RData")
 save(df_test, file = "df_test.RData")
 
+log_message("Finished Step 2 - Split - Project Step 2")
+
 ################################################################################
 #---- 3 DONE ******* Balance - Project Step 3 -------------- df_balanced# ------
 ################################################################################
+
+log_message("Starting Step 3 - Balance - Project Step 3")
 
 # Not using SMOTE because we have a large number of categorical variables.
 
@@ -558,6 +577,8 @@ save(df_test, file = "df_test.RData")
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #---- 3.1 DONE *****    Balance - Method 1 - Down Sample ----- df_balanced1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+log_message("Starting Step 3.1 - Balance-DownSample - Project Step 3")
 
 #load("df_train.RData")
 
@@ -574,9 +595,13 @@ print(paste("training balanced 1 dataset - class distribution:",
 
 save(df_balanced1, file = "df_balanced1.RData")
 
+log_message("Finished Step 3.1 - Balance-DownSample - Project Step 3")
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #---- 3.2 DONE *****    Balance - Method 2 - Up Sample ------- df_balanced2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+log_message("Starting Step 3.2 - Balance-UpSample - Project Step 3")
 
 #load("df_train.RData")
 
@@ -593,9 +618,13 @@ print(paste("training balanced 2 dataset - class distribution:",
 
 save(df_balanced2, file = "df_balanced2.RData")
 
+log_message("Finished Step 3.2 - Balance-UpSample - Project Step 3")
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #---- 3.3 DONE *****    Balance - Method 3 - No Balance ------ df_balanced3 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+log_message("Starting Step 3.3 - Balance-NoBalance - Project Step 3")
 
 # No Balancing
 df_balanced3 <- df_train
@@ -605,39 +634,7 @@ print(paste("training balanced 3 dataset - dim:", dim(df_balanced3)[1],
 
 save(df_balanced3, file = "df_balanced3.RData")
 
-#---- 3.4 DONE *****    Balance - Method 4 - SMOTE ----------- df_balanced4 ----
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-# SMOTE
-
-# Apply SMOTE (Synthetic Minority Oversampling Technique)
-df_balanced4 <- df_train %>% 
-  select(-starts_with("DETAILED-"))
-
-# Get the count of each class
-class_counts <- table(df_balanced4$Class)
-print(paste("Original class distribution:", class_counts[1], class_counts[2]))
-
-# Create a formula with Class as the target
-formula <- as.formula("Class ~ .")
-
-# Apply SMOTE using the ROSE package
-set.seed(123) # For reproducibility
-smote_result <- ROSE(formula, data = df_balanced4, N = 2 * min(class_counts), p = 0.5)$data
-
-# Update df_balanced4 with the balanced data
-df_balanced4 <- smote_result
-
-# Check the new class distribution
-new_class_counts <- table(df_balanced4$Class)
-print(paste("Balanced class distribution after SMOTE:", 
-      new_class_counts[1], new_class_counts[2]))
-
-
-print(paste("training balanced 3 dataset - dim:", dim(df_balanced3)[1],
-            ",", dim(df_balanced3)[2]))
-
-save(df_balanced3, file = "df_balanced3.RData")
+log_message("Finished Step 3.3 - Balance-NoBalance - Project Step 3")
 
 ################################################################################
 #---- 4 PROG ******* Select - Project Step 4 ------------------ df_s#b# --------
@@ -669,6 +666,8 @@ save(df_balanced3, file = "df_balanced3.RData")
 
 #---- 4-1-1 DONE ***       Select 1 - balanced 1 ------------------ df_s1b1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+log_message("Starting Step 4.1.1 - Select1 - df_s1b1 - Project Step 4")
 
 # Inputs that can be tuned
 in_limit_missing_col_percent <- 0.05
@@ -715,9 +714,13 @@ df_s1b1 <- df_processing_filt_rows %>%
 
 save(df_s1b1, file = "df_s1b1.RData")
 
+log_message("Finished Step 4.1.1 - select1_balanced1 - df_s1b1")
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #---- 4-1-2 DONE ***       Select 1 - balanced 2 ------------------ df_s1b2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+log_message("Starting Step 4.1.2 - select1_balanced2 - df_s1b2")
 
 # Columns
 print(paste("df_processing - missing column percent limit:",
@@ -760,12 +763,16 @@ df_s1b2 <- df_processing_filt_rows %>%
 
 save(df_s1b2, file = "df_s1b2.RData")
 
+log_message("Finished Step 4.1.2 - select1_balanced2 - df_s1b2")
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #---- 4-2 DONE *****    Select 2 - Fisher and Corr -------------- df_s2b# ------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #---- 4-2-1 DONE ***       Select 2 - balanced 1 ------------------ df_s2b1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+log_message("Starting Step 4.2.1 - select2_balanced1 - df_s2b1")
 
 df_s2b1 <- df_balanced1
 
@@ -978,8 +985,12 @@ df_s2b1 <- df_s2b1_allfact %>% select(-Class) %>% # nolint
 
 save(df_s2b1, file = "df_s2b1.RData")
 
+log_message("Finished Step 4.2.1 - select2_balanced1 - df_s2b1")
+
 #---- 4-2-2 DONE ***       Select 2 - balanced 2 ------------------ df_s2b2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+log_message("Starting Step 4.2.2 - select2_balanced2 - df_s2b2")
 
 #load("df_balanced2.RData") # nolint
 #load("df_columns_info.RData") # nolint
@@ -1193,8 +1204,12 @@ df_s2b2 <- df_s2b2_allfact %>% select(-Class) %>% # nolint
 
 save(df_s2b2, file = "df_s2b2.RData")
 
+log_message("Finished Step 4.2.2 - select2_balanced2 - df_s2b2")
+
 #---- 4-2-3 DONE ***       Select 2 - balanced 3 ------------------ df_s2b3 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+log_message("Starting Step 4.2.3 - select2_balanced3 - df_s2b3")
 
 #load("df_balanced3.RData") # nolint
 #load("df_columns_info.RData") # nolint
@@ -1411,12 +1426,16 @@ df_s2b3 <- df_s2b3_allfact %>% select(-Class) %>% # nolint
 
 save(df_s2b3, file = "df_s2b3.RData")
 
+log_message("Finished Step 4.2.3 - select2_balanced3 - df_s2b3")
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #---- 4-3 DONE *****    Select 3 - Missing Added ---------------- df_s3b# ------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #---- 4-3-1 DONE ***       Select 3 - balanced 1 ------------------ df_s3b1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+log_message("Starting Step 4.3.1 - select3_balanced1 - df_s3b1")
 
 # load("df_balanced1.RData") # nolint
 
@@ -1629,8 +1648,12 @@ df_s3b1 <- df_s3b1_allfact_miss %>% select(-Class) %>% # nolint
 
 save(df_s3b1, file = "df_s3b1.RData")
 
+log_message("Finished Step 4.3.1 - select3_balanced1 - df_s3b1")
+
 #---- 4-3-2 DONE ***       Select - 3 balanced dataset 2 ---------- df_s3b2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+log_message("Starting Step 4.3.2 - select3_balanced2 - df_s3b2")
 
 # load("df_balanced2.RData") # nolint
 
@@ -1840,6 +1863,8 @@ df_s3b2 <- df_s3b2_allfact_miss %>% select(-Class) %>% # nolint
 
 save(df_s3b2, file = "df_s3b2.RData")
 
+log_message("Starting Step 4.3.2 - select3_balanced2 - df_s3b2")
+
 #---- 4-4 DONE *****    Select 4 - All Included ------------------- df_s4b3 ----
 
 df_s4b3 <- df_balanced3
@@ -1875,6 +1900,8 @@ save(df_s4b3, file = "df_s4b3.RData")
 #load("df_test.RData") # nolint
 
 # Logistic Regression Model
+
+log_message("Starting Step 5.1.1 - model1_select1_balanced1 - m1_s1b1")
 
 df_m1_s1b1 <- df_s1b1 %>%
   select(Class, matches(paste0("^DETAILED-(",
@@ -1961,7 +1988,11 @@ store_results("m1s1b1", results_m1_s1b1, "Logistic Regression Model 1 - s1b1")
 
 save(results_storage, file = "results_after_m1_s1b1.RData")
 
+log_message("Finished Step 5.1.1 - model1_select1_balanced1 - m1_s1b1")
+
 #---- 5-1-2 DONE ***       Model 1 Logistic Regression ------------ m1_s1b2 ----
+
+log_message("Starting Step 5.1.2 - model1_select1_balanced2 - m1_s1b2")
 
 #load("df_s1b2.RData") # nolint
 #load("df_columns_info.RData") # nolint
@@ -2052,10 +2083,14 @@ results_m1_s1b2
 
 store_results("m1s1b2", results_m1_s1b2, "Logistic Regression Model 1 - s1b2")
 
-save(results_storage, file = "results_after_m2_s1b1.RData")
+save(results_storage, file = "results_after_m2_s1b2.RData")
+
+log_message("Finished Step 5.1.2 - model1_select1_balanced2 - m1_s1b2")
 
 #---- 5-1-3 DONE ***       Model 1 Logistic Regression ------------ m1_s2b1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+log_message("Starting Step 5.1.3 - model1_select2_balanced1 - m1_s2b1")
 
 #load("df_s2b1.RData") # nolint
 #load("df_columns_info.RData") # nolint
@@ -2141,8 +2176,12 @@ store_results("m1s2b1", results_m1_s2b1, "Logistic Regression Model 1 - s2b1")
 
 save(results_storage, file = "results_after_m1_s2b1.RData")
 
+log_message("Finished Step 5.1.3 - model1_select2_balanced1 - m1_s2b1")
+
 #---- 5-1-4 DONE ***       Model 1 Logistic Regression ------------ m1_s2b2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+log_message("Starting Step 5.1.4 - model1_select2_balanced2 - m1_s2b2")
 
 #load("df_s2b2.RData") # nolint
 #load("df_columns_info.RData") # nolint
@@ -2280,8 +2319,12 @@ store_results("m1s2b2", results_m1_s2b2, "Logistic Regression Model 1 - s2b2")
 
 save(results_storage, file = "results_after_m1_s2b2.RData")
 
+log_message("Finished Step 5.1.4 - model1_select2_balanced2 - m1_s2b2")
+
 #---- 5-1-5 DONE ***       Model 1 Logistic Regression ------------ m1_s3b1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+log_message("Starting Step 5.1.5 - model1_select3_balanced1 - m1_s3b1")
 
 #load("df_s3b1.RData") # nolint
 #load("df_columns_info.RData") # nolint
@@ -2374,8 +2417,12 @@ store_results("m1s3b1", results_m1_s3b1, "Logistic Regression Model 1 - s3b1")
 
 save(results_storage, file = "results_after_m1_s3b1.RData")
 
+log_message("Finished Step 5.1.5 - model1_select3_balanced1 - m1_s3b1")
+
 #---- 5-1-6 DONE ***       Model 1 Logistic Regression ------------ m1_s3b2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+log_message("Starting Step 5.1.6 - model1_select3_balanced2 - m1_s3b2")
 
 load("df_s3b2.RData") # nolint
 #load("df_columns_info.RData") # nolint
@@ -2492,12 +2539,16 @@ store_results("m1s3b2", results_m1_s3b2, "Logistic Regression Model 1 - s3b2")
 
 save(results_storage, file = "results_after_m1_s3b2.RData")
 
+log_message("Finished Step 5.1.6 - model1_select3_balanced2 - m1_s3b2")
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #---- 5-2 DONE *****    Model 2 K-Nearest Neighbors ----------------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #---- 5-2-1 DONE ***       Model 2 KNN - s1b1 --------------------- m2-s1b1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+log_message("Starting Step 5.2.1 - model2_select1_balanced1 - m2_s1b1")
 
 #load("df_s1b1.RData") # nolint
 #load("df_columns_info.RData") # nolint
@@ -2602,8 +2653,12 @@ store_results("m2s1b1", results_m2_s1b1, "KNN Model - s1b1")
 # Save the results to an RData file
 save(results_storage, file = "results_after_m2_s1b1.RData")
 
+log_message("Finished Step 5.2.1 - model2_select1_balanced1 - m2_s1b1")
+
 #---- 5-2-2 DONE ***       Model 2 KNN - s1b2 --------------------- m2-s1b2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+log_message("Starting Step 5.2.2 - model2_select1_balanced2 - m2_s1b2")
 
 #load("df_s1b2.RData") # nolint
 #load("df_columns_info.RData") # nolint
@@ -2708,8 +2763,12 @@ store_results("m2s1b2", results_m2_s1b2, "KNN Model - s1b2")
 # Save the results to an RData file
 save(results_storage, file = "results_after_m2_s1b2.RData")
 
+log_message("Finished Step 5.2.2 - model2_select1_balanced2 - m2_s1b2")
+
 #---- 5-2-3 DONE ***       Model 2 KNN - s2b1 --------------------- m2-s2b1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+log_message("Starting Step 5.2.3 - model2_select2_balanced1 - m2_s2b1")
 
 #load("df_s2b1.RData") # nolint
 #load("df_columns_info.RData") # nolint
@@ -2814,8 +2873,12 @@ store_results("m2s2b1", results_m2_s2b1, "KNN Model - s2b1")
 # Save the results to an RData file
 save(results_storage, file = "results_after_m2_s2b1.RData")
 
+log_message("Finished Step 5.2.3 - model2_select2_balanced1 - m2_s2b1")
+
 #---- 5-2-4 DONE ***       Model 2 KNN - s2b2 --------------------- m2-s2b2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+log_message("Starting Step 5.2.4 - model2_select2_balanced2 - m2_s2b2")
 
 #load("df_s2b2.RData") # nolint
 #load("df_columns_info.RData") # nolint
@@ -2920,8 +2983,12 @@ store_results("m2s2b2", results_m2_s2b2, "KNN Model - s2b2")
 # Save the results to an RData file
 save(results_storage, file = "results_after_m2_s2b2.RData")
 
+log_message("Finished Step 5.2.4 - model2_select2_balanced2 - m2_s2b2")
+
 #---- 5-2-5 DONE ***       Model 2 KNN - s3b1 --------------------- m2-s3b1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+log_message("Starting Step 5.2.5 - model2_select3_balanced1 - m2_s3b1")
 
 #load("df_s3b1.RData") # nolint
 #load("df_columns_info.RData") # nolint
@@ -3026,8 +3093,12 @@ store_results("m2s3b1", results_m2_s3b1, "KNN Model - s3b1")
 # Save the results to an RData file
 save(results_storage, file = "results_after_m2_s3b1.RData")
 
+log_message("Finished Step 5.2.5 - model2_select3_balanced1 - m2_s3b1")
+
 #---- 5-2-6 DONE ***       Model 2 KNN - s3b2 --------------------- m2-s3b2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+log_message("Starting Step 5.2.6 - model2_select3_balanced2 - m2_s3b2")
 
 #load("df_s3b2.RData") # nolint
 #load("df_columns_info.RData") # nolint
@@ -3132,11 +3203,15 @@ store_results("m2s3b2", results_m2_s3b2, "KNN Model - s3b2")
 # Save the results to an RData file
 save(results_storage, file = "results_after_m2_s3b2.RData")
 
+log_message("Finished Step 5.2.6 - model2_select3_balanced2 - m2_s3b2")
+
 #---- 5-3 DONE *****    Model 3 Decision Tree ----------------------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #---- 5-3-1 DONE ***      Model 3 Decision Tree ------------------- m3-s1b1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+log_message("Starting Step 5.3.1 - model3_select1_balanced1 - m3_s1b1")
 
 #load("df_s1b1.RData") # nolint
 #load("df_columns_info.RData") # nolint
@@ -3217,8 +3292,12 @@ store_results("m3s1b1", results_m3_s1b1, "Decision Tree Model - s1b1")
 # Save the results to an RData file
 save(results_storage, file = "results_after_m3_s1b1.RData")
 
+log_message("Finished Step 5.3.1 - model3_select1_balanced1 - m3_s1b1")
+
 #---- 5-3-2 DONE ***      Model 3 Decision Tree ------------------- m3-s1b2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+log_message("Starting Step 5.3.2 - model3_select1_balanced2 - m3_s1b2")
 
 #load("df_s1b2.RData") # nolint
 #load("df_columns_info.RData") # nolint
@@ -3299,8 +3378,12 @@ store_results("m3s1b2", results_m3_s1b2, "Decision Tree Model - s1b2")
 # Save the results to an RData file
 save(results_storage, file = "results_after_m3_s1b2.RData")
 
+log_message("Finished Step 5.3.2 - model3_select1_balanced2 - m3_s1b2")
+
 #---- 5-3-3 DONE ***      Model 3 Decision Tree ------------------- m3-s2b1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+log_message("Starting Step 5.3.3 - model3_select2_balanced1 - m3_s2b1")
 
 #load("df_s2b1.RData") # nolint
 #load("df_columns_info.RData") # nolint
@@ -3381,8 +3464,12 @@ store_results("m3s2b1", results_m3_s2b1, "Decision Tree Model - s2b1")
 # Save the results to an RData file
 save(results_storage, file = "results_after_m3_s2b1.RData")
 
+log_message("Finished Step 5.3.3 - model3_select2_balanced1 - m3_s2b1")
+
 #---- 5-3-4 DONE ***      Model 3 Decision Tree ------------------- m3-s2b2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+log_message("Starting Step 5.3.4 - model3_select2_balanced2 - m3_s2b2")
 
 #load("df_s2b2.RData") # nolint
 #load("df_columns_info.RData") # nolint
@@ -3463,8 +3550,12 @@ store_results("m3s2b2", results_m3_s2b2, "Decision Tree Model - s2b2")
 # Save the results to an RData file
 save(results_storage, file = "results_after_m3_s2b2.RData")
 
+log_message("Finished Step 5.3.4 - model3_select2_balanced2 - m3_s2b2")
+
 #---- 5-3-5 DONE ***      Model 3 Decision Tree ------------------- m3-s3b1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+log_message("Starting Step 5.3.5 - model3_select3_balanced1 - m3_s3b1")
 
 #load("df_s3b1.RData") # nolint
 #load("df_columns_info.RData") # nolint
@@ -3545,8 +3636,12 @@ store_results("m3s3b1", results_m3_s3b1, "Decision Tree Model - s3b1")
 # Save the results to an RData file
 save(results_storage, file = "results_after_m3_s3b1.RData")
 
+log_message("Starting Step 5.3.5 - model3_select3_balanced1 - m3_s3b1")
+
 #---- 5-3-6 DONE ***      Model 3 Decision Tree ------------------- m3-s3b2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+log_message("Starting Step 5.3.6 - model3_select3_balanced2 - m3_s3b2")
 
 #load("df_s3b2.RData") # nolint
 #load("df_columns_info.RData") # nolint
@@ -3627,11 +3722,16 @@ store_results("m3s3b2", results_m3_s3b2, "Decision Tree Model - s3b2")
 # Save the results to an RData file
 save(results_storage, file = "results_after_m3_s3b2.RData")
 
+log_message("Finished Step 5.3.6 - model3_select3_balanced2 - m3_s3b2")
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #---- 5-4 DONE *****    Model 4 Random Forest ----------------------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 #---- 5-4-1 DONE ***      Model 4 Random Forest ------------------- m4-s1b1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+log_message("Starting Step 5.4.1 - model4_select1_balanced1 - m4_s1b1")
 
 #load("df_s1b1.RData") # nolint
 #load("df_columns_info.RData") # nolint
@@ -3771,8 +3871,13 @@ if (inherits(fit_m4_s1b1$fit$fit$fit, "ranger")) {
   ggsave("m4_s1b1_var_importance.png", width = 10, height = 8, dpi = 300)
 
 }
+
+log_message("Finished Step 5.4.1 - model4_select1_balanced1 - m4_s1b1")
+
 #---- 5-4-2 DONE ***      Model 4 Random Forest ------------------- m4-s1b2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+log_message("Starting Step 5.4.2 - model4_select1_balanced2 - m4_s1b2")
 
 #load("df_s1b2.RData") # nolint
 #load("df_columns_info.RData") # nolint
@@ -3913,8 +4018,12 @@ if (inherits(fit_m4_s1b2$fit$fit$fit, "ranger")) {
 
 }
 
+log_message("Finished Step 5.4.2 - model4_select1_balanced2 - m4_s1b2")
+
 #---- 5-4-3 DONE ***      Model 4 Random Forest ------------------- m4-s2b1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+log_message("Starting Step 5.4.3 - model4_select2_balanced1 - m4_s2b1")
 
 #load("df_s2b1.RData") # nolint
 #load("df_columns_info.RData") # nolint
@@ -4054,8 +4163,13 @@ if (inherits(fit_m4_s2b1$fit$fit$fit, "ranger")) {
   ggsave("m4_s2b1_var_importance.png", width = 10, height = 8, dpi = 300)
 
 }
+
+log_message("Finished Step 5.4.3 - model4_select2_balanced1 - m4_s2b1")
+
 #---- 5-4-4 DONE ***      Model 4 Random Forest ------------------- m4-s2b2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+log_message("Starting Step 5.4.4 - model4_select2_balanced2 - m4_s2b2")
 
 #load("df_s2b2.RData") # nolint
 #load("df_columns_info.RData") # nolint
@@ -4195,8 +4309,13 @@ if (inherits(fit_m4_s2b2$fit$fit$fit, "ranger")) {
   ggsave("m4_s2b2_var_importance.png", width = 10, height = 8, dpi = 300)
 
 }
+
+log_message("Finished Step 5.4.4 - model4_select2_balanced2 - m4_s2b2")
+
 #---- 5-4-5 DONE ***      Model 4 Random Forest ------------------- m4-s3b1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+log_message("Starting Step 5.4.5 - model4_select3_balanced1 - m4_s3b1")
 
 #load("df_s3b1.RData") # nolint
 #load("df_columns_info.RData") # nolint
@@ -4337,8 +4456,12 @@ if (inherits(fit_m4_s3b1$fit$fit$fit, "ranger")) {
 
 }
 
+log_message("Finished Step 5.4.5 - model4_select3_balanced1 - m4_s3b1")
+
 #---- 5-4-6 DONE ***      Model 4 Random Forest ------------------- m4-s3b2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+log_message("Starting Step 5.4.6 - model4_select3_balanced2 - m4_s3b2")
 
 #load("df_s3b2.RData") # nolint
 #load("df_columns_info.RData") # nolint
@@ -4479,11 +4602,15 @@ if (inherits(fit_m4_s3b2$fit$fit$fit, "ranger")) {
 
 }
 
+log_message("Finished Step 5.4.6 - model4_select3_balanced2 - m4_s3b2")
+
 #---- 5-5 DONE *****    Model 5 Support Vect Machine ---------------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #---- 5-5-1 DONE ***      Model 5 Support Vector Machine ---------- m5-s1b1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+log_message("Starting Step 5.5.1 - model5_select1_balanced1 - m5_s1b1")
 
 #load("df_s1b1.RData") # nolint
 #load("df_columns_info.RData") # nolint
@@ -4583,8 +4710,12 @@ store_results("m5s1b1", results_m5_s1b1, "Support Vector Machine Model - s1b1")
 # Save the results to an RData file
 save(results_storage, file = "results_after_m5_s1b1.RData")
 
+log_message("Finished Step 5.5.1 - model5_select1_balanced1 - m5_s1b1")
+
 #---- 5-5-2 DONE ***      Model 5 Support Vector Machine ---------- m5-s1b2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+log_message("Starting Step 5.5.2 - model5_select1_balanced2 - m5_s1b2")
 
 #load("df_s1b2.RData") # nolint
 #load("df_columns_info.RData") # nolint
@@ -4684,8 +4815,12 @@ store_results("m5s1b2", results_m5_s1b2, "Support Vector Machine Model - s1b2")
 # Save the results to an RData file
 save(results_storage, file = "results_after_m5_s1b2.RData")
 
+log_message("Finished Step 5.5.2 - model5_select1_balanced2 - m5_s1b2")
+
 #---- 5-5-3 DONE ***      Model 5 Support Vector Machine ---------- m5-s2b1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+log_message("Starting Step 5.5.3 - model5_select2_balanced1 - m5_s2b1")
 
 #load("df_s2b1.RData") # nolint
 #load("df_columns_info.RData") # nolint
@@ -4810,8 +4945,12 @@ store_results("m5s2b1", results_m5_s2b1, "Support Vector Machine Model - s2b1")
 # Save the results to an RData file
 save(results_storage, file = "results_after_m5_s2b1.RData")
 
+log_message("Finished Step 5.5.3 - model5_select2_balanced1 - m5_s2b1")
+
 #---- 5-5-4 DONE ***      Model 5 Support Vector Machine ---------- m5-s2b2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+log_message("Starting Step 5.5.4 - model5_select2_balanced2 - m5_s2b2")
 
 #load("df_s2b2.RData") # nolint
 #load("df_columns_info.RData") # nolint
@@ -4911,8 +5050,12 @@ store_results("m5s2b2", results_m5_s2b2, "Support Vector Machine Model - s2b2")
 # Save the results to an RData file
 save(results_storage, file = "results_after_m5_s2b2.RData")
 
+log_message("Finished Step 5.5.4 - model5_select2_balanced2 - m5_s2b2")
+
 #---- 5-5-5 DONE ***      Model 5 Support Vector Machine ---------- m5-s3b1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+log_message("Starting Step 5.5.5 - model5_select3_balanced1 - m5_s3b1")
 
 #load("df_s3b1.RData") # nolint
 #load("df_columns_info.RData") # nolint
@@ -5012,8 +5155,12 @@ store_results("m5s3b1", results_m5_s3b1, "Support Vector Machine Model - s3b1")
 # Save the results to an RData file
 save(results_storage, file = "results_after_m5_s3b1.RData")
 
+log_message("Finished Step 5.5.5 - model5_select3_balanced1 - m5_s3b1")
+
 #---- 5-5-6 DONE ***      Model 5 Support Vector Machine ---------- m5-s3b2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+log_message("Starting Step 5.5.6 - model5_select3_balanced2 - m5_s3b2")
 
 #load("df_s3b2.RData") # nolint
 #load("df_columns_info.RData") # nolint
@@ -5113,11 +5260,15 @@ store_results("m5s3b2", results_m5_s3b2, "Support Vector Machine Model - s3b2")
 # Save the results to an RData file
 save(results_storage, file = "results_after_m5_s3b2.RData")
 
+log_message("Finished Step 5.5.6 - model5_select3_balanced2 - m5_s3b2")
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #---- 5-6 PEND *****    Model 6 Gradient Boosting ------------------------------
 
 #---- 5-6-1 DONE ***      Model 6 Gradient Boosting --------------- m6-s1b1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+log_message("Starting Step 6.1.1 - model6_select1_balanced1 - m6_s1b1")
 
 #load("df_s1b1.RData") # nolint
 #load("df_columns_info.RData") # nolint
@@ -5235,8 +5386,12 @@ store_results("m6s1b1", results_m6_s1b1, "Gradient Boosting Model - s1b1")
 # Save the results to an RData file
 save(results_storage, file = "results_after_m6_s1b1.RData")
 
+log_message("Finished Step 6.1.1 - model6_select1_balanced1 - m6_s1b1")
+
 #---- 5-6-2 DONE ***      Model 6 Gradient Boosting --------------- m6-s1b2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+log_message("Starting Step 6.1.2 - model6_select1_balanced2 - m6_s1b2")
 
 #load("df_s1b2.RData") # nolint
 #load("df_columns_info.RData") # nolint
@@ -5340,8 +5495,12 @@ store_results("m6s1b2", results_m6_s1b2, "Gradient Boosting Model - s1b2")
 # Save the results to an RData file
 save(results_storage, file = "results_after_m6_s1b2.RData")
 
+log_message("Finished Step 6.1.2 - model6_select1_balanced2 - m6_s1b2")
+
 #---- 5-6-3 DONE ***      Model 6 Gradient Boosting --------------- m6-s2b1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+log_message("Starting Step 6.1.3 - model6_select2_balanced1 - m6_s2b1")
 
 #load("df_s2b1.RData") # nolint
 #load("df_columns_info.RData") # nolint
@@ -5461,8 +5620,12 @@ store_results("m6s2b1", results_m6_s2b1, "Gradient Boosting Model - s2b1")
 # Save the results to an RData file
 save(results_storage, file = "results_after_m6_s2b1.RData")
 
+log_message("Finished Step 6.1.3 - model6_select2_balanced1 - m6_s2b1")
+
 #---- 5-6-4 DONE ***      Model 6 Gradient Boosting --------------- m6-s2b2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+log_message("Starting Step 6.1.4 - model6_select2_balanced2 - m6_s2b2")
 
 #load("df_s2b2.RData") # nolint
 #load("df_columns_info.RData") # nolint
@@ -5565,8 +5728,13 @@ store_results("m6s2b2", results_m6_s2b2, "Gradient Boosting Model - s2b2")
 
 # Save the results to an RData file
 save(results_storage, file = "results_after_m6_s2b2.RData")
+
+log_message("Finished Step 6.1.4 - model6_select2_balanced2 - m6_s2b2")
+
 #---- 5-6-5 DONE ***      Model 6 Gradient Boosting --------------- m6-s3b1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+log_message("Starting Step 6.1.5 - model6_select3_balanced1 - m6_s3b1")
 
 #load("df_s3b1.RData") # nolint
 #load("df_columns_info.RData") # nolint
@@ -5670,8 +5838,12 @@ store_results("m6s3b1", results_m6_s3b1, "Gradient Boosting Model - s3b1")
 # Save the results to an RData file
 save(results_storage, file = "results_after_m6_s3b1.RData")
 
+log_message("Finished Step 5.6.5 - model6_select3_balanced1 - m6_s3b1")
+
 #---- 5-6-6 DONE ***      Model 6 Gradient Boosting --------------- m6-s3b2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+log_message("Starting Step 5.6.6 - model6_select3_balanced2 - m6_s3b2")
 
 #load("df_s3b2.RData") # nolint
 #load("df_columns_info.RData") # nolint
@@ -5775,8 +5947,12 @@ store_results("m6s3b2", results_m6_s3b2, "Gradient Boosting Model - s3b2")
 # Save the results to an RData file
 save(results_storage, file = "results_after_m6_s3b2.RData")
 
+log_message("Finished Step 5.6.6 - model6_select3_balanced2 - m6_s3b2")
+
 #---- 5-6-7 DONE ***      Model 6 Gradient Boosting --------------- m6-s4b3 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+log_message("Starting Step 5.6.7 - model6_select4_balanced3 - m6_s4b3")
 
 #load("df_s4b3.RData") # nolint
 #load("df_columns_info.RData") # nolint
@@ -5926,8 +6102,12 @@ store_results("m6s4b3", results_m6_s4b3, "Gradient Boosting Model - s4b3")
 # Save the results to an RData file
 save(results_storage, file = "results_after_m6_s4b3.RData")
 
+log_message("Finished Step 5.6.7 - model6_select4_balanced3 - m6_s4b3")
+
 #---- 5-6-8 DONE ***      Model 6 Gradient Boosting --------------- m6-s2b3 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+log_message("Starting Step 5.6.8 - model6_select2_balanced3 - m6_s2b3")
 
 #load("df_s2b3.RData") # nolint
 #load("df_columns_info.RData") # nolint
@@ -6049,6 +6229,8 @@ store_results("m6s2b3", results_m6_s2b3, "Gradient Boosting Model - s2b3")
 
 # Save the results to an RData file
 save(results_storage, file = "results_after_m6_s2b3.RData")
+
+log_message("Finished Step 5.6.8 - model6_select2_balanced3 - m6_s2b3")
 
 #---- 6 DONE *******      Final Steps ------------------------------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
