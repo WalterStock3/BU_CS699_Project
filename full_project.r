@@ -27,6 +27,7 @@ library(ROSE) # nolint
 library(pROC) # nolint
 library(ranger)
 library(xgboost)
+library(themis)
 
 # Set up parallel processing - do this once at the start of your script
 library(future)
@@ -36,15 +37,14 @@ library(doFuture) # nolint
 # Register doFuture as the parallel backend
 registerDoFuture()
 
-
 #---- 0.1 DONE *****    Functions - Full Performance Evaluation ----------------
 
-#results_m2_s1b1 <- calculate_all_measures(fit_m2_s1b1, df_test, best_threshold) # nolint
+#results_m2_s1b1 <- calculate_all_measures(final_fit_m2_s1b1, df_test, best_threshold) # nolint
 #results_m1_s1b1 <- calculate_all_measures(final_fit_m1_s1b1, df_test, 0.5) # nolint
 
 calculate_all_measures <- function(in_model, in_test_df, threshold) {
   #in_test_df <- df_test # nolint
-  #in_model <- fit_m2_s1b1 # nolint
+  #in_model <- final_fit_m2_s1b1 # nolint
   #threshold <- best_threshold # nolint
 
   #in_test_df <- df_test # nolint
@@ -118,7 +118,6 @@ calculate_all_measures <- function(in_model, in_test_df, threshold) {
   #abline(a = 0, b = 1, lty = 2, col = "red") # nolint
 
   return(performance_measures)
-
 }
 
 #---- 0.2 DONE *****    Functions - Calc Performance Measures ------------------
@@ -892,7 +891,7 @@ df_s2b1_4integers <- df_balanced1 %>%
                                        pull(column_name),
                                      collapse = "|"), ")_")))
 
-in_select1_cor_threshold <- 0.05
+in_select1_cor_threshold <- 0.5
 
 repeat {
   df_numeric <- df_s2b1_4integers %>%
@@ -1111,7 +1110,7 @@ df_s2b2_4integers <- df_balanced2 %>%
                                        pull(column_name),
                                      collapse = "|"), ")_")))
 
-in_select2_cor_threshold <- 0.8
+in_select2_cor_threshold <- 0.5
 
 repeat {
   df_numeric <- df_s2b2_4integers %>%
@@ -1310,7 +1309,7 @@ plt_s2b3_fisher
 ggsave("plt_s2b3_fisher.png", plot = plt_s2b3_fisher,
        width = 10, height = 12, dpi = 300)
 
-neg_log10_P_cutoff <- 100
+neg_log10_P_cutoff <- 0.05
 
 # Identify the columns to keep
 select_cols <- df_s2b3_fisher_results %>%
@@ -1554,7 +1553,7 @@ df_s3b1_4integers <- df_balanced1 %>%
                                        pull(column_name),
                                      collapse = "|"), ")_")))
 
-in_select3_cor_threshold <- 0.05
+in_select3_cor_threshold <- 0.5
 
 repeat {
   df_numeric <- df_s3b1_4integers %>%
@@ -1768,7 +1767,7 @@ df_s3b2_4integers <- df_balanced2 %>%
                                        pull(column_name),
                                      collapse = "|"), ")_")))
 
-in_select3_cor_threshold <- 0.05
+in_select3_cor_threshold <- 0.5
 
 repeat {
   df_numeric <- df_s3b2_4integers %>%
@@ -1863,15 +1862,19 @@ df_s3b2 <- df_s3b2_allfact_miss %>% select(-Class) %>% # nolint
 
 save(df_s3b2, file = "df_s3b2.RData")
 
-log_message("Starting Step 4.3.2 - select3_balanced2 - df_s3b2")
+log_message("Finished Step 4.3.2 - select3_balanced2 - df_s3b2")
 
 #---- 4-4 DONE *****    Select 4 - All Included ------------------- df_s4b3 ----
+
+log_message("Starting Step 4.4 - select4_balanced3 - df_s4b3")
 
 df_s4b3 <- df_balanced3
 
 #---- 4-4-4-4 DONE *          Final --------------------------------------------
 
 save(df_s4b3, file = "df_s4b3.RData")
+
+log_message("Finished Step 4.4 - select4_balanced3 - df_s4b3")
 
 ################################################################################
 #---- 5 PROG ******* Models - Project Step 5 ------------------ m#_s#b# --------
@@ -1930,7 +1933,7 @@ wf_m1_s1b1 <- workflow() %>%
 
 # 4. Cross-validation
 set.seed(123)
-folds_m1_s1b1 <- vfold_cv(df_m1_s1b1, v = 5, strata = Class)
+folds_m1_s1b1 <- vfold_cv(df_m1_s1b1, v = 10, strata = Class)
 
 # 5. Grid of hyperparameters
 tune_grid_m1_s1b1 <- grid_regular(penalty(), mixture(), levels = 5)
@@ -1956,8 +1959,13 @@ best_parameters_m1_s1b1 <- select_best(tune_results_m1_s1b1, metric = "roc_auc")
 # 8. Finalize the workflow
 final_wf_m1_s1b1 <- finalize_workflow(wf_m1_s1b1, best_parameters_m1_s1b1)
 
+save(final_wf_m1_s1b1, file = "final_wf_m1_s1b1.RData")
+
 # 9. Fit the final model
 final_fit_m1_s1b1 <- fit(final_wf_m1_s1b1, data = df_m1_s1b1)
+
+# Save the final model to an RData file
+save(final_fit_m1_s1b1, file = "final_fit_m1_s1b1.RData")
 
 # 10. Evaluate the model on the test dataset
 # Evaluate the model on the test dataset
@@ -1972,13 +1980,6 @@ confusion_matrix_m1_s1b1 <- test_predications_m1_s1b1 %>%
 
 # Print the confusion matrix
 print(confusion_matrix_m1_s1b1)
-
-# Visualize the confusion matrix
-autoplot(confusion_matrix_m1_s1b1, type = "heatmap") +
-  labs(title = "Confusion Matrix for Logistic Regression",
-       x = "Predicted Class",
-       y = "Actual Class") +
-  theme_minimal()
 
 results_m1_s1b1 <- calculate_all_measures(final_fit_m1_s1b1, df_test, 0.5)
 
@@ -2027,7 +2028,7 @@ wf_m1_s1b2 <- workflow() %>%
 
 # 4. Cross-validation
 set.seed(123)
-folds_m1_s1b2 <- vfold_cv(df_m1_s1b2, v = 5, strata = Class)
+folds_m1_s1b2 <- vfold_cv(df_m1_s1b2, v = 10, strata = Class)
 
 # 5. Grid of hyperparameters
 tune_grid_m1_s1b2 <- grid_regular(penalty(), mixture(), levels = 5)
@@ -2053,8 +2054,12 @@ best_parameters_m1_s1b2 <- select_best(tune_results_m1_s1b2, metric = "roc_auc")
 # 8. Finalize the workflow
 final_wf_m1_s1b2 <- finalize_workflow(wf_m1_s1b2, best_parameters_m1_s1b2)
 
+save(final_wf_m1_s1b2, file = "final_wf_m1_s1b2.RData")
+
 # 9. Fit the final model
 final_fit_m1_s1b2 <- fit(final_wf_m1_s1b2, data = df_m1_s1b2)
+
+save(final_fit_m1_s1b2, file = "final_fit_m1_s1b2.RData")
 
 # 10. Evaluate the model on the test dataset
 # Evaluate the model on the test dataset
@@ -2069,13 +2074,6 @@ confusion_matrix_m1_s1b2 <- test_predications_m1_s1b2 %>%
 
 # Print the confusion matrix
 print(confusion_matrix_m1_s1b2)
-
-# Visualize the confusion matrix
-autoplot(confusion_matrix_m1_s1b2, type = "heatmap") +
-  labs(title = "Confusion Matrix for Logistic Regression",
-       x = "Predicted Class",
-       y = "Actual Class") +
-  theme_minimal()
 
 results_m1_s1b2 <- calculate_all_measures(final_fit_m1_s1b2, df_test, 0.5)
 
@@ -2125,7 +2123,7 @@ wf_m1_s2b1 <- workflow() %>%
 
 # 4. Cross-validation
 set.seed(123)
-folds_m1_s2b1 <- vfold_cv(df_m1_s2b1, v = 5, strata = Class)
+folds_m1_s2b1 <- vfold_cv(df_m1_s2b1, v = 10, strata = Class)
 
 # 5. Grid of hyperparameters
 tune_grid_m1_s2b1 <- grid_regular(penalty(), mixture(), levels = 5)
@@ -2151,8 +2149,12 @@ best_parameters_m1_s2b1 <- select_best(tune_results_m1_s2b1, metric = "roc_auc")
 # 8. Finalize the workflow
 final_wf_m1_s2b1 <- finalize_workflow(wf_m1_s2b1, best_parameters_m1_s2b1)
 
+save(final_wf_m1_s2b1, file = "final_wf_m1_s2b1.RData")
+
 # 9. Fit the final model
 final_fit_m1_s2b1 <- fit(final_wf_m1_s2b1, data = df_m1_s2b1)
+
+save(final_fit_m1_s2b1, file = "final_fit_m1_s2b1.RData")
 
 # 10. Evaluate the model on the test dataset
 # Evaluate the model on the test dataset
@@ -2181,7 +2183,7 @@ log_message("Finished Step 5.1.3 - model1_select2_balanced1 - m1_s2b1")
 #---- 5-1-4 DONE ***       Model 1 Logistic Regression ------------ m1_s2b2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-log_message("Starting Step 5.1.4 - model1_select2_balanced2 - m1_s2b2")
+log_message("Starting Step 5.1.3 - model1_select2_balanced1 - m1_s2b2")
 
 #load("df_s2b2.RData") # nolint
 #load("df_columns_info.RData") # nolint
@@ -2189,21 +2191,16 @@ log_message("Starting Step 5.1.4 - model1_select2_balanced2 - m1_s2b2")
 
 # Logistic Regression Model
 
-# Starting with itegers only.
 df_m1_s2b2 <- df_s2b2 %>%
-  select(-where(~is.factor(.) && length(levels(.)) > 20))
-#%>%
-#  select(Class, matches(paste0("^DETAILED-(",
-#                               paste(df_columns_info %>%
-#                                       filter(variable_type %in%
-#                                                c("integer")) %>%
-#                                       pull(column_name),
-#                                     collapse = "|"), ")_")))
-
-df_m1_s2b2 %>% str()
+  select(Class, matches(paste0("^DETAILED-(",
+                               paste(df_columns_info %>%
+                                       filter(variable_type %in%
+                                                c("integer")) %>%
+                                       pull(column_name),
+                                     collapse = "|"), ")_")))
 
 # 1. Model Specification
-spec_m1_s2b2 <- logistic_reg(penalty = tune(), mixture = 1) %>%
+spec_m1_s2b2 <- logistic_reg(penalty = tune(), mixture = tune()) %>%
   set_engine("glmnet") %>%
   set_mode("classification")
 
@@ -2211,8 +2208,7 @@ spec_m1_s2b2 <- logistic_reg(penalty = tune(), mixture = 1) %>%
 rec_m1_s2b2 <- recipe(Class ~ ., data = df_m1_s2b2) %>%
   step_zv(all_predictors()) %>%
   step_impute_median(all_numeric_predictors()) %>%
-  step_normalize(all_numeric_predictors()) %>%
-  step_unknown(all_nominal_predictors(), new_level = "unknown") %>%
+  step_normalize(all_predictors()) %>%
   step_dummy(all_nominal_predictors(), -all_outcomes())
 
 # 3. Workflow
@@ -2222,27 +2218,17 @@ wf_m1_s2b2 <- workflow() %>%
 
 # 4. Cross-validation
 set.seed(123)
-folds_m1_s2b2 <- vfold_cv(df_m1_s2b2, v = 5, strata = Class)
+folds_m1_s2b2 <- vfold_cv(df_m1_s2b2, v = 10, strata = Class)
 
 # 5. Grid of hyperparameters
-#tune_grid_m1_s2b2 <- grid_regular(
-#  penalty(range = c(-10, -2)),
-#  mixture(range = c(0.01, 0.05)),
-#  levels = 5
-#)
-tune_grid_m1_s2b2 <- grid_regular(
-  penalty(),
-  levels = 5
-)
-
-#tune_grid_m1_s2b2 |> view()
+tune_grid_m1_s2b2 <- grid_regular(penalty(), mixture(), levels = 5)
 
 # 6. Tune the model
 tune_results_m1_s2b2 <- tune_grid(
   wf_m1_s2b2,
   resamples = folds_m1_s2b2,
   grid = tune_grid_m1_s2b2,
-  metrics = metric_set(roc_auc, bal_accuracy, sens, spec)
+  metrics = metric_set(roc_auc, accuracy, sens, spec)
 )
 
 # Show the tuning results
@@ -2253,17 +2239,139 @@ autoplot(tune_results_m1_s2b2) +
   theme_minimal()
 
 # 7. Select the best parameters
-best_parameters_m1_s2b2 <- select_best(tune_results_m1_s2b2,
+best_parameters_m1_s2b2 <- select_best(tune_results_m1_s2b2, metric = "roc_auc")
+
+# 8. Finalize the workflow
+final_wf_m1_s2b2 <- finalize_workflow(wf_m1_s2b2, best_parameters_m1_s2b2)
+
+save(final_wf_m1_s2b2, file = "final_wf_m1_s2b2.RData")
+
+# 9. Fit the final model
+final_fit_m1_s2b2 <- fit(final_wf_m1_s2b2, data = df_m1_s2b2)
+
+save(final_fit_m1_s2b2, file = "final_fit_m1_s2b2.RData")
+
+# 10. Evaluate the model on the test dataset
+# Evaluate the model on the test dataset
+test_predications_m1_s2b2 <-
+  predict(final_fit_m1_s2b2, new_data = df_test, type = "prob") %>%
+  bind_cols(predict(final_fit_m1_s2b2, new_data = df_test, type = "class")) %>%
+  bind_cols(df_test %>% select(Class))
+
+# Generate a confusion matrix
+confusion_matrix_m1_s2b2 <- test_predications_m1_s2b2 %>%
+  conf_mat(truth = Class, estimate = .pred_class)
+
+# Print the confusion matrix
+print(confusion_matrix_m1_s2b2)
+
+results_m1_s2b2 <- calculate_all_measures(final_fit_m1_s2b2, df_test, 0.5)
+
+results_m1_s2b2
+
+store_results("m1s2b2", results_m1_s2b2, "Logistic Regression Model 1 - s2b2")
+
+save(results_storage, file = "results_after_m1_s2b2.RData")
+
+log_message("Finished Step 5.1.3 - model1_select2_balanced1 - m1_s2b2")
+
+#---- 5-1-4-2 DONE ***       Model 1 Logistic Regression -------- m1_s2b2_2 ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+log_message("Starting Step 5.1.4.2 - model1_select2_balanced2-2 - m1_s2b2_2")
+#Altered to include factor variables.
+
+#load("df_s2b2.RData") # nolint
+#load("df_columns_info.RData") # nolint
+#load("df_test.RData") # nolint
+
+# Logistic Regression Model
+
+# Starting with itegers only.
+df_m1_s2b2_2 <- df_s2b2 %>%
+  select(-where(~is.factor(.) && length(levels(.)) > 20))
+#%>%
+#  select(Class, matches(paste0("^DETAILED-(",
+#                               paste(df_columns_info %>%
+#                                       filter(variable_type %in%
+#                                                c("integer")) %>%
+#                                       pull(column_name),
+#                                     collapse = "|"), ")_")))
+
+df_m1_s2b2_2 %>% str()
+
+# 1. Model Specification
+spec_m1_s2b2_2 <- logistic_reg(penalty = tune(), mixture = 1) %>%
+  set_engine("glmnet") %>%
+  set_mode("classification")
+
+# 2. Recipe
+rec_m1_s2b2_2 <- recipe(Class ~ ., data = df_m1_s2b2_2) %>%
+  step_zv(all_predictors()) %>%
+  step_impute_median(all_numeric_predictors()) %>%
+  step_normalize(all_numeric_predictors()) %>%
+  step_unknown(all_nominal_predictors(), new_level = "unknown") %>%
+  step_dummy(all_nominal_predictors(), -all_outcomes())
+
+# 3. Workflow
+wf_m1_s2b2_2 <- workflow() %>%
+  add_model(spec_m1_s2b2_2) %>%
+  add_recipe(rec_m1_s2b2_2)
+
+# 4. Cross-validation
+set.seed(123)
+folds_m1_s2b2_2 <- vfold_cv(df_m1_s2b2_2, v = 10, strata = Class)
+
+# 5. Grid of hyperparameters
+#tune_grid_m1_s2b2_2 <- grid_regular(
+#  penalty(range = c(-10, -2)),
+#  mixture(range = c(0.01, 0.05)),
+#  levels = 5
+#)
+tune_grid_m1_s2b2_2 <- grid_regular(
+  penalty(),
+  levels = 5
+)
+
+#tune_grid_m1_s2b2_2 |> view()
+
+# 6. Tune the model
+tune_results_m1_s2b2_2 <- tune_grid(
+  wf_m1_s2b2_2,
+  resamples = folds_m1_s2b2_2,
+  grid = tune_grid_m1_s2b2_2,
+  metrics = metric_set(roc_auc, bal_accuracy, sens, spec)
+)
+
+# Show the tuning results
+autoplot(tune_results_m1_s2b2_2) +
+  labs(title = "Tuning Results for Logistic Regression",
+       x = "Penalty",
+       y = "Mixture") +
+  theme_minimal()
+
+# 7. Select the best parameters
+best_parameters_m1_s2b2_2 <- select_best(tune_results_m1_s2b2_2,
                                        metric = "roc_auc")
 
-best_parameters_m1_s2b2
+best_parameters_m1_s2b2_2
+
+# 8. Finalize the workflow
+final_wf_m1_s2b2_2 <- finalize_workflow(wf_m1_s2b2_2, best_parameters_m1_s2b2_2)
+
+save(final_wf_m1_s2b2_2, file = "final_wf_m1_s2b2_2.RData")
+
+# 9. Fit the final model
+final_fit_m1_s2b2_2 <- fit(final_wf_m1_s2b2_2, data = df_m1_s2b2_2)
+
+save(final_fit_m1_s2b2_2, file = "final_fit_m1_s2b2_2.RData")
 
 # Try different thresholds to achieve target TPR and TNR
 thresholds <- seq(0.2, 0.8, by = 0.01)
 threshold_results <- list()
 
 for (thresh in thresholds) {
-  results <- calculate_all_measures(final_fit_m1_s2b2, df_m1_s2b2, thresh)
+  results <- calculate_all_measures(final_fit_m1_s2b2_2, df_m1_s2b2_2, thresh)
   tpr_1 <- results$values[results$measures == "TPR_1"]
   tpr_0 <- results$values[results$measures == "TPR_0"]
 
@@ -2289,37 +2397,32 @@ cat("Best threshold:", best_threshold,
     "\nTPR_1 (Sensitivity):", best_row$TPR_1, 
     "\nTPR_0 (Specificity):", best_row$TPR_0)
 
-# 8. Finalize the workflow
-final_wf_m1_s2b2 <- finalize_workflow(wf_m1_s2b2, best_parameters_m1_s2b2)
-
-# 9. Fit the final model
-final_fit_m1_s2b2 <- fit(final_wf_m1_s2b2, data = df_m1_s2b2)
-
 # 10. Evaluate the model on the test dataset
 # Evaluate the model on the test dataset
 # Get probability predictions
-test_predictions_prob_m1_s2b2 <- 
-  predict(final_fit_m1_s2b2, new_data = df_test, type = "prob") %>%
-  bind_cols(predict(final_fit_m1_s2b2, new_data = df_test, type = "class")) %>%
+test_predictions_prob_m1_s2b2_2 <- 
+  predict(final_fit_m1_s2b2_2, new_data = df_test, type = "prob") %>%
+  bind_cols(predict(final_fit_m1_s2b2_2, new_data = df_test, type = "class")) %>%
   bind_cols(df_test %>% select(Class))
 
 # Generate a confusion matrix
-confusion_matrix_m1_s2b2 <- test_predications_m1_s2b2 %>%
+confusion_matrix_m1_s2b2_2 <- test_predications_m1_s2b2_2 %>%
   conf_mat(truth = Class, estimate = .pred_class)
 
 # Print the confusion matrix
-print(confusion_matrix_m1_s2b2)
+print(confusion_matrix_m1_s2b2_2)
 
-results_m1_s2b2 <- calculate_all_measures(final_fit_m1_s2b2, df_test, threshold = .5)
+# Keeping this at 0.5 because I want the good performance capturing 0 class.
+results_m1_s2b2_2 <- calculate_all_measures(final_fit_m1_s2b2_2, df_test, threshold = .5)
                                            #best_threshold)
 
-results_m1_s2b2
+results_m1_s2b2_2
 
-store_results("m1s2b2", results_m1_s2b2, "Logistic Regression Model 1 - s2b2")
+store_results("m1s2b2", results_m1_s2b2_2, "Logistic Regression Model 1 - s2b2")
 
-save(results_storage, file = "results_after_m1_s2b2.RData")
+save(results_storage, file = "results_after_m1_s2b2_2.RData")
 
-log_message("Finished Step 5.1.4 - model1_select2_balanced2 - m1_s2b2")
+log_message("Finished Step 5.1.4 - model1_select2_balanced2 - m1_s2b2_2")
 
 #---- 5-1-5 DONE ***       Model 1 Logistic Regression ------------ m1_s3b1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2359,7 +2462,7 @@ wf_m1_s3b1 <- workflow() %>%
 
 # 4. Cross-validation
 set.seed(123)
-folds_m1_s3b1 <- vfold_cv(df_m1_s3b1, v = 5, strata = Class)
+folds_m1_s3b1 <- vfold_cv(df_m1_s3b1, v = 10, strata = Class)
 
 # 5. Grid of hyperparameters
 tune_grid_m1_s3b1 <- grid_regular(penalty(), mixture(), levels = 5)
@@ -2385,8 +2488,12 @@ best_parameters_m1_s3b1 <- select_best(tune_results_m1_s3b1, metric = "roc_auc")
 # 8. Finalize the workflow
 final_wf_m1_s3b1 <- finalize_workflow(wf_m1_s3b1, best_parameters_m1_s3b1)
 
+save(final_wf_m1_s3b1, file = "final_wf_m1_s3b1.RData")
+
 # 9. Fit the final model
 final_fit_m1_s3b1 <- fit(final_wf_m1_s3b1, data = df_m1_s3b1)
+
+save(final_fit_m1_s3b1, file = "final_fit_m1_s3b1.RData")
 
 # 10. Evaluate the model on the test dataset
 # Evaluate the model on the test dataset
@@ -2401,13 +2508,6 @@ confusion_matrix_m1_s3b1 <- test_predications_m1_s3b1 %>%
 
 # Print the confusion matrix
 print(confusion_matrix_m1_s3b1)
-
-# Visualize the confusion matrix
-autoplot(confusion_matrix_m1_s3b1, type = "heatmap") +
-  labs(title = "Confusion Matrix for Logistic Regression",
-       x = "Predicted Class",
-       y = "Actual Class") +
-  theme_minimal()
 
 results_m1_s3b1 <- calculate_all_measures(final_fit_m1_s3b1, df_test, 0.5)
 
@@ -2424,7 +2524,7 @@ log_message("Finished Step 5.1.5 - model1_select3_balanced1 - m1_s3b1")
 
 log_message("Starting Step 5.1.6 - model1_select3_balanced2 - m1_s3b2")
 
-load("df_s3b2.RData") # nolint
+#load("df_s3b2.RData") # nolint
 #load("df_columns_info.RData") # nolint
 #load("df_test.RData") # nolint
 
@@ -2457,7 +2557,7 @@ wf_m1_s3b2 <- workflow() %>%
 
 # 4. Cross-validation
 set.seed(123)
-folds_m1_s3b2 <- vfold_cv(df_m1_s3b2, v = 5, strata = Class)
+folds_m1_s3b2 <- vfold_cv(df_m1_s3b2, v = 10, strata = Class)
 
 # 5. Grid of hyperparameters
 tune_grid_m1_s3b2 <- grid_regular(penalty(), mixture(), levels = 5)
@@ -2480,42 +2580,15 @@ autoplot(tune_results_m1_s3b2) +
 # 7. Select the best parameters
 best_parameters_m1_s3b2 <- select_best(tune_results_m1_s3b2, metric = "roc_auc")
 
-# Try different thresholds to achieve target TPR and TNR
-thresholds <- seq(0.2, 0.8, by = 0.01)
-threshold_results <- list()
-
-for (thresh in thresholds) {
-  results <- calculate_all_measures(final_fit_m1_s3b2, df_m1_s3b2, thresh)
-  tpr_1 <- results$values[results$measures == "TPR_1"]
-  tpr_0 <- results$values[results$measures == "TPR_0"]
-
-  threshold_results[[as.character(thresh)]] <- data.frame(
-    threshold = thresh,
-    TPR_1 = tpr_1,
-    TPR_0 = tpr_0,
-    # Heavily penalize being below the targets
-    diff_from_target = ifelse(tpr_1 < 0.81, 0.81 - tpr_1, 0) +
-      ifelse(tpr_0 < 0.79, 0.79 - tpr_0, 0)
-  )
-}
-
-threshold_df <- do.call(rbind, threshold_results)
-best_threshold <- threshold_df[which.min(threshold_df$diff_from_target),
- "threshold"]
-
-best_threshold
-
-# Print results for the best threshold
-best_row <- threshold_df[threshold_df$threshold == best_threshold, ]
-cat("Best threshold:", best_threshold, 
-    "\nTPR_1 (Sensitivity):", best_row$TPR_1, 
-    "\nTPR_0 (Specificity):", best_row$TPR_0)
-
 # 8. Finalize the workflow
 final_wf_m1_s3b2 <- finalize_workflow(wf_m1_s3b2, best_parameters_m1_s3b2)
 
+save(final_wf_m1_s3b2, file = "final_wf_m1_s3b2.RData")
+
 # 9. Fit the final model
 final_fit_m1_s3b2 <- fit(final_wf_m1_s3b2, data = df_m1_s3b2)
+
+save(final_fit_m1_s3b2, file = "final_fit_m1_s3b2.RData")
 
 # 10. Evaluate the model on the test dataset
 # Evaluate the model on the test dataset
@@ -2590,7 +2663,7 @@ wf_m2_s1b1 <- workflow() %>%
 
 # 4. Cross-validation
 set.seed(123)
-folds_m2_s1b1 <- vfold_cv(df_m2_s1b1, v = 5, strata = Class)
+folds_m2_s1b1 <- vfold_cv(df_m2_s1b1, v = 10, strata = Class)
 
 # 5. Grid of hyperparameters
 grid_m2_s1b1 <- grid_regular(
@@ -2621,15 +2694,19 @@ print(best_params_m2_s1b1)
 # 8. Finalize the workflow
 final_wf_m2_s1b1 <- finalize_workflow(wf_m2_s1b1, best_params_m2_s1b1)
 
+save(final_wf_m2_s1b1, file = "final_wf_m2_s1b1.RData")
+
 # 9. Fit the final model
-fit_m2_s1b1 <- fit(final_wf_m2_s1b1, data = df_m2_s1b1)
+final_fit_m2_s1b1 <- fit(final_wf_m2_s1b1, data = df_m2_s1b1)
+
+save(final_fit_m2_s1b1, file = "final_fit_m2_s1b1.RData")
 
 # Try different thresholds to achieve the target TPR and TNR
 thresholds <- seq(0.3, 0.7, by = 0.05)
 threshold_results <- list()
 
 for (thresh in thresholds) {
-  results <- calculate_all_measures(fit_m2_s1b1, df_m2_s1b1, thresh)
+  results <- calculate_all_measures(final_fit_m2_s1b1, df_m2_s1b1, thresh)
   tpr_1 <- results$values[results$measures == "TPR_1"]
   tpr_0 <- results$values[results$measures == "TPR_0"]
 
@@ -2646,7 +2723,7 @@ best_threshold <-
   threshold_df[which.min(threshold_df$diff_from_target), "threshold"]
 
 # 10. Evaluate the model on the test dataset
-results_m2_s1b1 <- calculate_all_measures(fit_m2_s1b1, df_test, best_threshold)
+results_m2_s1b1 <- calculate_all_measures(final_fit_m2_s1b1, df_test, best_threshold)
 results_m2_s1b1
 store_results("m2s1b1", results_m2_s1b1, "KNN Model - s1b1")
 
@@ -2700,7 +2777,7 @@ wf_m2_s1b2 <- workflow() %>%
 
 # 4. Cross-validation
 set.seed(123)
-folds_m2_s1b2 <- vfold_cv(df_m2_s1b2, v = 5, strata = Class)
+folds_m2_s1b2 <- vfold_cv(df_m2_s1b2, v = 10, strata = Class)
 
 # 5. Grid of hyperparameters
 grid_m2_s1b2 <- grid_regular(
@@ -2731,15 +2808,19 @@ print(best_params_m2_s1b2)
 # 8. Finalize the workflow
 final_wf_m2_s1b2 <- finalize_workflow(wf_m2_s1b2, best_params_m2_s1b2)
 
+save(final_wf_m2_s1b2, file = "final_wf_m2_s1b2.RData")
+
 # 9. Fit the final model
-fit_m2_s1b2 <- fit(final_wf_m2_s1b2, data = df_m2_s1b2)
+final_fit_m2_s1b2 <- fit(final_wf_m2_s1b2, data = df_m2_s1b2)
+
+save(final_fit_m2_s1b2, file = "final_fit_m2_s1b2.RData")
 
 # Try different thresholds to achieve the target TPR and TNR
 thresholds <- seq(0.3, 0.7, by = 0.05)
 threshold_results <- list()
 
 for (thresh in thresholds) {
-  results <- calculate_all_measures(fit_m2_s1b2, df_m2_s1b2, thresh)
+  results <- calculate_all_measures(final_fit_m2_s1b2, df_m2_s1b2, thresh)
   tpr_1 <- results$values[results$measures == "TPR_1"]
   tpr_0 <- results$values[results$measures == "TPR_0"]
 
@@ -2756,7 +2837,7 @@ best_threshold <-
   threshold_df[which.min(threshold_df$diff_from_target), "threshold"]
 
 # 10. Evaluate the model on the test dataset
-results_m2_s1b2 <- calculate_all_measures(fit_m2_s1b2, df_test, best_threshold)
+results_m2_s1b2 <- calculate_all_measures(final_fit_m2_s1b2, df_test, best_threshold)
 results_m2_s1b2
 store_results("m2s1b2", results_m2_s1b2, "KNN Model - s1b2")
 
@@ -2810,7 +2891,7 @@ wf_m2_s2b1 <- workflow() %>%
 
 # 4. Cross-validation
 set.seed(123)
-folds_m2_s2b1 <- vfold_cv(df_m2_s2b1, v = 5, strata = Class)
+folds_m2_s2b1 <- vfold_cv(df_m2_s2b1, v = 10, strata = Class)
 
 # 5. Grid of hyperparameters
 grid_m2_s2b1 <- grid_regular(
@@ -2841,15 +2922,19 @@ print(best_params_m2_s2b1)
 # 8. Finalize the workflow
 final_wf_m2_s2b1 <- finalize_workflow(wf_m2_s2b1, best_params_m2_s2b1)
 
+save(final_wf_m2_s2b1, file = "final_wf_m2_s2b1.RData")
+
 # 9. Fit the final model
-fit_m2_s2b1 <- fit(final_wf_m2_s2b1, data = df_m2_s2b1)
+final_fit_m2_s2b1 <- fit(final_wf_m2_s2b1, data = df_m2_s2b1)
+
+save(final_fit_m2_s2b1, file = "final_fit_m2_s2b1.RData")
 
 # Try different thresholds to achieve the target TPR and TNR
 thresholds <- seq(0.3, 0.7, by = 0.05)
 threshold_results <- list()
 
 for (thresh in thresholds) {
-  results <- calculate_all_measures(fit_m2_s2b1, df_m2_s2b1, thresh)
+  results <- calculate_all_measures(final_fit_m2_s2b1, df_m2_s2b1, thresh)
   tpr_1 <- results$values[results$measures == "TPR_1"]
   tpr_0 <- results$values[results$measures == "TPR_0"]
 
@@ -2866,7 +2951,7 @@ best_threshold <-
   threshold_df[which.min(threshold_df$diff_from_target), "threshold"]
 
 # 10. Evaluate the model on the test dataset
-results_m2_s2b1 <- calculate_all_measures(fit_m2_s2b1, df_test, best_threshold)
+results_m2_s2b1 <- calculate_all_measures(final_fit_m2_s2b1, df_test, best_threshold)
 results_m2_s2b1
 store_results("m2s2b1", results_m2_s2b1, "KNN Model - s2b1")
 
@@ -2920,7 +3005,7 @@ wf_m2_s2b2 <- workflow() %>%
 
 # 4. Cross-validation
 set.seed(123)
-folds_m2_s2b2 <- vfold_cv(df_m2_s2b2, v = 5, strata = Class)
+folds_m2_s2b2 <- vfold_cv(df_m2_s2b2, v = 10, strata = Class)
 
 # 5. Grid of hyperparameters
 grid_m2_s2b2 <- grid_regular(
@@ -2951,15 +3036,19 @@ print(best_params_m2_s2b2)
 # 8. Finalize the workflow
 final_wf_m2_s2b2 <- finalize_workflow(wf_m2_s2b2, best_params_m2_s2b2)
 
+save(final_wf_m2_s2b2, file = "final_wf_m2_s2b2.RData")
+
 # 9. Fit the final model
-fit_m2_s2b2 <- fit(final_wf_m2_s2b2, data = df_m2_s2b2)
+final_fit_m2_s2b2 <- fit(final_wf_m2_s2b2, data = df_m2_s2b2)
+
+save(final_fit_m2_s2b2, file = "final_fit_m2_s2b2.RData")
 
 # Try different thresholds to achieve the target TPR and TNR
 thresholds <- seq(0.3, 0.7, by = 0.05)
 threshold_results <- list()
 
 for (thresh in thresholds) {
-  results <- calculate_all_measures(fit_m2_s2b2, df_m2_s2b2, thresh)
+  results <- calculate_all_measures(final_fit_m2_s2b2, df_m2_s2b2, thresh)
   tpr_1 <- results$values[results$measures == "TPR_1"]
   tpr_0 <- results$values[results$measures == "TPR_0"]
 
@@ -2976,7 +3065,7 @@ best_threshold <-
   threshold_df[which.min(threshold_df$diff_from_target), "threshold"]
 
 # 10. Evaluate the model on the test dataset
-results_m2_s2b2 <- calculate_all_measures(fit_m2_s2b2, df_test, best_threshold)
+results_m2_s2b2 <- calculate_all_measures(final_fit_m2_s2b2, df_test, best_threshold)
 results_m2_s2b2
 store_results("m2s2b2", results_m2_s2b2, "KNN Model - s2b2")
 
@@ -3030,7 +3119,7 @@ wf_m2_s3b1 <- workflow() %>%
 
 # 4. Cross-validation
 set.seed(123)
-folds_m2_s3b1 <- vfold_cv(df_m2_s3b1, v = 5, strata = Class)
+folds_m2_s3b1 <- vfold_cv(df_m2_s3b1, v = 10, strata = Class)
 
 # 5. Grid of hyperparameters
 grid_m2_s3b1 <- grid_regular(
@@ -3061,15 +3150,19 @@ print(best_params_m2_s3b1)
 # 8. Finalize the workflow
 final_wf_m2_s3b1 <- finalize_workflow(wf_m2_s3b1, best_params_m2_s3b1)
 
+save(final_wf_m2_s3b1, file = "final_wf_m2_s3b1.RData")
+
 # 9. Fit the final model
-fit_m2_s3b1 <- fit(final_wf_m2_s3b1, data = df_m2_s3b1)
+final_fit_m2_s3b1 <- fit(final_wf_m2_s3b1, data = df_m2_s3b1)
+
+save(final_fit_m2_s3b1, file = "final_fit_m2_s3b1.RData")
 
 # Try different thresholds to achieve the target TPR and TNR
 thresholds <- seq(0.3, 0.7, by = 0.05)
 threshold_results <- list()
 
 for (thresh in thresholds) {
-  results <- calculate_all_measures(fit_m2_s3b1, df_m2_s3b1, thresh)
+  results <- calculate_all_measures(final_fit_m2_s3b1, df_m2_s3b1, thresh)
   tpr_1 <- results$values[results$measures == "TPR_1"]
   tpr_0 <- results$values[results$measures == "TPR_0"]
 
@@ -3086,7 +3179,7 @@ best_threshold <-
   threshold_df[which.min(threshold_df$diff_from_target), "threshold"]
 
 # 10. Evaluate the model on the test dataset
-results_m2_s3b1 <- calculate_all_measures(fit_m2_s3b1, df_test, best_threshold)
+results_m2_s3b1 <- calculate_all_measures(final_fit_m2_s3b1, df_test, best_threshold)
 results_m2_s3b1
 store_results("m2s3b1", results_m2_s3b1, "KNN Model - s3b1")
 
@@ -3140,7 +3233,7 @@ wf_m2_s3b2 <- workflow() %>%
 
 # 4. Cross-validation
 set.seed(123)
-folds_m2_s3b2 <- vfold_cv(df_m2_s3b2, v = 5, strata = Class)
+folds_m2_s3b2 <- vfold_cv(df_m2_s3b2, v = 10, strata = Class)
 
 # 5. Grid of hyperparameters
 grid_m2_s3b2 <- grid_regular(
@@ -3171,15 +3264,19 @@ print(best_params_m2_s3b2)
 # 8. Finalize the workflow
 final_wf_m2_s3b2 <- finalize_workflow(wf_m2_s3b2, best_params_m2_s3b2)
 
+save(final_wf_m2_s3b2, file = "final_wf_m2_s3b2.RData")
+
 # 9. Fit the final model
-fit_m2_s3b2 <- fit(final_wf_m2_s3b2, data = df_m2_s3b2)
+final_fit_m2_s3b2 <- fit(final_wf_m2_s3b2, data = df_m2_s3b2)
+
+save(final_fit_m2_s3b2, file = "final_fit_m2_s3b2.RData")
 
 # Try different thresholds to achieve the target TPR and TNR
 thresholds <- seq(0.3, 0.7, by = 0.05)
 threshold_results <- list()
 
 for (thresh in thresholds) {
-  results <- calculate_all_measures(fit_m2_s3b2, df_m2_s3b2, thresh)
+  results <- calculate_all_measures(final_fit_m2_s3b2, df_m2_s3b2, thresh)
   tpr_1 <- results$values[results$measures == "TPR_1"]
   tpr_0 <- results$values[results$measures == "TPR_0"]
 
@@ -3196,7 +3293,7 @@ best_threshold <-
   threshold_df[which.min(threshold_df$diff_from_target), "threshold"]
 
 # 10. Evaluate the model on the test dataset
-results_m2_s3b2 <- calculate_all_measures(fit_m2_s3b2, df_test, best_threshold)
+results_m2_s3b2 <- calculate_all_measures(final_fit_m2_s3b2, df_test, best_threshold)
 results_m2_s3b2
 store_results("m2s3b2", results_m2_s3b2, "KNN Model - s3b2")
 
@@ -3249,7 +3346,7 @@ wf_m3_s1b1 <- workflow() %>%
 
 # 4. Cross-validation
 set.seed(123)
-folds_m3_s1b1 <- vfold_cv(df_m3_s1b1, v = 5, strata = Class)
+folds_m3_s1b1 <- vfold_cv(df_m3_s1b1, v = 10, strata = Class)
 
 # 5. Grid of hyperparameters
 grid_m3_s1b1 <- grid_regular(
@@ -3281,11 +3378,15 @@ print(best_params_m3_s1b1)
 # 8. Finalize the workflow
 final_wf_m3_s1b1 <- finalize_workflow(wf_m3_s1b1, best_params_m3_s1b1)
 
+save(final_wf_m3_s1b1, file = "final_wf_m3_s1b1.RData")
+
 # 9. Fit the final model
-fit_m3_s1b1 <- fit(final_wf_m3_s1b1, data = df_m3_s1b1)
+final_fit_m3_s1b1 <- fit(final_wf_m3_s1b1, data = df_m3_s1b1)
+
+save(final_fit_m3_s1b1, file = "final_fit_m3_s1b1.RData")
 
 # 10. Evaluate the model on the test dataset
-results_m3_s1b1 <- calculate_all_measures(fit_m3_s1b1, df_test, 0.5)
+results_m3_s1b1 <- calculate_all_measures(final_fit_m3_s1b1, df_test, 0.5)
 results_m3_s1b1
 store_results("m3s1b1", results_m3_s1b1, "Decision Tree Model - s1b1")
 
@@ -3335,7 +3436,7 @@ wf_m3_s1b2 <- workflow() %>%
 
 # 4. Cross-validation
 set.seed(123)
-folds_m3_s1b2 <- vfold_cv(df_m3_s1b2, v = 5, strata = Class)
+folds_m3_s1b2 <- vfold_cv(df_m3_s1b2, v = 10, strata = Class)
 
 # 5. Grid of hyperparameters
 grid_m3_s1b2 <- grid_regular(
@@ -3367,11 +3468,15 @@ print(best_params_m3_s1b2)
 # 8. Finalize the workflow
 final_wf_m3_s1b2 <- finalize_workflow(wf_m3_s1b2, best_params_m3_s1b2)
 
+save(final_wf_m3_s1b2, file = "final_wf_m3_s1b2.RData")
+
 # 9. Fit the final model
-fit_m3_s1b2 <- fit(final_wf_m3_s1b2, data = df_m3_s1b2)
+final_fit_m3_s1b2 <- fit(final_wf_m3_s1b2, data = df_m3_s1b2)
+
+save(final_fit_m3_s1b2, file = "final_fit_m3_s1b2.RData")
 
 # 10. Evaluate the model on the test dataset
-results_m3_s1b2 <- calculate_all_measures(fit_m3_s1b2, df_test, 0.5)
+results_m3_s1b2 <- calculate_all_measures(final_fit_m3_s1b2, df_test, 0.5)
 results_m3_s1b2
 store_results("m3s1b2", results_m3_s1b2, "Decision Tree Model - s1b2")
 
@@ -3421,7 +3526,7 @@ wf_m3_s2b1 <- workflow() %>%
 
 # 4. Cross-validation
 set.seed(123)
-folds_m3_s2b1 <- vfold_cv(df_m3_s2b1, v = 5, strata = Class)
+folds_m3_s2b1 <- vfold_cv(df_m3_s2b1, v = 10, strata = Class)
 
 # 5. Grid of hyperparameters
 grid_m3_s2b1 <- grid_regular(
@@ -3453,11 +3558,15 @@ print(best_params_m3_s2b1)
 # 8. Finalize the workflow
 final_wf_m3_s2b1 <- finalize_workflow(wf_m3_s2b1, best_params_m3_s2b1)
 
+save(final_wf_m3_s2b1, file = "final_wf_m3_s2b1.RData")
+
 # 9. Fit the final model
-fit_m3_s2b1 <- fit(final_wf_m3_s2b1, data = df_m3_s2b1)
+final_fit_m3_s2b1 <- fit(final_wf_m3_s2b1, data = df_m3_s2b1)
+
+save(final_fit_m3_s2b1, file = "final_fit_m3_s2b1.RData")
 
 # 10. Evaluate the model on the test dataset
-results_m3_s2b1 <- calculate_all_measures(fit_m3_s2b1, df_test, 0.5)
+results_m3_s2b1 <- calculate_all_measures(final_fit_m3_s2b1, df_test, 0.5)
 results_m3_s2b1
 store_results("m3s2b1", results_m3_s2b1, "Decision Tree Model - s2b1")
 
@@ -3507,7 +3616,7 @@ wf_m3_s2b2 <- workflow() %>%
 
 # 4. Cross-validation
 set.seed(123)
-folds_m3_s2b2 <- vfold_cv(df_m3_s2b2, v = 5, strata = Class)
+folds_m3_s2b2 <- vfold_cv(df_m3_s2b2, v = 10, strata = Class)
 
 # 5. Grid of hyperparameters
 grid_m3_s2b2 <- grid_regular(
@@ -3539,11 +3648,15 @@ print(best_params_m3_s2b2)
 # 8. Finalize the workflow
 final_wf_m3_s2b2 <- finalize_workflow(wf_m3_s2b2, best_params_m3_s2b2)
 
+save(final_wf_m3_s2b2, file = "final_wf_m3_s2b2.RData")
+
 # 9. Fit the final model
-fit_m3_s2b2 <- fit(final_wf_m3_s2b2, data = df_m3_s2b2)
+final_fit_m3_s2b2 <- fit(final_wf_m3_s2b2, data = df_m3_s2b2)
+
+save(final_fit_m3_s2b2, file = "final_fit_m3_s2b2.RData")
 
 # 10. Evaluate the model on the test dataset
-results_m3_s2b2 <- calculate_all_measures(fit_m3_s2b2, df_test, 0.5)
+results_m3_s2b2 <- calculate_all_measures(final_fit_m3_s2b2, df_test, 0.5)
 results_m3_s2b2
 store_results("m3s2b2", results_m3_s2b2, "Decision Tree Model - s2b2")
 
@@ -3593,7 +3706,7 @@ wf_m3_s3b1 <- workflow() %>%
 
 # 4. Cross-validation
 set.seed(123)
-folds_m3_s3b1 <- vfold_cv(df_m3_s3b1, v = 5, strata = Class)
+folds_m3_s3b1 <- vfold_cv(df_m3_s3b1, v = 10, strata = Class)
 
 # 5. Grid of hyperparameters
 grid_m3_s3b1 <- grid_regular(
@@ -3625,11 +3738,15 @@ print(best_params_m3_s3b1)
 # 8. Finalize the workflow
 final_wf_m3_s3b1 <- finalize_workflow(wf_m3_s3b1, best_params_m3_s3b1)
 
+save(final_wf_m3_s3b1, file = "final_wf_m3_s3b1.RData")
+
 # 9. Fit the final model
-fit_m3_s3b1 <- fit(final_wf_m3_s3b1, data = df_m3_s3b1)
+final_fit_m3_s3b1 <- fit(final_wf_m3_s3b1, data = df_m3_s3b1)
+
+save(final_fit_m3_s3b1, file = "final_fit_m3_s3b1.RData")
 
 # 10. Evaluate the model on the test dataset
-results_m3_s3b1 <- calculate_all_measures(fit_m3_s3b1, df_test, 0.5)
+results_m3_s3b1 <- calculate_all_measures(final_fit_m3_s3b1, df_test, 0.5)
 results_m3_s3b1
 store_results("m3s3b1", results_m3_s3b1, "Decision Tree Model - s3b1")
 
@@ -3679,7 +3796,7 @@ wf_m3_s3b2 <- workflow() %>%
 
 # 4. Cross-validation
 set.seed(123)
-folds_m3_s3b2 <- vfold_cv(df_m3_s3b2, v = 5, strata = Class)
+folds_m3_s3b2 <- vfold_cv(df_m3_s3b2, v = 10, strata = Class)
 
 # 5. Grid of hyperparameters
 grid_m3_s3b2 <- grid_regular(
@@ -3711,11 +3828,15 @@ print(best_params_m3_s3b2)
 # 8. Finalize the workflow
 final_wf_m3_s3b2 <- finalize_workflow(wf_m3_s3b2, best_params_m3_s3b2)
 
+save(final_wf_m3_s3b2, file = "final_wf_m3_s3b2.RData")
+
 # 9. Fit the final model
-fit_m3_s3b2 <- fit(final_wf_m3_s3b2, data = df_m3_s3b2)
+final_fit_m3_s3b2 <- fit(final_wf_m3_s3b2, data = df_m3_s3b2)
+
+save(final_fit_m3_s3b2, file = "final_fit_m3_s3b2.RData")
 
 # 10. Evaluate the model on the test dataset
-results_m3_s3b2 <- calculate_all_measures(fit_m3_s3b2, df_test, 0.5)
+results_m3_s3b2 <- calculate_all_measures(final_fit_m3_s3b2, df_test, 0.5)
 results_m3_s3b2
 store_results("m3s3b2", results_m3_s3b2, "Decision Tree Model - s3b2")
 
@@ -4199,7 +4320,7 @@ wf_m4_s2b2 <- workflow() %>%
 
 # 4. Cross-validation
 set.seed(123)
-folds_m4_s2b2 <- vfold_cv(df_m4_s2b2, v = 5, strata = Class)
+folds_m4_s2b2 <- vfold_cv(df_m4_s2b2, v = 10, strata = Class)
 
 # 5. Grid of hyperparameters
 # For mtry, we'll try different numbers of predictors
@@ -4648,7 +4769,7 @@ wf_m5_s1b1 <- workflow() %>%
 
 # 4. Cross-validation
 set.seed(123)
-folds_m5_s1b1 <- vfold_cv(df_m5_s1b1, v = 5, strata = Class)
+folds_m5_s1b1 <- vfold_cv(df_m5_s1b1, v = 10, strata = Class)
 
 # 5. Grid of hyperparameters
 tune_grid_m5_s1b1 <- grid_regular(
@@ -4753,7 +4874,7 @@ wf_m5_s1b2 <- workflow() %>%
 
 # 4. Cross-validation
 set.seed(123)
-folds_m5_s1b2 <- vfold_cv(df_m5_s1b2, v = 5, strata = Class)
+folds_m5_s1b2 <- vfold_cv(df_m5_s1b2, v = 10, strata = Class)
 
 # 5. Grid of hyperparameters
 tune_grid_m5_s1b2 <- grid_regular(
@@ -4858,7 +4979,7 @@ wf_m5_s2b1 <- workflow() %>%
 
 # 4. Cross-validation
 set.seed(123)
-folds_m5_s2b1 <- vfold_cv(df_m5_s2b1, v = 5, strata = Class)
+folds_m5_s2b1 <- vfold_cv(df_m5_s2b1, v = 10, strata = Class)
 
 # 5. Grid of hyperparameters
 tune_grid_m5_s2b1 <- grid_regular(
@@ -4988,7 +5109,7 @@ wf_m5_s2b2 <- workflow() %>%
 
 # 4. Cross-validation
 set.seed(123)
-folds_m5_s2b2 <- vfold_cv(df_m5_s2b2, v = 5, strata = Class)
+folds_m5_s2b2 <- vfold_cv(df_m5_s2b2, v = 10, strata = Class)
 
 # 5. Grid of hyperparameters
 tune_grid_m5_s2b2 <- grid_regular(
@@ -5093,7 +5214,7 @@ wf_m5_s3b1 <- workflow() %>%
 
 # 4. Cross-validation
 set.seed(123)
-folds_m5_s3b1 <- vfold_cv(df_m5_s3b1, v = 5, strata = Class)
+folds_m5_s3b1 <- vfold_cv(df_m5_s3b1, v = 10, strata = Class)
 
 # 5. Grid of hyperparameters
 tune_grid_m5_s3b1 <- grid_regular(
@@ -5198,7 +5319,7 @@ wf_m5_s3b2 <- workflow() %>%
 
 # 4. Cross-validation
 set.seed(123)
-folds_m5_s3b2 <- vfold_cv(df_m5_s3b2, v = 5, strata = Class)
+folds_m5_s3b2 <- vfold_cv(df_m5_s3b2, v = 10, strata = Class)
 
 # 5. Grid of hyperparameters
 tune_grid_m5_s3b2 <- grid_regular(
@@ -5308,7 +5429,7 @@ wf_m6_s1b1 <- workflow() %>%
 
 # 4. Cross-validation
 set.seed(123)
-folds_m6_s1b1 <- vfold_cv(df_m6_s1b1, v = 5, strata = Class)
+folds_m6_s1b1 <- vfold_cv(df_m6_s1b1, v = 10, strata = Class)
 
 # 5. Grid of hyperparameters
 tune_grid_m6_s1b1 <- grid_regular(
@@ -5431,7 +5552,7 @@ wf_m6_s1b2 <- workflow() %>%
 
 # 4. Cross-validation
 set.seed(123)
-folds_m6_s1b2 <- vfold_cv(df_m6_s1b2, v = 5, strata = Class)
+folds_m6_s1b2 <- vfold_cv(df_m6_s1b2, v = 10, strata = Class)
 
 # 5. Grid of hyperparameters
 tune_grid_m6_s1b2 <- grid_regular(
@@ -5538,7 +5659,7 @@ wf_m6_s2b1 <- workflow() %>%
 
 # 4. Cross-validation
 set.seed(123)
-folds_m6_s2b1 <- vfold_cv(df_m6_s2b1, v = 5, strata = Class)
+folds_m6_s2b1 <- vfold_cv(df_m6_s2b1, v = 10, strata = Class)
 
 # 5. Grid of hyperparameters
 tune_grid_m6_s2b1 <- grid_regular(
@@ -5665,7 +5786,7 @@ wf_m6_s2b2 <- workflow() %>%
 
 # 4. Cross-validation
 set.seed(123)
-folds_m6_s2b2 <- vfold_cv(df_m6_s2b2, v = 5, strata = Class)
+folds_m6_s2b2 <- vfold_cv(df_m6_s2b2, v = 10, strata = Class)
 
 # 5. Grid of hyperparameters
 tune_grid_m6_s2b2 <- grid_regular(
@@ -5774,7 +5895,7 @@ wf_m6_s3b1 <- workflow() %>%
 
 # 4. Cross-validation
 set.seed(123)
-folds_m6_s3b1 <- vfold_cv(df_m6_s3b1, v = 5, strata = Class)
+folds_m6_s3b1 <- vfold_cv(df_m6_s3b1, v = 10, strata = Class)
 
 # 5. Grid of hyperparameters
 tune_grid_m6_s3b1 <- grid_regular(
@@ -5883,7 +6004,7 @@ wf_m6_s3b2 <- workflow() %>%
 
 # 4. Cross-validation
 set.seed(123)
-folds_m6_s3b2 <- vfold_cv(df_m6_s3b2, v = 5, strata = Class)
+folds_m6_s3b2 <- vfold_cv(df_m6_s3b2, v = 10, strata = Class)
 
 # 5. Grid of hyperparameters
 tune_grid_m6_s3b2 <- grid_regular(
@@ -6009,7 +6130,7 @@ wf_m6_s4b3 <- workflow() %>%
 
 # 4. Cross-validation
 set.seed(123)
-folds_m6_s4b3 <- vfold_cv(df_m6_s4b3, v = 5, strata = Class)
+folds_m6_s4b3 <- vfold_cv(df_m6_s4b3, v = 10, strata = Class)
 
 # 5. Grid of hyperparameters
 tune_grid_m6_s4b3 <- grid_regular(
@@ -6141,7 +6262,7 @@ wf_m6_s2b3 <- workflow() %>%
 
 # 4. Cross-validation
 set.seed(123)
-folds_m6_s2b3 <- vfold_cv(df_m6_s2b3, v = 5, strata = Class)
+folds_m6_s2b3 <- vfold_cv(df_m6_s2b3, v = 10, strata = Class)
 
 # 5. Grid of hyperparameters
 # 5. Grid of hyperparameters
@@ -6234,6 +6355,108 @@ log_message("Finished Step 5.6.8 - model6_select2_balanced3 - m6_s2b3")
 
 #---- 6 DONE *******      Final Steps ------------------------------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#---- 7 DONE *******      Ensemble Logistic Model - No Tuning ----- em1 --------
+
+log_message("Starting Step 6.1 - Ensemble Logistic Model - No Tuning")
+
+# Make sure all the required models are loaded
+# If not loaded already, load the models
+if (!exists("final_fit_m1_s1b1")) load("final_fit_m1_s1b1.RData")
+if (!exists("final_fit_m1_s1b2")) load("final_fit_m1_s1b2.RData")
+if (!exists("final_fit_m1_s2b1")) load("final_fit_m1_s2b1.RData")
+if (!exists("final_fit_m1_s2b2")) load("final_fit_m1_s2b2.RData")
+if (!exists("final_fit_m1_s3b1")) load("final_fit_m1_s3b1.RData")
+if (!exists("final_fit_m1_s3b2")) load("final_fit_m1_s3b2.RData")
+if (!exists("final_fit_m1_s2b2_2")) load("final_fit_m1_s2b2_2.RData")
+if (!exists("final_fit_m2_s1b1")) load("final_fit_m2_s1b1.RData")
+if (!exists("final_fit_m2_s1b2")) load("final_fit_m2_s1b2.RData")
+if (!exists("final_fit_m2_s2b1")) load("final_fit_m2_s2b1.RData")
+if (!exists("final_fit_m2_s2b2")) load("final_fit_m2_s2b2.RData")
+if (!exists("final_fit_m2_s3b1")) load("final_fit_m2_s3b1.RData")
+if (!exists("final_fit_m2_s3b2")) load("final_fit_m2_s3b2.RData")
+if (!exists("final_fit_m3_s1b1")) load("final_fit_m3_s1b1.RData")
+if (!exists("final_fit_m3_s1b2")) load("final_fit_m3_s1b2.RData")
+if (!exists("final_fit_m3_s2b1")) load("final_fit_m3_s2b1.RData")
+if (!exists("final_fit_m3_s2b2")) load("final_fit_m3_s2b2.RData")
+if (!exists("final_fit_m3_s3b1")) load("final_fit_m3_s3b1.RData")
+if (!exists("final_fit_m3_s3b2")) load("final_fit_m3_s3b2.RData")
+if (!exists("final_fit_m4_s1b1")) load("final_fit_m4_s1b1.RData")
+if (!exists("final_fit_m4_s1b2")) load("final_fit_m4_s1b2.RData")
+if (!exists("final_fit_m4_s2b1")) load("final_fit_m4_s2b1.RData")
+if (!exists("final_fit_m4_s2b2")) load("final_fit_m4_s2b2.RData")
+if (!exists("final_fit_m4_s3b1")) load("final_fit_m4_s3b1.RData")
+if (!exists("final_fit_m4_s3b2")) load("final_fit_m4_s3b2.RData")
+if (!exists("final_fit_m5_s1b1")) load("final_fit_m5_s1b1.RData")
+if (!exists("final_fit_m5_s1b2")) load("final_fit_m5_s1b2.RData")
+if (!exists("final_fit_m5_s2b1")) load("final_fit_m5_s2b1.RData")
+if (!exists("final_fit_m5_s2b2")) load("final_fit_m5_s2b2.RData")
+if (!exists("final_fit_m5_s3b1")) load("final_fit_m5_s3b1.RData")
+if (!exists("final_fit_m5_s3b2")) load("final_fit_m5_s3b2.RData")
+if (!exists("final_fit_m6_s2b1")) load("final_fit_m6_s2b1.RData")
+if (!exists("final_fit_m6_s2b2")) load("final_fit_m6_s2b2.RData")
+if (!exists("final_fit_m6_s3b1")) load("final_fit_m6_s3b1.RData")
+if (!exists("final_fit_m6_s3b2")) load("final_fit_m6_s3b2.RData")
+
+# Run predict using all 36 models and store the predicted probabilities.
+#  Then use the propabilities to train a meta logistic regression model.
+
+# Combine predictions from all models
+meta_features <- bind_cols(
+  predict(final_fit_m1_s1b1, new_data = df_train, type = "prob") %>%
+    rename_with(~ paste0("m1_s1b1_", .), starts_with(".pred")),
+  predict(final_fit_m1_s1b2, new_data = df_train, type = "prob") %>%
+    rename_with(~ paste0("m1_s1b2_", .), starts_with(".pred")),
+  predict(final_fit_m1_s2b1, new_data = df_train, type = "prob") %>%
+    rename_with(~ paste0("m1_s2b1_", .), starts_with(".pred")),
+  predict(final_fit_m1_s2b2, new_data = df_train, type = "prob") %>%
+    rename_with(~ paste0("m1_s2b2_", .), starts_with(".pred")),
+  predict(final_fit_m1_s3b1, new_data = df_train, type = "prob") %>%
+    rename_with(~ paste0("m1_s3b1_", .), starts_with(".pred")),
+  predict(final_fit_m1_s3b2, new_data = df_train, type = "prob") %>%
+    rename_with(~ paste0("m1_s3b2_", .), starts_with(".pred")),
+  predict(final_fit_m1_s2b2_2, new_data = df_train, type = "prob") %>%
+    rename_with(~ paste0("m1_s2b2_2_", .), starts_with(".pred")),
+  predict(final_fit_m2_s1b1, new_data = df_train, type = "prob") %>%
+    rename_with(~ paste0("m2_s1b1_", .), starts_with(".pred")),
+  predict(final_fit_m2_s1b2, new_data = df_train, type = "prob") %>%
+    rename_with(~ paste0("m2_s1b2_", .), starts_with(".pred")),
+  predict(final_fit_m2_s2b1, new_data = df_train, type = "prob") %>%
+    rename_with(~ paste0("m2_s2b1_", .), starts_with(".pred")),
+  predict(final_fit_m2_s2b2, new_data = df_train, type = "prob") %>%
+    rename_with(~ paste0("m2_s2b2_", .), starts_with(".pred")),
+  predict(final_fit_m2_s3b1, new_data = df_train, type = "prob") %>%
+    rename_with(~ paste0("m2_s3b1_", .), starts_with(".pred")),
+  predict(final_fit_m2_s3b2, new_data = df_train, type = "prob") %>%
+    rename_with(~ paste0("m2_s3b2_", .), starts_with(".pred"))
+) %>%
+  bind_cols(df_train %>% select(Class))
+
+meta_features <- meta_features %>%
+  select(-ends_with(".pred_0"))
+
+meta_rec <- recipe(Class ~ ., data = meta_features) %>%
+  themis::step_smote(Class)
+
+meta_spec <- logistic_reg() %>%
+  set_engine("glm") %>%
+  set_mode("classification")
+
+meta_wf <- workflow() %>%
+  add_model(meta_spec) %>%
+  add_recipe(meta_rec)
+
+meta_fit <- fit(meta_wf, data = meta_features)
+
+results_em1 <- calculate_all_measures(meta_fit, df_test, 0.5)
+  
+# Generate a confusion matrix
+confusion_matrix_em1 <- test_predications_em1 %>%
+  conf_mat(truth = Class, estimate = .pred_class)
+# Print the confusion matrix
+print(confusion_matrix_em1)
+
+results_em1 <- calculate_all_measures(final_fit_em1, 0.5)
 
 # Export the results to a CSV file
 results_storage %>%
