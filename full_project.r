@@ -28,6 +28,7 @@ library(pROC) # nolint
 library(ranger)
 library(xgboost)
 library(themis)
+library(stacks)
 
 # Set up parallel processing - do this once at the start of your script
 library(future)
@@ -2275,7 +2276,7 @@ save(results_storage, file = "results_after_m1_s2b2.RData")
 
 log_message("Finished Step 5.1.3 - model1_select2_balanced1 - m1_s2b2")
 
-#---- 5-1-4-2 DONE ***       Model 1 Logistic Regression -------- m1_s2b2_2 ----
+#---- 5-1-4-2 DONE *       Model 1 Logistic Regression ---------- m1_s2b2_2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 log_message("Starting Step 5.1.4.2 - model1_select2_balanced2-2 - m1_s2b2_2")
@@ -4759,7 +4760,7 @@ spec_m5_s1b1 <- svm_rbf(
 rec_m5_s1b1 <- recipe(Class ~ ., data = df_m5_s1b1) %>%
   step_zv(all_predictors()) %>%
   step_impute_median(all_numeric_predictors()) %>%
-  step_normalize(all_predictors()) %>%
+  step_normalize(all_numeric_predictors()) %>%
   step_dummy(all_nominal_predictors(), -all_outcomes())
 
 # 3. Workflow
@@ -4864,7 +4865,7 @@ spec_m5_s1b2 <- svm_rbf(
 rec_m5_s1b2 <- recipe(Class ~ ., data = df_m5_s1b2) %>%
   step_zv(all_predictors()) %>%
   step_impute_median(all_numeric_predictors()) %>%
-  step_normalize(all_predictors()) %>%
+  step_normalize(all_numeric_predictors()) %>%
   step_dummy(all_nominal_predictors(), -all_outcomes())
 
 # 3. Workflow
@@ -6353,12 +6354,10 @@ save(results_storage, file = "results_after_m6_s2b3.RData")
 
 log_message("Finished Step 5.6.8 - model6_select2_balanced3 - m6_s2b3")
 
-#---- 6 DONE *******      Final Steps ------------------------------------------
+#---- 6 DONE *******      Starting Ensemble Methods ----------------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#---- 7 DONE *******      Ensemble Logistic Model - No Tuning ----- em1 --------
-
-log_message("Starting Step 6.1 - Ensemble Logistic Model - No Tuning")
+log_message("Starting Seciton 6 - Ensemble Methods")
 
 # Make sure all the required models are loaded
 # If not loaded already, load the models
@@ -6398,66 +6397,125 @@ if (!exists("final_fit_m6_s2b2")) load("final_fit_m6_s2b2.RData")
 if (!exists("final_fit_m6_s3b1")) load("final_fit_m6_s3b1.RData")
 if (!exists("final_fit_m6_s3b2")) load("final_fit_m6_s3b2.RData")
 
+#---- 6.1 DONE *******      Ensemble Logistic Model - No Tuning ----- em1 --------
+
+log_message("Starting Step 6.1 - Ensemble Logistic Model - No Tuning")
+
 # Run predict using all 36 models and store the predicted probabilities.
 #  Then use the propabilities to train a meta logistic regression model.
 
 # Combine predictions from all models
-meta_features <- bind_cols(
-  predict(final_fit_m1_s1b1, new_data = df_train, type = "prob") %>%
-    rename_with(~ paste0("m1_s1b1_", .), starts_with(".pred")),
-  predict(final_fit_m1_s1b2, new_data = df_train, type = "prob") %>%
-    rename_with(~ paste0("m1_s1b2_", .), starts_with(".pred")),
-  predict(final_fit_m1_s2b1, new_data = df_train, type = "prob") %>%
-    rename_with(~ paste0("m1_s2b1_", .), starts_with(".pred")),
-  predict(final_fit_m1_s2b2, new_data = df_train, type = "prob") %>%
-    rename_with(~ paste0("m1_s2b2_", .), starts_with(".pred")),
-  predict(final_fit_m1_s3b1, new_data = df_train, type = "prob") %>%
-    rename_with(~ paste0("m1_s3b1_", .), starts_with(".pred")),
-  predict(final_fit_m1_s3b2, new_data = df_train, type = "prob") %>%
-    rename_with(~ paste0("m1_s3b2_", .), starts_with(".pred")),
-  predict(final_fit_m1_s2b2_2, new_data = df_train, type = "prob") %>%
-    rename_with(~ paste0("m1_s2b2_2_", .), starts_with(".pred")),
-  predict(final_fit_m2_s1b1, new_data = df_train, type = "prob") %>%
-    rename_with(~ paste0("m2_s1b1_", .), starts_with(".pred")),
-  predict(final_fit_m2_s1b2, new_data = df_train, type = "prob") %>%
-    rename_with(~ paste0("m2_s1b2_", .), starts_with(".pred")),
-  predict(final_fit_m2_s2b1, new_data = df_train, type = "prob") %>%
-    rename_with(~ paste0("m2_s2b1_", .), starts_with(".pred")),
-  predict(final_fit_m2_s2b2, new_data = df_train, type = "prob") %>%
-    rename_with(~ paste0("m2_s2b2_", .), starts_with(".pred")),
-  predict(final_fit_m2_s3b1, new_data = df_train, type = "prob") %>%
-    rename_with(~ paste0("m2_s3b1_", .), starts_with(".pred")),
-  predict(final_fit_m2_s3b2, new_data = df_train, type = "prob") %>%
-    rename_with(~ paste0("m2_s3b2_", .), starts_with(".pred"))
-) %>%
-  bind_cols(df_train %>% select(Class))
+#meta_features <- bind_cols(
+#  predict(final_fit_m1_s1b1, new_data = df_train, type = "prob") %>%
+#    rename_with(~ paste0("m1_s1b1_", .), starts_with(".pred")),
+#  predict(final_fit_m1_s1b2, new_data = df_train, type = "prob") %>%
+#   rename_with(~ paste0("m1_s1b2_", .), starts_with(".pred")),
+#  %>%
+#  bind_cols(df_train %>% select(Class))
 
-meta_features <- meta_features %>%
-  select(-ends_with(".pred_0"))
+#meta_features <- meta_features %>%
+#  select(-ends_with(".pred_0"))
 
-meta_rec <- recipe(Class ~ ., data = meta_features) %>%
-  themis::step_smote(Class)
+#meta_rec <- recipe(Class ~ ., data = meta_features) %>%
+#  themis::step_smote(Class)
 
-meta_spec <- logistic_reg() %>%
-  set_engine("glm") %>%
-  set_mode("classification")
+#meta_spec <- logistic_reg() %>%
+#  set_engine("glm") %>%
+#  set_mode("classification")
 
-meta_wf <- workflow() %>%
-  add_model(meta_spec) %>%
-  add_recipe(meta_rec)
+#meta_wf <- workflow() %>%
+#  add_model(meta_spec) %>%
+#  add_recipe(meta_rec)
 
-meta_fit <- fit(meta_wf, data = meta_features)
+#meta_fit <- fit(meta_wf, data = meta_features)
 
-results_em1 <- calculate_all_measures(meta_fit, df_test, 0.5)
+#results_em1 <- calculate_all_measures(meta_fit, df_test, 0.5)
   
 # Generate a confusion matrix
-confusion_matrix_em1 <- test_predications_em1 %>%
-  conf_mat(truth = Class, estimate = .pred_class)
+#confusion_matrix_em1 <- test_predications_em1 %>%
+#  conf_mat(truth = Class, estimate = .pred_class)
 # Print the confusion matrix
-print(confusion_matrix_em1)
+#print(confusion_matrix_em1)
 
-results_em1 <- calculate_all_measures(final_fit_em1, 0.5)
+#results_em1 <- calculate_all_measures(final_fit_em1, 0.5)
 
+log_message("Starting Step 6.1 - Ensemble Logistic Model - No Tuning")
+
+#---- 6.2 DONE *******      Ensemble Stacking ---- em2 --------
+
+log_message("Starting Step 6.2 - Ensemble Stacking")
+
+# Create a stack
+ensemble_stack <- stacks()
+
+# Add models to the stack
+# We need to extract the workflows from the fitted models
+# First, let's create control objects for resamples
+ctrl <- control_stack_resamples()
+
+# Load the training data again
+# Note: This assumes df_train contains the original training data
+# We need to create the same resampling folds as were used in original models
+set.seed(123)
+folds <- vfold_cv(df_train, v = 10, strata = "Class")
+
+# Register the first model
+model1_stack <- 
+  logistic_reg(penalty = tune(), mixture = tune()) %>%
+  set_engine("glmnet") %>%
+  set_mode("classification")
+
+wf1_stack <- workflow() %>%
+  add_model(model1_stack) %>%
+  add_recipe(rec_m1_s1b1)
+
+model1_results <- tune_grid(
+  wf1_stack,
+  resamples = folds,
+  grid = grid_regular(penalty(), mixture(), levels = 5),
+  control = ctrl
+)
+
+ensemble_stack <- add_candidates(ensemble_stack, model1_results)
+
+# Register the second model
+model2_stack <- 
+  logistic_reg(penalty = tune(), mixture = tune()) %>%
+  set_engine("glmnet") %>%
+  set_mode("classification")
+
+wf2_stack <- workflow() %>%
+  add_model(model2_stack) %>%
+  add_recipe(rec_m1_s1b2)
+
+model2_results <- tune_grid(
+  wf2_stack,
+  resamples = folds,
+  grid = grid_regular(penalty(), mixture(), levels = 5),
+  control = ctrl
+)
+
+ensemble_stack <- add_candidates(ensemble_stack, model2_results)
+
+# Blend the predictions using a meta-learner
+ensemble_blend <- blend_predictions(ensemble_stack)
+
+# Fit the stacked ensemble model
+ensemble_fit <- fit_members(ensemble_blend, df_train)
+
+# Evaluate the stacked model on the test dataset
+results_em2 <- calculate_all_measures(ensemble_fit, df_test, 0.5)
+results_em2
+
+# Store the results
+store_results("em2", results_em2, "Stacked Ensemble Model - m1_s1b1 & m1_s1b2")
+
+# Save the results to an RData file
+save(results_storage, file = "results_after_em2.RData")
+
+log_message("Finished Step 6.2 - Ensemble Stacking")
+
+#---- 7 DONE *******      Save Results ----
 # Export the results to a CSV file
 results_storage %>%
   bind_rows() %>%
