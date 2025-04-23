@@ -4834,110 +4834,12 @@ save(results_storage, file = "results_after_m5_s1b1.RData")
 
 log_message("Finished Step 5.5.1 - model5_select1_balanced1 - m5_s1b1")
 
-#---- 5-5-2 DONE ***      Model 5 Support Vector Machine ---------- m5-s1b2 ----
+#---- 5-5-2 RMVD ***      Model 5 Support Vector Machine ---------- m5-s1b2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-log_message("Starting Step 5.5.2 - model5_select1_balanced2 - m5_s1b2")
+log_message("Removed Step 5.5.2 - model5_select1_balanced2 - m5_s1b2")
 
-#load("df_s1b2.RData") # nolint
-#load("df_columns_info.RData") # nolint
-#load("df_test.RData") # nolint
-
-# Support Vector Machine Model
-
-df_m5_s1b2 <- df_s1b2 %>%
-  select(Class, matches(paste0("^DETAILED-(",
-                               paste(df_columns_info %>%
-                                       filter(variable_type %in%
-                                                c("integer")) %>%
-                                       pull(column_name),
-                                     collapse = "|"), ")_")))
-
-# 1. Model Specification
-spec_m5_s1b2 <- svm_rbf(
-  cost = tune(),
-  rbf_sigma = tune()
-) %>%
-  set_engine("kernlab") %>%
-  set_mode("classification")
-
-# 2. Recipe
-rec_m5_s1b2 <- recipe(Class ~ ., data = df_m5_s1b2) %>%
-  step_zv(all_predictors()) %>%
-  step_impute_median(all_numeric_predictors()) %>%
-  step_normalize(all_numeric_predictors()) %>%
-  step_dummy(all_nominal_predictors(), -all_outcomes())
-
-# 3. Workflow
-wf_m5_s1b2 <- workflow() %>%
-  add_model(spec_m5_s1b2) %>%
-  add_recipe(rec_m5_s1b2)
-
-# 4. Cross-validation
-set.seed(123)
-folds_m5_s1b2 <- vfold_cv(df_m5_s1b2, v = 10, strata = Class)
-
-# 5. Grid of hyperparameters
-tune_grid_m5_s1b2 <- grid_regular(
-  cost(),
-  rbf_sigma(),
-  levels = 5
-)
-
-# 6. Tune the model
-tune_results_m5_s1b2 <- tune_grid(
-  wf_m5_s1b2,
-  resamples = folds_m5_s1b2,
-  grid = tune_grid_m5_s1b2,
-  metrics = metric_set(roc_auc, accuracy, sens, spec)
-)
-
-# Show the tuning results
-autoplot(tune_results_m5_s1b2) +
-  labs(title = "Tuning Results for Support Vector Machine",
-       x = "Tuned Parameter",
-       y = "Performance") +
-  theme_minimal()
-
-# 7. Select the best parameters
-best_parameters_m5_s1b2 <- select_best(tune_results_m5_s1b2, metric = "roc_auc")
-
-# 8. Finalize the workflow
-final_wf_m5_s1b2 <- finalize_workflow(wf_m5_s1b2, best_parameters_m5_s1b2)
-
-# 9. Fit the final model
-fit_m5_s1b2 <- fit(final_wf_m5_s1b2, data = df_m5_s1b2)
-
-# 10. Evaluate the model on the test dataset
-test_predications_m5_s1b2 <-
-  predict(fit_m5_s1b2, new_data = df_test, type = "prob") %>%
-  bind_cols(predict(fit_m5_s1b2, new_data = df_test, type = "class")) %>%
-  bind_cols(df_test %>% select(Class))
-
-# Generate a confusion matrix
-confusion_matrix_m5_s1b2 <- test_predications_m5_s1b2 %>%
-  conf_mat(truth = Class, estimate = .pred_class)
-
-# Print the confusion matrix
-print(confusion_matrix_m5_s1b2)
-
-# Visualize the confusion matrix
-autoplot(confusion_matrix_m5_s1b2, type = "heatmap") +
-  labs(title = "Confusion Matrix for Support Vector Machine",
-       x = "Predicted Class",
-       y = "Actual Class") +
-  theme_minimal()
-
-results_m5_s1b2 <- calculate_all_measures(fit_m5_s1b2, df_test, 0.5)
-
-results_m5_s1b2
-
-store_results("m5s1b2", results_m5_s1b2, "Support Vector Machine Model - s1b2")
-
-# Save the results to an RData file
-save(results_storage, file = "results_after_m5_s1b2.RData")
-
-log_message("Finished Step 5.5.2 - model5_select1_balanced2 - m5_s1b2")
+log_message("Removed Step 5.5.2 - model5_select1_balanced2 - m5_s1b2")
 
 #---- 5-5-3 DONE ***      Model 5 Support Vector Machine ---------- m5-s2b1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -5040,8 +4942,8 @@ best_threshold <- threshold_df[which.min(threshold_df$diff_from_target),
 
 # Print results for the best threshold
 best_row <- threshold_df[threshold_df$threshold == best_threshold, ]
-cat("Best threshold:", best_threshold, 
-    "\nTPR_1 (Sensitivity):", best_row$TPR_1, 
+cat("Best threshold:", best_threshold,
+    "\nTPR_1 (Sensitivity):", best_row$TPR_1,
     "\nTPR_0 (Specificity):", best_row$TPR_0)
 
 # 10. Evaluate the model on the test dataset
@@ -5069,110 +4971,14 @@ save(results_storage, file = "results_after_m5_s2b1.RData")
 
 log_message("Finished Step 5.5.3 - model5_select2_balanced1 - m5_s2b1")
 
-#---- 5-5-4 DONE ***      Model 5 Support Vector Machine ---------- m5-s2b2 ----
+#---- 5-5-4 RMVD ***      Model 5 Support Vector Machine ---------- m5-s2b2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-log_message("Starting Step 5.5.4 - model5_select2_balanced2 - m5_s2b2")
+log_message("Removed Step 5.5.4 - model5_select2_balanced2 - m5_s2b2")
 
-#load("df_s2b2.RData") # nolint
-#load("df_columns_info.RData") # nolint
-#load("df_test.RData") # nolint
+# Something in the b2 data is causing the model to fail.
 
-# Support Vector Machine Model
-
-df_m5_s2b2 <- df_s2b2 %>%
-  select(Class, matches(paste0("^DETAILED-(",
-                               paste(df_columns_info %>%
-                                       filter(variable_type %in%
-                                                c("integer")) %>%
-                                       pull(column_name),
-                                     collapse = "|"), ")_")))
-
-# 1. Model Specification
-spec_m5_s2b2 <- svm_rbf(
-  cost = tune(),
-  rbf_sigma = tune()
-) %>%
-  set_engine("kernlab") %>%
-  set_mode("classification")
-
-# 2. Recipe
-rec_m5_s2b2 <- recipe(Class ~ ., data = df_m5_s2b2) %>%
-  step_zv(all_predictors()) %>%
-  step_impute_median(all_numeric_predictors()) %>%
-  step_normalize(all_predictors()) %>%
-  step_dummy(all_nominal_predictors(), -all_outcomes())
-
-# 3. Workflow
-wf_m5_s2b2 <- workflow() %>%
-  add_model(spec_m5_s2b2) %>%
-  add_recipe(rec_m5_s2b2)
-
-# 4. Cross-validation
-set.seed(123)
-folds_m5_s2b2 <- vfold_cv(df_m5_s2b2, v = 10, strata = Class)
-
-# 5. Grid of hyperparameters
-tune_grid_m5_s2b2 <- grid_regular(
-  cost(),
-  rbf_sigma(),
-  levels = 5
-)
-
-# 6. Tune the model
-tune_results_m5_s2b2 <- tune_grid(
-  wf_m5_s2b2,
-  resamples = folds_m5_s2b2,
-  grid = tune_grid_m5_s2b2,
-  metrics = metric_set(roc_auc, accuracy, sens, spec)
-)
-
-# Show the tuning results
-autoplot(tune_results_m5_s2b2) +
-  labs(title = "Tuning Results for Support Vector Machine",
-       x = "Tuned Parameter",
-       y = "Performance") +
-  theme_minimal()
-
-# 7. Select the best parameters
-best_parameters_m5_s2b2 <- select_best(tune_results_m5_s2b2, metric = "roc_auc")
-
-# 8. Finalize the workflow
-final_wf_m5_s2b2 <- finalize_workflow(wf_m5_s2b2, best_parameters_m5_s2b2)
-
-# 9. Fit the final model
-fit_m5_s2b2 <- fit(final_wf_m5_s2b2, data = df_m5_s2b2)
-
-# 10. Evaluate the model on the test dataset
-test_predications_m5_s2b2 <-
-  predict(fit_m5_s2b2, new_data = df_test, type = "prob") %>%
-  bind_cols(predict(fit_m5_s2b2, new_data = df_test, type = "class")) %>%
-  bind_cols(df_test %>% select(Class))
-
-# Generate a confusion matrix
-confusion_matrix_m5_s2b2 <- test_predications_m5_s2b2 %>%
-  conf_mat(truth = Class, estimate = .pred_class)
-
-# Print the confusion matrix
-print(confusion_matrix_m5_s2b2)
-
-# Visualize the confusion matrix
-autoplot(confusion_matrix_m5_s2b2, type = "heatmap") +
-  labs(title = "Confusion Matrix for Support Vector Machine",
-       x = "Predicted Class",
-       y = "Actual Class") +
-  theme_minimal()
-
-results_m5_s2b2 <- calculate_all_measures(fit_m5_s2b2, df_test, 0.5)
-
-results_m5_s2b2
-
-store_results("m5s2b2", results_m5_s2b2, "Support Vector Machine Model - s2b2")
-
-# Save the results to an RData file
-save(results_storage, file = "results_after_m5_s2b2.RData")
-
-log_message("Finished Step 5.5.4 - model5_select2_balanced2 - m5_s2b2")
+log_message("Removed Step 5.5.4 - model5_select2_balanced2 - m5_s2b2")
 
 #---- 5-5-5 DONE ***      Model 5 Support Vector Machine ---------- m5-s3b1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -5279,113 +5085,17 @@ save(results_storage, file = "results_after_m5_s3b1.RData")
 
 log_message("Finished Step 5.5.5 - model5_select3_balanced1 - m5_s3b1")
 
-#---- 5-5-6 DONE ***      Model 5 Support Vector Machine ---------- m5-s3b2 ----
+#---- 5-5-6 RMVD ***      Model 5 Support Vector Machine ---------- m5-s3b2 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-log_message("Starting Step 5.5.6 - model5_select3_balanced2 - m5_s3b2")
+log_message("Removed Step 5.5.6 - model5_select3_balanced2 - m5_s3b2")
 
-#load("df_s3b2.RData") # nolint
-#load("df_columns_info.RData") # nolint
-#load("df_test.RData") # nolint
+# Something in the b2 data is causing the model to fail.
 
-# Support Vector Machine Model
-
-df_m5_s3b2 <- df_s3b2 %>%
-  select(Class, matches(paste0("^DETAILED-(",
-                               paste(df_columns_info %>%
-                                       filter(variable_type %in%
-                                                c("integer")) %>%
-                                       pull(column_name),
-                                     collapse = "|"), ")_")))
-
-# 1. Model Specification
-spec_m5_s3b2 <- svm_rbf(
-  cost = tune(),
-  rbf_sigma = tune()
-) %>%
-  set_engine("kernlab") %>%
-  set_mode("classification")
-
-# 2. Recipe
-rec_m5_s3b2 <- recipe(Class ~ ., data = df_m5_s3b2) %>%
-  step_zv(all_predictors()) %>%
-  step_impute_median(all_numeric_predictors()) %>%
-  step_normalize(all_predictors()) %>%
-  step_dummy(all_nominal_predictors(), -all_outcomes())
-
-# 3. Workflow
-wf_m5_s3b2 <- workflow() %>%
-  add_model(spec_m5_s3b2) %>%
-  add_recipe(rec_m5_s3b2)
-
-# 4. Cross-validation
-set.seed(123)
-folds_m5_s3b2 <- vfold_cv(df_m5_s3b2, v = 10, strata = Class)
-
-# 5. Grid of hyperparameters
-tune_grid_m5_s3b2 <- grid_regular(
-  cost(),
-  rbf_sigma(),
-  levels = 5
-)
-
-# 6. Tune the model
-tune_results_m5_s3b2 <- tune_grid(
-  wf_m5_s3b2,
-  resamples = folds_m5_s3b2,
-  grid = tune_grid_m5_s3b2,
-  metrics = metric_set(roc_auc, accuracy, sens, spec)
-)
-
-# Show the tuning results
-autoplot(tune_results_m5_s3b2) +
-  labs(title = "Tuning Results for Support Vector Machine",
-       x = "Tuned Parameter",
-       y = "Performance") +
-  theme_minimal()
-
-# 7. Select the best parameters
-best_parameters_m5_s3b2 <- select_best(tune_results_m5_s3b2, metric = "roc_auc")
-
-# 8. Finalize the workflow
-final_wf_m5_s3b2 <- finalize_workflow(wf_m5_s3b2, best_parameters_m5_s3b2)
-
-# 9. Fit the final model
-fit_m5_s3b2 <- fit(final_wf_m5_s3b2, data = df_m5_s3b2)
-
-# 10. Evaluate the model on the test dataset
-test_predications_m5_s3b2 <-
-  predict(fit_m5_s3b2, new_data = df_test, type = "prob") %>%
-  bind_cols(predict(fit_m5_s3b2, new_data = df_test, type = "class")) %>%
-  bind_cols(df_test %>% select(Class))
-
-# Generate a confusion matrix
-confusion_matrix_m5_s3b2 <- test_predications_m5_s3b2 %>%
-  conf_mat(truth = Class, estimate = .pred_class)
-
-# Print the confusion matrix
-print(confusion_matrix_m5_s3b2)
-
-# Visualize the confusion matrix
-autoplot(confusion_matrix_m5_s3b2, type = "heatmap") +
-  labs(title = "Confusion Matrix for Support Vector Machine",
-       x = "Predicted Class",
-       y = "Actual Class") +
-  theme_minimal()
-
-results_m5_s3b2 <- calculate_all_measures(fit_m5_s3b2, df_test, 0.5)
-
-results_m5_s3b2
-
-store_results("m5s3b2", results_m5_s3b2, "Support Vector Machine Model - s3b2")
-
-# Save the results to an RData file
-save(results_storage, file = "results_after_m5_s3b2.RData")
-
-log_message("Finished Step 5.5.6 - model5_select3_balanced2 - m5_s3b2")
+log_message("Removed Step 5.5.6 - model5_select3_balanced2 - m5_s3b2")
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#---- 5-6 PEND *****    Model 6 Gradient Boosting ------------------------------
+#---- 5-6 DONE *****    Model 6 Gradient Boosting ------------------------------
 
 #---- 5-6-1 DONE ***      Model 6 Gradient Boosting --------------- m6-s1b1 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -5515,7 +5225,7 @@ log_message("Finished Step 6.1.1 - model6_select1_balanced1 - m6_s1b1")
 
 log_message("Starting Step 6.1.2 - model6_select1_balanced2 - m6_s1b2")
 
-#load("df_s1b2.RData") # nolint
+load("df_s1b2.RData") # nolint
 #load("df_columns_info.RData") # nolint
 #load("df_test.RData") # nolint
 
@@ -5530,13 +5240,17 @@ df_m6_s1b2 <- df_s1b2 %>%
                                      collapse = "|"), ")_")))
 
 # 1. Model Specification
+# Determine number of cores to use (leave one core free)
+n_cores <- parallel::detectCores() - 1
+n_cores <- max(n_cores, 1)  # Ensure at least one core
+
 spec_m6_s1b2 <- boost_tree(
   trees = tune(),
   tree_depth = tune(),
   learn_rate = tune(),
   min_n = tune()
 ) %>%
-  set_engine("xgboost") %>%
+  set_engine("xgboost", nthread = n_cores) %>%
   set_mode("classification")
 
 # 2. Recipe
@@ -5749,7 +5463,7 @@ log_message("Finished Step 6.1.3 - model6_select2_balanced1 - m6_s2b1")
 
 log_message("Starting Step 6.1.4 - model6_select2_balanced2 - m6_s2b2")
 
-#load("df_s2b2.RData") # nolint
+load("df_s2b2.RData") # nolint
 #load("df_columns_info.RData") # nolint
 #load("df_test.RData") # nolint
 
@@ -5798,6 +5512,17 @@ tune_grid_m6_s2b2 <- grid_regular(
   levels = 5
 )
 
+# Determine number of cores to use (leave one core free)
+n_cores <- parallel::detectCores() - 1
+n_cores <- max(n_cores, 1)  # Ensure at least one core
+
+# Set the parallel plan - this activates parallel processing
+# plan(multisession, workers = n_cores)  # For Windows # nolint
+plan(multicore, workers = n_cores)   # For Unix/Linux/Mac
+
+# Display information about parallel processing
+cat("Using", n_cores, "cores for parallel processing\n")
+
 # 6. Tune the model
 tune_results_m6_s2b2 <- tune_grid(
   wf_m6_s2b2,
@@ -5805,6 +5530,13 @@ tune_results_m6_s2b2 <- tune_grid(
   grid = tune_grid_m6_s2b2,
   metrics = metric_set(roc_auc, accuracy, sens, spec)
 )
+
+# Reset the future plan to sequential
+plan(sequential)
+# Unregister the parallel backend
+registerDoSEQ()  # Switch back to sequential processing
+# Display information about stopping parallel processing
+cat("Stopped parallel processing\n")
 
 # Show the tuning results
 autoplot(tune_results_m6_s2b2) +
@@ -5907,6 +5639,17 @@ tune_grid_m6_s3b1 <- grid_regular(
   levels = 5
 )
 
+# Determine number of cores to use (leave one core free)
+n_cores <- parallel::detectCores() - 1
+n_cores <- max(n_cores, 1)  # Ensure at least one core
+
+# Set the parallel plan - this activates parallel processing
+# plan(multisession, workers = n_cores)  # For Windows # nolint
+plan(multicore, workers = n_cores)   # For Unix/Linux/Mac
+
+# Display information about parallel processing
+cat("Using", n_cores, "cores for parallel processing\n")
+
 # 6. Tune the model
 tune_results_m6_s3b1 <- tune_grid(
   wf_m6_s3b1,
@@ -5914,6 +5657,20 @@ tune_results_m6_s3b1 <- tune_grid(
   grid = tune_grid_m6_s3b1,
   metrics = metric_set(roc_auc, accuracy, sens, spec)
 )
+
+# Reset the future plan to sequential
+plan(sequential)
+# Unregister the parallel backend
+registerDoSEQ()  # Switch back to sequential processing
+# Display information about stopping parallel processing
+cat("Stopped parallel processing\n")
+
+# Show the tuning results
+autoplot(tune_results_m6_s2b2) +
+  labs(title = "Tuning Results for Gradient Boosting",
+       x = "Tuned Parameter",
+       y = "Performance") +
+  theme_minimal()
 
 # Show the tuning results
 autoplot(tune_results_m6_s3b1) +
@@ -5967,7 +5724,7 @@ log_message("Finished Step 5.6.5 - model6_select3_balanced1 - m6_s3b1")
 
 log_message("Starting Step 5.6.6 - model6_select3_balanced2 - m6_s3b2")
 
-#load("df_s3b2.RData") # nolint
+load("df_s3b2.RData") # nolint
 #load("df_columns_info.RData") # nolint
 #load("df_test.RData") # nolint
 
@@ -6016,6 +5773,17 @@ tune_grid_m6_s3b2 <- grid_regular(
   levels = 5
 )
 
+# Determine number of cores to use (leave one core free)
+n_cores <- parallel::detectCores() - 1
+n_cores <- max(n_cores, 1)  # Ensure at least one core
+
+# Set the parallel plan - this activates parallel processing
+# plan(multisession, workers = n_cores)  # For Windows # nolint
+plan(multicore, workers = n_cores)   # For Unix/Linux/Mac
+
+# Display information about parallel processing
+cat("Using", n_cores, "cores for parallel processing\n")
+
 # 6. Tune the model
 tune_results_m6_s3b2 <- tune_grid(
   wf_m6_s3b2,
@@ -6023,6 +5791,13 @@ tune_results_m6_s3b2 <- tune_grid(
   grid = tune_grid_m6_s3b2,
   metrics = metric_set(roc_auc, accuracy, sens, spec)
 )
+
+# Reset the future plan to sequential
+plan(sequential)
+# Unregister the parallel backend
+registerDoSEQ()  # Switch back to sequential processing
+# Display information about stopping parallel processing
+cat("Stopped parallel processing\n")
 
 # Show the tuning results
 autoplot(tune_results_m6_s3b2) +
@@ -6397,7 +6172,7 @@ if (!exists("final_fit_m6_s2b2")) load("final_fit_m6_s2b2.RData")
 if (!exists("final_fit_m6_s3b1")) load("final_fit_m6_s3b1.RData")
 if (!exists("final_fit_m6_s3b2")) load("final_fit_m6_s3b2.RData")
 
-#---- 6.1 DONE *******      Ensemble Logistic Model - No Tuning ----- em1 --------
+#---- 6.1 DONE *******      Ensemble Logistic Model - No Tuning ------- em1 ----
 
 log_message("Starting Step 6.1 - Ensemble Logistic Model - No Tuning")
 
