@@ -1,4 +1,4 @@
-df_train#---- 0 DONE ******* Project Step 0 --------------------------------------------
+#---- 0 DONE ******* Project Step 0 --------------------------------------------
 ## TODO:
 #  - Complete a graph for Fisher Scores for Logical - 4-2-1-1
 #  - Complete a grpah for Factor wihout processing Missing.
@@ -3939,10 +3939,12 @@ print(best_params_m4_s1b1)
 final_wf_m4_s1b1 <- finalize_workflow(wf_m4_s1b1, best_params_m4_s1b1)
 
 # 9. Fit the final model
-fit_m4_s1b1 <- fit(final_wf_m4_s1b1, data = df_m4_s1b1)
+final_fit_m4_s1b1 <- fit(final_wf_m4_s1b1, data = df_m4_s1b1)
+
+save(final_fit_m4_s1b1, file = "final_fit_m4_s1b1.RData")
 
 for (thresh in thresholds) {
-  results <- calculate_all_measures(fit_m4_s1b1, df_m4_s1b1, thresh)
+  results <- calculate_all_measures(final_fit_m4_s1b1, df_m4_s1b1, thresh)
   tpr_1 <- results$values[results$measures == "TPR_1"]
   tpr_0 <- results$values[results$measures == "TPR_0"]
 
@@ -3967,7 +3969,7 @@ best_threshold <-
 cat("Best threshold:", best_threshold, "\n")
 
 # 10. Evaluate the model on the test dataset
-results_m4_s1b1 <- calculate_all_measures(fit_m4_s1b1, df_test, 0.5)
+results_m4_s1b1 <- calculate_all_measures(final_fit_m4_s1b1, df_test, 0.5)
 results_m4_s1b1
 store_results("m4s1b1", results_m4_s1b1, "Random Forest Model - s1b1")
 
@@ -3975,8 +3977,8 @@ store_results("m4s1b1", results_m4_s1b1, "Random Forest Model - s1b1")
 save(results_storage, file = "results_after_m4_s1b1.RData")
 
 # Optional: Extract variable importance
-if (inherits(fit_m4_s1b1$fit$fit$fit, "ranger")) {
-  var_imp <- ranger::importance(fit_m4_s1b1$fit$fit$fit)
+if (inherits(final_fit_m4_s1b1$fit$fit$fit, "ranger")) {
+  var_imp <- ranger::importance(final_fit_m4_s1b1$fit$fit$fit)
   var_imp_df <- data.frame(Variable = names(var_imp), Importance = var_imp)
   var_imp_df <- var_imp_df[order(var_imp_df$Importance, decreasing = TRUE), ]
 
@@ -4085,10 +4087,12 @@ print(best_params_m4_s1b2)
 final_wf_m4_s1b2 <- finalize_workflow(wf_m4_s1b2, best_params_m4_s1b2)
 
 # 9. Fit the final model
-fit_m4_s1b2 <- fit(final_wf_m4_s1b2, data = df_m4_s1b2)
+final_fit_m4_s1b2 <- fit(final_wf_m4_s1b2, data = df_m4_s1b2)
+
+save(final_fit_m4_s1b2, file = "final_fit_m4_s1b2.RData")
 
 for (thresh in thresholds) {
-  results <- calculate_all_measures(fit_m4_s1b2, df_m4_s1b2, thresh)
+  results <- calculate_all_measures(final_fit_m4_s1b2, df_m4_s1b2, thresh)
   tpr_1 <- results$values[results$measures == "TPR_1"]
   tpr_0 <- results$values[results$measures == "TPR_0"]
 
@@ -4113,7 +4117,7 @@ best_threshold <-
 cat("Best threshold:", best_threshold, "\n")
 
 # 10. Evaluate the model on the test dataset
-results_m4_s1b2 <- calculate_all_measures(fit_m4_s1b2, df_test, 0.5)
+results_m4_s1b2 <- calculate_all_measures(final_fit_m4_s1b2, df_test, 0.5)
 results_m4_s1b2
 store_results("m4s1b2", results_m4_s1b2, "Random Forest Model - s1b2")
 
@@ -4121,8 +4125,8 @@ store_results("m4s1b2", results_m4_s1b2, "Random Forest Model - s1b2")
 save(results_storage, file = "results_after_m4_s1b2.RData")
 
 # Optional: Extract variable importance
-if (inherits(fit_m4_s1b2$fit$fit$fit, "ranger")) {
-  var_imp <- ranger::importance(fit_m4_s1b2$fit$fit$fit)
+if (inherits(final_fit_m4_s1b2$fit$fit$fit, "ranger")) {
+  var_imp <- ranger::importance(final_fit_m4_s1b2$fit$fit$fit)
   var_imp_df <- data.frame(Variable = names(var_imp), Importance = var_imp)
   var_imp_df <- var_imp_df[order(var_imp_df$Importance, decreasing = TRUE), ]
 
@@ -4231,10 +4235,11 @@ print(best_params_m4_s2b1)
 final_wf_m4_s2b1 <- finalize_workflow(wf_m4_s2b1, best_params_m4_s2b1)
 
 # 9. Fit the final model
-fit_m4_s2b1 <- fit(final_wf_m4_s2b1, data = df_m4_s2b1)
+final_fit_m4_s2b1 <- fit(final_wf_m4_s2b1, data = df_m4_s2b1)
+save(final_fit_m4_s2b1, file = "final_fit_m4_s2b1.RData")
 
 for (thresh in thresholds) {
-  results <- calculate_all_measures(fit_m4_s2b1, df_m4_s2b1, thresh)
+  results <- calculate_all_measures(final_fit_m4_s2b1, df_m4_s2b1, thresh)
   tpr_1 <- results$values[results$measures == "TPR_1"]
   tpr_0 <- results$values[results$measures == "TPR_0"]
 
@@ -4259,7 +4264,7 @@ best_threshold <-
 cat("Best threshold:", best_threshold, "\n")
 
 # 10. Evaluate the model on the test dataset
-results_m4_s2b1 <- calculate_all_measures(fit_m4_s2b1, df_test, 0.5)
+results_m4_s2b1 <- calculate_all_measures(final_fit_m4_s2b1, df_test, 0.5)
 results_m4_s2b1
 store_results("m4s2b1", results_m4_s2b1, "Random Forest Model - s2b1")
 
@@ -4267,8 +4272,8 @@ store_results("m4s2b1", results_m4_s2b1, "Random Forest Model - s2b1")
 save(results_storage, file = "results_after_m4_s2b1.RData")
 
 # Optional: Extract variable importance
-if (inherits(fit_m4_s2b1$fit$fit$fit, "ranger")) {
-  var_imp <- ranger::importance(fit_m4_s2b1$fit$fit$fit)
+if (inherits(final_fit_m4_s2b1$fit$fit$fit, "ranger")) {
+  var_imp <- ranger::importance(final_fit_m4_s2b1$fit$fit$fit)
   var_imp_df <- data.frame(Variable = names(var_imp), Importance = var_imp)
   var_imp_df <- var_imp_df[order(var_imp_df$Importance, decreasing = TRUE), ]
 
@@ -4377,10 +4382,11 @@ print(best_params_m4_s2b2)
 final_wf_m4_s2b2 <- finalize_workflow(wf_m4_s2b2, best_params_m4_s2b2)
 
 # 9. Fit the final model
-fit_m4_s2b2 <- fit(final_wf_m4_s2b2, data = df_m4_s2b2)
+final_fit_m4_s2b2 <- fit(final_wf_m4_s2b2, data = df_m4_s2b2)
+save(final_fit_m4_s2b2, file = "final_fit_m4_s2b2.RData")
 
 for (thresh in thresholds) {
-  results <- calculate_all_measures(fit_m4_s2b2, df_m4_s2b2, thresh)
+  results <- calculate_all_measures(final_fit_m4_s2b2, df_m4_s2b2, thresh)
   tpr_1 <- results$values[results$measures == "TPR_1"]
   tpr_0 <- results$values[results$measures == "TPR_0"]
 
@@ -4405,7 +4411,7 @@ best_threshold <-
 cat("Best threshold:", best_threshold, "\n")
 
 # 10. Evaluate the model on the test dataset
-results_m4_s2b2 <- calculate_all_measures(fit_m4_s2b2, df_test, 0.5)
+results_m4_s2b2 <- calculate_all_measures(final_fit_m4_s2b2, df_test, 0.5)
 results_m4_s2b2
 store_results("m4s2b2", results_m4_s2b2, "Random Forest Model - s2b2")
 
@@ -4413,8 +4419,8 @@ store_results("m4s2b2", results_m4_s2b2, "Random Forest Model - s2b2")
 save(results_storage, file = "results_after_m4_s2b2.RData")
 
 # Optional: Extract variable importance
-if (inherits(fit_m4_s2b2$fit$fit$fit, "ranger")) {
-  var_imp <- ranger::importance(fit_m4_s2b2$fit$fit$fit)
+if (inherits(final_fit_m4_s2b2$fit$fit$fit, "ranger")) {
+  var_imp <- ranger::importance(final_fit_m4_s2b2$fit$fit$fit)
   var_imp_df <- data.frame(Variable = names(var_imp), Importance = var_imp)
   var_imp_df <- var_imp_df[order(var_imp_df$Importance, decreasing = TRUE), ]
 
@@ -4523,10 +4529,11 @@ print(best_params_m4_s3b1)
 final_wf_m4_s3b1 <- finalize_workflow(wf_m4_s3b1, best_params_m4_s3b1)
 
 # 9. Fit the final model
-fit_m4_s3b1 <- fit(final_wf_m4_s3b1, data = df_m4_s3b1)
+final_fit_m4_s3b1 <- fit(final_wf_m4_s3b1, data = df_m4_s3b1)
+save(final_fit_m4_s3b1, file = "final_fit_m4_s3b1.RData")
 
 for (thresh in thresholds) {
-  results <- calculate_all_measures(fit_m4_s3b1, df_m4_s3b1, thresh)
+  results <- calculate_all_measures(final_fit_m4_s3b1, df_m4_s3b1, thresh)
   tpr_1 <- results$values[results$measures == "TPR_1"]
   tpr_0 <- results$values[results$measures == "TPR_0"]
 
@@ -4551,7 +4558,7 @@ best_threshold <-
 cat("Best threshold:", best_threshold, "\n")
 
 # 10. Evaluate the model on the test dataset
-results_m4_s3b1 <- calculate_all_measures(fit_m4_s3b1, df_test, 0.5)
+results_m4_s3b1 <- calculate_all_measures(final_fit_m4_s3b1, df_test, 0.5)
 results_m4_s3b1
 store_results("m4s3b1", results_m4_s3b1, "Random Forest Model - s3b1")
 
@@ -4559,8 +4566,8 @@ store_results("m4s3b1", results_m4_s3b1, "Random Forest Model - s3b1")
 save(results_storage, file = "results_after_m4_s3b1.RData")
 
 # Optional: Extract variable importance
-if (inherits(fit_m4_s3b1$fit$fit$fit, "ranger")) {
-  var_imp <- ranger::importance(fit_m4_s3b1$fit$fit$fit)
+if (inherits(final_fit_m4_s3b1$fit$fit$fit, "ranger")) {
+  var_imp <- ranger::importance(final_fit_m4_s3b1$fit$fit$fit)
   var_imp_df <- data.frame(Variable = names(var_imp), Importance = var_imp)
   var_imp_df <- var_imp_df[order(var_imp_df$Importance, decreasing = TRUE), ]
 
@@ -4669,10 +4676,11 @@ print(best_params_m4_s3b2)
 final_wf_m4_s3b2 <- finalize_workflow(wf_m4_s3b2, best_params_m4_s3b2)
 
 # 9. Fit the final model
-fit_m4_s3b2 <- fit(final_wf_m4_s3b2, data = df_m4_s3b2)
+final_fit_m4_s3b2 <- fit(final_wf_m4_s3b2, data = df_m4_s3b2)
+save(final_fit_m4_s3b2, file = "final_fit_m4_s3b2.RData")
 
 for (thresh in thresholds) {
-  results <- calculate_all_measures(fit_m4_s3b2, df_m4_s3b2, thresh)
+  results <- calculate_all_measures(final_fit_m4_s3b2, df_m4_s3b2, thresh)
   tpr_1 <- results$values[results$measures == "TPR_1"]
   tpr_0 <- results$values[results$measures == "TPR_0"]
 
@@ -4697,7 +4705,7 @@ best_threshold <-
 cat("Best threshold:", best_threshold, "\n")
 
 # 10. Evaluate the model on the test dataset
-results_m4_s3b2 <- calculate_all_measures(fit_m4_s3b2, df_test, 0.5)
+results_m4_s3b2 <- calculate_all_measures(final_fit_m4_s3b2, df_test, 0.5)
 results_m4_s3b2
 store_results("m4s3b2", results_m4_s3b2, "Random Forest Model - s3b2")
 
@@ -4705,8 +4713,8 @@ store_results("m4s3b2", results_m4_s3b2, "Random Forest Model - s3b2")
 save(results_storage, file = "results_after_m4_s3b2.RData")
 
 # Optional: Extract variable importance
-if (inherits(fit_m4_s3b2$fit$fit$fit, "ranger")) {
-  var_imp <- ranger::importance(fit_m4_s3b2$fit$fit$fit)
+if (inherits(final_fit_m4_s3b2$fit$fit$fit, "ranger")) {
+  var_imp <- ranger::importance(final_fit_m4_s3b2$fit$fit$fit)
   var_imp_df <- data.frame(Variable = names(var_imp), Importance = var_imp)
   var_imp_df <- var_imp_df[order(var_imp_df$Importance, decreasing = TRUE), ]
 
@@ -4801,12 +4809,13 @@ best_parameters_m5_s1b1 <- select_best(tune_results_m5_s1b1, metric = "roc_auc")
 final_wf_m5_s1b1 <- finalize_workflow(wf_m5_s1b1, best_parameters_m5_s1b1)
 
 # 9. Fit the final model
-fit_m5_s1b1 <- fit(final_wf_m5_s1b1, data = df_m5_s1b1)
+final_fit_m5_s1b1 <- fit(final_wf_m5_s1b1, data = df_m5_s1b1)
+save(final_fit_m5_s1b1, file = "final_fit_m5_s1b1.RData")
 
 # 10. Evaluate the model on the test dataset
 test_predications_m5_s1b1 <-
-  predict(fit_m5_s1b1, new_data = df_test, type = "prob") %>%
-  bind_cols(predict(fit_m5_s1b1, new_data = df_test, type = "class")) %>%
+  predict(final_fit_m5_s1b1, new_data = df_test, type = "prob") %>%
+  bind_cols(predict(final_fit_m5_s1b1, new_data = df_test, type = "class")) %>%
   bind_cols(df_test %>% select(Class))
 
 # Generate a confusion matrix
@@ -4823,7 +4832,7 @@ autoplot(confusion_matrix_m5_s1b1, type = "heatmap") +
        y = "Actual Class") +
   theme_minimal()
 
-results_m5_s1b1 <- calculate_all_measures(fit_m5_s1b1, df_test, 0.5)
+results_m5_s1b1 <- calculate_all_measures(final_fit_m5_s1b1, df_test, 0.5)
 
 results_m5_s1b1
 
@@ -4915,14 +4924,15 @@ print(best_parameters_m5_s2b1)
 final_wf_m5_s2b1 <- finalize_workflow(wf_m5_s2b1, best_parameters_m5_s2b1)
 
 # 9. Fit the final model
-fit_m5_s2b1 <- fit(final_wf_m5_s2b1, data = df_m5_s2b1)
+final_fit_m5_s2b1 <- fit(final_wf_m5_s2b1, data = df_m5_s2b1)
+save(final_fit_m5_s2b1, file = "final_fit_m5_s2b1.RData")
 
 # Try different thresholds to achieve target TPR and TNR
 thresholds <- seq(0.2, 0.8, by = 0.01)
 threshold_results <- list()
 
 for (thresh in thresholds) {
-  results <- calculate_all_measures(fit_m5_s2b1, df_m5_s2b1, thresh)
+  results <- calculate_all_measures(final_fit_m5_s2b1, df_m5_s2b1, thresh)
   tpr_1 <- results$values[results$measures == "TPR_1"]
   tpr_0 <- results$values[results$measures == "TPR_0"]
 
@@ -4948,8 +4958,8 @@ cat("Best threshold:", best_threshold,
 
 # 10. Evaluate the model on the test dataset
 test_predications_m5_s2b1 <-
-  predict(fit_m5_s2b1, new_data = df_test, type = "prob") %>%
-  bind_cols(predict(fit_m5_s2b1, new_data = df_test, type = "class")) %>%
+  predict(final_fit_m5_s2b1, new_data = df_test, type = "prob") %>%
+  bind_cols(predict(final_fit_m5_s2b1, new_data = df_test, type = "class")) %>%
   bind_cols(df_test %>% select(Class))
 
 # Generate a confusion matrix
@@ -4959,7 +4969,7 @@ confusion_matrix_m5_s2b1 <- test_predications_m5_s2b1 %>%
 # Print the confusion matrix
 print(confusion_matrix_m5_s2b1)
 
-results_m5_s2b1 <- calculate_all_measures(fit_m5_s2b1, df_test, #0.5)
+results_m5_s2b1 <- calculate_all_measures(final_fit_m5_s2b1, df_test, #0.5)
 best_threshold)
 
 results_m5_s2b1
@@ -5052,12 +5062,13 @@ best_parameters_m5_s3b1 <- select_best(tune_results_m5_s3b1, metric = "roc_auc")
 final_wf_m5_s3b1 <- finalize_workflow(wf_m5_s3b1, best_parameters_m5_s3b1)
 
 # 9. Fit the final model
-fit_m5_s3b1 <- fit(final_wf_m5_s3b1, data = df_m5_s3b1)
+final_fit_m5_s3b1 <- fit(final_wf_m5_s3b1, data = df_m5_s3b1)
+save(final_fit_m5_s3b1, file = "final_fit_m5_s3b1.RData")
 
 # 10. Evaluate the model on the test dataset
 test_predications_m5_s3b1 <-
-  predict(fit_m5_s3b1, new_data = df_test, type = "prob") %>%
-  bind_cols(predict(fit_m5_s3b1, new_data = df_test, type = "class")) %>%
+  predict(final_fit_m5_s3b1, new_data = df_test, type = "prob") %>%
+  bind_cols(predict(final_fit_m5_s3b1, new_data = df_test, type = "class")) %>%
   bind_cols(df_test %>% select(Class))
 
 # Generate a confusion matrix
@@ -5074,7 +5085,7 @@ autoplot(confusion_matrix_m5_s3b1, type = "heatmap") +
        y = "Actual Class") +
   theme_minimal()
 
-results_m5_s3b1 <- calculate_all_measures(fit_m5_s3b1, df_test, 0.5)
+results_m5_s3b1 <- calculate_all_measures(final_fit_m5_s3b1, df_test, 0.5)
 
 results_m5_s3b1
 
@@ -5194,12 +5205,13 @@ print(best_parameters_m6_s1b1)
 final_wf_m6_s1b1 <- finalize_workflow(wf_m6_s1b1, best_parameters_m6_s1b1)
 
 # 9. Fit the final model
-fit_m6_s1b1 <- fit(final_wf_m6_s1b1, data = df_m6_s1b1)
+final_fit_m6_s1b1 <- fit(final_wf_m6_s1b1, data = df_m6_s1b1)
+save(final_fit_m6_s1b1, file = "final_fit_m6_s1b1.RData")
 
 # 10. Evaluate the model on the test dataset
 test_predications_m6_s1b1 <-
-  predict(fit_m6_s1b1, new_data = df_test, type = "prob") %>%
-  bind_cols(predict(fit_m6_s1b1, new_data = df_test, type = "class")) %>%
+  predict(final_fit_m6_s1b1, new_data = df_test, type = "prob") %>%
+  bind_cols(predict(final_fit_m6_s1b1, new_data = df_test, type = "class")) %>%
   bind_cols(df_test %>% select(Class))
 
 # Generate a confusion matrix
@@ -5209,7 +5221,7 @@ confusion_matrix_m6_s1b1 <- test_predications_m6_s1b1 %>%
 # Print the confusion matrix
 print(confusion_matrix_m6_s1b1)
 
-results_m6_s1b1 <- calculate_all_measures(fit_m6_s1b1, df_test, 0.5)
+results_m6_s1b1 <- calculate_all_measures(final_fit_m6_s1b1, df_test, 0.5)
 
 results_m6_s1b1
 
@@ -5225,7 +5237,7 @@ log_message("Finished Step 6.1.1 - model6_select1_balanced1 - m6_s1b1")
 
 log_message("Starting Step 6.1.2 - model6_select1_balanced2 - m6_s1b2")
 
-load("df_s1b2.RData") # nolint
+#load("df_s1b2.RData") # nolint
 #load("df_columns_info.RData") # nolint
 #load("df_test.RData") # nolint
 
@@ -5240,9 +5252,6 @@ df_m6_s1b2 <- df_s1b2 %>%
                                      collapse = "|"), ")_")))
 
 # 1. Model Specification
-# Determine number of cores to use (leave one core free)
-n_cores <- parallel::detectCores() - 1
-n_cores <- max(n_cores, 1)  # Ensure at least one core
 
 spec_m6_s1b2 <- boost_tree(
   trees = tune(),
@@ -5278,6 +5287,17 @@ tune_grid_m6_s1b2 <- grid_regular(
   levels = 5
 )
 
+# Determine number of cores to use (leave one core free)
+n_cores <- parallel::detectCores() - 1
+n_cores <- max(n_cores, 1)  # Ensure at least one core
+
+# Set the parallel plan - this activates parallel processing
+# plan(multisession, workers = n_cores)  # For Windows # nolint
+plan(multicore, workers = n_cores)   # For Unix/Linux/Mac
+
+# Display information about parallel processing
+cat("Using", n_cores, "cores for parallel processing\n")
+
 # 6. Tune the model
 tune_results_m6_s1b2 <- tune_grid(
   wf_m6_s1b2,
@@ -5285,6 +5305,13 @@ tune_results_m6_s1b2 <- tune_grid(
   grid = tune_grid_m6_s1b2,
   metrics = metric_set(roc_auc, accuracy, sens, spec)
 )
+
+# Reset the future plan to sequential
+plan(sequential)
+# Unregister the parallel backend
+registerDoSEQ()  # Switch back to sequential processing
+# Display information about stopping parallel processing
+cat("Stopped parallel processing\n")
 
 # Show the tuning results
 autoplot(tune_results_m6_s1b2) +
@@ -5300,12 +5327,13 @@ best_parameters_m6_s1b2 <- select_best(tune_results_m6_s1b2, metric = "roc_auc")
 final_wf_m6_s1b2 <- finalize_workflow(wf_m6_s1b2, best_parameters_m6_s1b2)
 
 # 9. Fit the final model
-fit_m6_s1b2 <- fit(final_wf_m6_s1b2, data = df_m6_s1b2)
+final_fit_m6_s1b2 <- fit(final_wf_m6_s1b2, data = df_m6_s1b2)
+save(final_fit_m6_s1b2, file = "final_fit_m6_s1b2.RData")
 
 # 10. Evaluate the model on the test dataset
 test_predications_m6_s1b2 <-
-  predict(fit_m6_s1b2, new_data = df_test, type = "prob") %>%
-  bind_cols(predict(fit_m6_s1b2, new_data = df_test, type = "class")) %>%
+  predict(final_fit_m6_s1b2, new_data = df_test, type = "prob") %>%
+  bind_cols(predict(final_fit_m6_s1b2, new_data = df_test, type = "class")) %>%
   bind_cols(df_test %>% select(Class))
 
 # Generate a confusion matrix
@@ -5322,7 +5350,7 @@ autoplot(confusion_matrix_m6_s1b2, type = "heatmap") +
        y = "Actual Class") +
   theme_minimal()
 
-results_m6_s1b2 <- calculate_all_measures(fit_m6_s1b2, df_test, 0.5)
+results_m6_s1b2 <- calculate_all_measures(final_fit_m6_s1b2, df_test, 0.5)
 
 results_m6_s1b2
 
@@ -5432,12 +5460,13 @@ best_parameters_m6_s2b1 <- select_best(tune_results_m6_s2b1, metric = "roc_auc")
 final_wf_m6_s2b1 <- finalize_workflow(wf_m6_s2b1, best_parameters_m6_s2b1)
 
 # 9. Fit the final model
-fit_m6_s2b1 <- fit(final_wf_m6_s2b1, data = df_m6_s2b1)
+final_fit_m6_s2b1 <- fit(final_wf_m6_s2b1, data = df_m6_s2b1)
+save(final_fit_m6_s2b1, file = "final_fit_m6_s2b1.RData")
 
 # 10. Evaluate the model on the test dataset
 test_predications_m6_s2b1 <-
-  predict(fit_m6_s2b1, new_data = df_test, type = "prob") %>%
-  bind_cols(predict(fit_m6_s2b1, new_data = df_test, type = "class")) %>%
+  predict(final_fit_m6_s2b1, new_data = df_test, type = "prob") %>%
+  bind_cols(predict(final_fit_m6_s2b1, new_data = df_test, type = "class")) %>%
   bind_cols(df_test %>% select(Class))
 
 # Generate a confusion matrix
@@ -5447,7 +5476,7 @@ confusion_matrix_m6_s2b1 <- test_predications_m6_s2b1 %>%
 # Print the confusion matrix
 print(confusion_matrix_m6_s2b1)
 
-results_m6_s2b1 <- calculate_all_measures(fit_m6_s2b1, df_test, 0.5)
+results_m6_s2b1 <- calculate_all_measures(final_fit_m6_s2b1, df_test, 0.5)
 
 results_m6_s2b1
 
@@ -5552,12 +5581,13 @@ best_parameters_m6_s2b2 <- select_best(tune_results_m6_s2b2, metric = "roc_auc")
 final_wf_m6_s2b2 <- finalize_workflow(wf_m6_s2b2, best_parameters_m6_s2b2)
 
 # 9. Fit the final model
-fit_m6_s2b2 <- fit(final_wf_m6_s2b2, data = df_m6_s2b2)
+final_fit_m6_s2b2 <- fit(final_wf_m6_s2b2, data = df_m6_s2b2)
+save(final_fit_m6_s2b2, file = "final_fit_m6_s2b2.RData")
 
 # 10. Evaluate the model on the test dataset
 test_predications_m6_s2b2 <-
-  predict(fit_m6_s2b2, new_data = df_test, type = "prob") %>%
-  bind_cols(predict(fit_m6_s2b2, new_data = df_test, type = "class")) %>%
+  predict(final_fit_m6_s2b2, new_data = df_test, type = "prob") %>%
+  bind_cols(predict(final_fit_m6_s2b2, new_data = df_test, type = "class")) %>%
   bind_cols(df_test %>% select(Class))
 
 # Generate a confusion matrix
@@ -5574,7 +5604,7 @@ autoplot(confusion_matrix_m6_s2b2, type = "heatmap") +
        y = "Actual Class") +
   theme_minimal()
 
-results_m6_s2b2 <- calculate_all_measures(fit_m6_s2b2, df_test, 0.5)
+results_m6_s2b2 <- calculate_all_measures(final_fit_m6_s2b2, df_test, 0.5)
 
 results_m6_s2b2
 
@@ -5686,12 +5716,13 @@ best_parameters_m6_s3b1 <- select_best(tune_results_m6_s3b1, metric = "roc_auc")
 final_wf_m6_s3b1 <- finalize_workflow(wf_m6_s3b1, best_parameters_m6_s3b1)
 
 # 9. Fit the final model
-fit_m6_s3b1 <- fit(final_wf_m6_s3b1, data = df_m6_s3b1)
+final_fit_m6_s3b1 <- fit(final_wf_m6_s3b1, data = df_m6_s3b1)
+save(final_fit_m6_s3b1, file = "final_fit_m6_s3b1.RData")
 
 # 10. Evaluate the model on the test dataset
 test_predications_m6_s3b1 <-
-  predict(fit_m6_s3b1, new_data = df_test, type = "prob") %>%
-  bind_cols(predict(fit_m6_s3b1, new_data = df_test, type = "class")) %>%
+  predict(final_fit_m6_s3b1, new_data = df_test, type = "prob") %>%
+  bind_cols(predict(final_fit_m6_s3b1, new_data = df_test, type = "class")) %>%
   bind_cols(df_test %>% select(Class))
 
 # Generate a confusion matrix
@@ -5708,7 +5739,7 @@ autoplot(confusion_matrix_m6_s3b1, type = "heatmap") +
        y = "Actual Class") +
   theme_minimal()
 
-results_m6_s3b1 <- calculate_all_measures(fit_m6_s3b1, df_test, 0.5)
+results_m6_s3b1 <- calculate_all_measures(final_fit_m6_s3b1, df_test, 0.5)
 
 results_m6_s3b1
 
@@ -5813,12 +5844,13 @@ best_parameters_m6_s3b2 <- select_best(tune_results_m6_s3b2, metric = "roc_auc")
 final_wf_m6_s3b2 <- finalize_workflow(wf_m6_s3b2, best_parameters_m6_s3b2)
 
 # 9. Fit the final model
-fit_m6_s3b2 <- fit(final_wf_m6_s3b2, data = df_m6_s3b2)
+final_fit_m6_s3b2 <- fit(final_wf_m6_s3b2, data = df_m6_s3b2)
+save(final_fit_m6_s3b2, file = "final_fit_m6_s3b2.RData")
 
 # 10. Evaluate the model on the test dataset
 test_predications_m6_s3b2 <-
-  predict(fit_m6_s3b2, new_data = df_test, type = "prob") %>%
-  bind_cols(predict(fit_m6_s3b2, new_data = df_test, type = "class")) %>%
+  predict(final_fit_m6_s3b2, new_data = df_test, type = "prob") %>%
+  bind_cols(predict(final_fit_m6_s3b2, new_data = df_test, type = "class")) %>%
   bind_cols(df_test %>% select(Class))
 
 # Generate a confusion matrix
@@ -5835,7 +5867,7 @@ autoplot(confusion_matrix_m6_s3b2, type = "heatmap") +
        y = "Actual Class") +
   theme_minimal()
 
-results_m6_s3b2 <- calculate_all_measures(fit_m6_s3b2, df_test, 0.5)
+results_m6_s3b2 <- calculate_all_measures(final_fit_m6_s3b2, df_test, 0.5)
 
 results_m6_s3b2
 
@@ -5976,11 +6008,12 @@ print(best_parameters_m6_s4b3)
 final_wf_m6_s4b3 <- finalize_workflow(wf_m6_s4b3, best_parameters_m6_s4b3)
 
 # 9. Fit the final model
-fit_m6_s4b3 <- fit(final_wf_m6_s4b3, data = df_m6_s4b3)
+final_fit_m6_s4b3 <- fit(final_wf_m6_s4b3, data = df_m6_s4b3)
+save(final_fit_m6_s4b3, file = "final_fit_m6_s4b3.RData")
 
 test_predications_m6_s4b3 <-
-  predict(fit_m6_s4b3, new_data = df_test, type = "prob") %>%
-  bind_cols(predict(fit_m6_s4b3, new_data = df_test, type = "class")) %>%
+  predict(final_fit_m6_s4b3, new_data = df_test, type = "prob") %>%
+  bind_cols(predict(final_fit_m6_s4b3, new_data = df_test, type = "class")) %>%
   bind_cols(df_test %>% select(Class))
 
 # Generate a confusion matrix
@@ -5990,7 +6023,7 @@ confusion_matrix_m6_s4b3 <- test_predications_m6_s4b3 %>%
 # Print the confusion matrix
 print(confusion_matrix_m6_s4b3)
 
-results_m6_s4b3 <- calculate_all_measures(fit_m6_s4b3, df_test, 0.5)
+results_m6_s4b3 <- calculate_all_measures(final_fit_m6_s4b3, df_test, 0.5)
 
 results_m6_s4b3
 
@@ -6103,12 +6136,13 @@ print(best_parameters_m6_s2b3)
 final_wf_m6_s2b3 <- finalize_workflow(wf_m6_s2b3, best_parameters_m6_s2b3)
 
 # 9. Fit the final model
-fit_m6_s2b3 <- fit(final_wf_m6_s2b3, data = df_m6_s2b3)
+final_fit_m6_s2b3 <- fit(final_wf_m6_s2b3, data = df_m6_s2b3)
+save(final_fit_m6_s2b3, file = "final_fit_m6_s2b3.RData")
 
 # 10. Evaluate the model on the test dataset
 test_predications_m6_s2b3 <-
-  predict(fit_m6_s2b3, new_data = df_test, type = "prob") %>%
-  bind_cols(predict(fit_m6_s2b3, new_data = df_test, type = "class")) %>%
+  predict(final_fit_m6_s2b3, new_data = df_test, type = "prob") %>%
+  bind_cols(predict(final_fit_m6_s2b3, new_data = df_test, type = "class")) %>%
   bind_cols(df_test %>% select(Class))
 
 # Generate a confusion matrix
@@ -6118,7 +6152,7 @@ confusion_matrix_m6_s2b3 <- test_predications_m6_s2b3 %>%
 # Print the confusion matrix
 print(confusion_matrix_m6_s2b3)
 
-results_m6_s2b3 <- calculate_all_measures(fit_m6_s2b3, df_test, 0.5)
+results_m6_s2b3 <- calculate_all_measures(final_fit_m6_s2b3, df_test, 0.5)
 
 results_m6_s2b3
 
@@ -6162,15 +6196,19 @@ if (!exists("final_fit_m4_s2b2")) load("final_fit_m4_s2b2.RData")
 if (!exists("final_fit_m4_s3b1")) load("final_fit_m4_s3b1.RData")
 if (!exists("final_fit_m4_s3b2")) load("final_fit_m4_s3b2.RData")
 if (!exists("final_fit_m5_s1b1")) load("final_fit_m5_s1b1.RData")
-if (!exists("final_fit_m5_s1b2")) load("final_fit_m5_s1b2.RData")
+#if (!exists("final_fit_m5_s1b2")) load("final_fit_m5_s1b2.RData")
 if (!exists("final_fit_m5_s2b1")) load("final_fit_m5_s2b1.RData")
-if (!exists("final_fit_m5_s2b2")) load("final_fit_m5_s2b2.RData")
+#if (!exists("final_fit_m5_s2b2")) load("final_fit_m5_s2b2.RData")
 if (!exists("final_fit_m5_s3b1")) load("final_fit_m5_s3b1.RData")
-if (!exists("final_fit_m5_s3b2")) load("final_fit_m5_s3b2.RData")
+#if (!exists("final_fit_m5_s3b2")) load("final_fit_m5_s3b2.RData")
+if (!exists("final_fit_m6_s1b1")) load("final_fit_m6_s1b1.RData")
+if (!exists("final_fit_m6_s1b2")) load("final_fit_m6_s1b2.RData")
 if (!exists("final_fit_m6_s2b1")) load("final_fit_m6_s2b1.RData")
 if (!exists("final_fit_m6_s2b2")) load("final_fit_m6_s2b2.RData")
 if (!exists("final_fit_m6_s3b1")) load("final_fit_m6_s3b1.RData")
 if (!exists("final_fit_m6_s3b2")) load("final_fit_m6_s3b2.RData")
+if (!exists("final_fit_m6_s4b3")) load("final_fit_m6_s4b3.RData")
+if (!exists("final_fit_m6_s2b3")) load("final_fit_m6_s2b3.RData")
 
 #---- 6.1 DONE *******      Ensemble Logistic Model - No Tuning ------- em1 ----
 
