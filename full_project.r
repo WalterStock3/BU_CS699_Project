@@ -1,4 +1,4 @@
-#---- 0 DONE ******* Project Step 0 --------------------------------------------
+df_train#---- 0 DONE ******* Project Step 0 --------------------------------------------
 ## TODO:
 #  - Complete a graph for Fisher Scores for Logical - 4-2-1-1
 #  - Complete a grpah for Factor wihout processing Missing.
@@ -2401,13 +2401,13 @@ cat("Best threshold:", best_threshold,
 # 10. Evaluate the model on the test dataset
 # Evaluate the model on the test dataset
 # Get probability predictions
-test_predictions_prob_m1_s2b2_2 <- 
+test_predictions_m1_s2b2_2 <-
   predict(final_fit_m1_s2b2_2, new_data = df_test, type = "prob") %>%
   bind_cols(predict(final_fit_m1_s2b2_2, new_data = df_test, type = "class")) %>%
   bind_cols(df_test %>% select(Class))
 
 # Generate a confusion matrix
-confusion_matrix_m1_s2b2_2 <- test_predications_m1_s2b2_2 %>%
+confusion_matrix_m1_s2b2_2 <- test_predictions_m1_s2b2_2 %>%
   conf_mat(truth = Class, estimate = .pred_class)
 
 # Print the confusion matrix
@@ -6176,119 +6176,125 @@ if (!exists("final_fit_m6_s3b2")) load("final_fit_m6_s3b2.RData")
 
 log_message("Starting Step 6.1 - Ensemble Logistic Model - No Tuning")
 
-# Run predict using all 36 models and store the predicted probabilities.
-#  Then use the propabilities to train a meta logistic regression model.
+#load("df_train.RData") # nolint
 
-# Combine predictions from all models
-#meta_features <- bind_cols(
-#  predict(final_fit_m1_s1b1, new_data = df_train, type = "prob") %>%
-#    rename_with(~ paste0("m1_s1b1_", .), starts_with(".pred")),
-#  predict(final_fit_m1_s1b2, new_data = df_train, type = "prob") %>%
-#   rename_with(~ paste0("m1_s1b2_", .), starts_with(".pred")),
-#  %>%
-#  bind_cols(df_train %>% select(Class))
+df_em1_s2_b2 <- df_train %>%
+  select(Class, matches("^DETAILED-"))
 
-#meta_features <- meta_features %>%
-#  select(-ends_with(".pred_0"))
+meta_features_em1 <- bind_cols(
+  predict(final_fit_m1_s1b1, new_data = df_em1_s2_b2, type = "prob") %>%
+    rename_with(~ paste0("m1_s1b1_", .), starts_with(".pred")),
+  predict(final_fit_m1_s1b2, new_data = df_em1_s2_b2, type = "prob") %>%
+   rename_with(~ paste0("m1_s1b2_", .), starts_with(".pred")),
+  predict(final_fit_m1_s2b1, new_data = df_em1_s2_b2, type = "prob") %>%
+    rename_with(~ paste0("m1_s2b1_", .), starts_with(".pred")),
+  predict(final_fit_m1_s2b2, new_data = df_em1_s2_b2, type = "prob") %>%
+    rename_with(~ paste0("m1_s2b2_", .), starts_with(".pred")),
+  predict(final_fit_m1_s3b1, new_data = df_em1_s2_b2, type = "prob") %>%
+    rename_with(~ paste0("m1_s3b1_", .), starts_with(".pred")),
+  predict(final_fit_m1_s3b2, new_data = df_em1_s2_b2, type = "prob") %>%
+    rename_with(~ paste0("m1_s3b2_", .), starts_with(".pred")),
+  predict(final_fit_m1_s2b2_2, new_data = df_em1_s2_b2, type = "prob") %>%
+    rename_with(~ paste0("m1_s2b2_2_", .), starts_with(".pred")),
+  predict(final_fit_m2_s1b1, new_data = df_em1_s2_b2, type = "prob") %>%
+    rename_with(~ paste0("m2_s1b1_", .), starts_with(".pred")),
+  predict(final_fit_m2_s1b2, new_data = df_em1_s2_b2, type = "prob") %>%
+    rename_with(~ paste0("m2_s1b2_", .), starts_with(".pred")),
+  predict(final_fit_m2_s2b1, new_data = df_em1_s2_b2, type = "prob") %>%
+    rename_with(~ paste0("m2_s2b1_", .), starts_with(".pred")),
+  predict(final_fit_m2_s2b2, new_data = df_em1_s2_b2, type = "prob") %>%
+    rename_with(~ paste0("m2_s2b2_", .), starts_with(".pred")),
+  predict(final_fit_m2_s3b1, new_data = df_em1_s2_b2, type = "prob") %>%
+    rename_with(~ paste0("m2_s3b1_", .), starts_with(".pred")),
+  predict(final_fit_m2_s3b2, new_data = df_em1_s2_b2, type = "prob") %>%
+    rename_with(~ paste0("m2_s3b2_", .), starts_with(".pred"))) %>%
+  bind_cols(df_em1_s2_b2 %>% select(Class))
 
-#meta_rec <- recipe(Class ~ ., data = meta_features) %>%
-#  themis::step_smote(Class)
+# Train a meta-learner
+meta_rec_em1 <- recipe(Class ~ ., data = meta_features_em1)
 
-#meta_spec <- logistic_reg() %>%
-#  set_engine("glm") %>%
-#  set_mode("classification")
+# Add class weights to increase importance of class 1
+meta_spec_em1 <- logistic_reg(penalty = tune(), mixture = tune()) %>%
+  set_engine("glmnet", class.weights = c("0" = 1, "1" = 3)) %>%  # Class 1 has 3x weight
+  set_mode("classification")
 
-#meta_wf <- workflow() %>%
-#  add_model(meta_spec) %>%
-#  add_recipe(meta_rec)
+meta_spec_em1 <- logistic_reg(penalty = tune(), mixture = tune()) %>%
+  set_engine("glmnet") %>%
+  set_mode("classification")
 
-#meta_fit <- fit(meta_wf, data = meta_features)
+meta_wf_em1 <- workflow() %>%
+  add_model(meta_spec_em1) %>%
+  add_recipe(meta_rec_em1)
 
-#results_em1 <- calculate_all_measures(meta_fit, df_test, 0.5)
-  
-# Generate a confusion matrix
-#confusion_matrix_em1 <- test_predications_em1 %>%
-#  conf_mat(truth = Class, estimate = .pred_class)
-# Print the confusion matrix
-#print(confusion_matrix_em1)
-
-#results_em1 <- calculate_all_measures(final_fit_em1, 0.5)
-
-log_message("Starting Step 6.1 - Ensemble Logistic Model - No Tuning")
-
-#---- 6.2 DONE *******      Ensemble Stacking ---- em2 --------
-
-log_message("Starting Step 6.2 - Ensemble Stacking")
-
-# Create a stack
-ensemble_stack <- stacks()
-
-# Add models to the stack
-# We need to extract the workflows from the fitted models
-# First, let's create control objects for resamples
-ctrl <- control_stack_resamples()
-
-# Load the training data again
-# Note: This assumes df_train contains the original training data
-# We need to create the same resampling folds as were used in original models
+# 4. Cross-validation
 set.seed(123)
-folds <- vfold_cv(df_train, v = 10, strata = "Class")
+folds_em1 <- vfold_cv(meta_features_em1, v = 10, strata = Class)
 
-# Register the first model
-model1_stack <- 
-  logistic_reg(penalty = tune(), mixture = tune()) %>%
-  set_engine("glmnet") %>%
-  set_mode("classification")
+# 5. Grid of hyperparameters
+tune_grid_em1 <- grid_regular(penalty(), mixture(), levels = 5)
 
-wf1_stack <- workflow() %>%
-  add_model(model1_stack) %>%
-  add_recipe(rec_m1_s1b1)
-
-model1_results <- tune_grid(
-  wf1_stack,
-  resamples = folds,
-  grid = grid_regular(penalty(), mixture(), levels = 5),
-  control = ctrl
+# 6. Tune the model
+tune_results_em1 <- tune_grid(
+  meta_wf,
+  resamples = folds_em1,
+  grid = tune_grid_em1,
+  metrics = metric_set(roc_auc, accuracy, sens, spec)
 )
 
-ensemble_stack <- add_candidates(ensemble_stack, model1_results)
+# Show the tuning results
+autoplot(tune_results_em1) +
+  labs(title = "Tuning Results for Logistic Regression",
+       x = "Penalty",
+       y = "Mixture") +
+  theme_minimal()
 
-# Register the second model
-model2_stack <- 
-  logistic_reg(penalty = tune(), mixture = tune()) %>%
-  set_engine("glmnet") %>%
-  set_mode("classification")
+# 7. Select the best parameters
+best_parameters_em1 <- select_best(tune_results_em1, metric = "spec")
 
-wf2_stack <- workflow() %>%
-  add_model(model2_stack) %>%
-  add_recipe(rec_m1_s1b2)
+# 8. Finalize the workflow
+final_meta_wf_em1 <- finalize_workflow(meta_wf_em1, best_parameters_em1)
 
-model2_results <- tune_grid(
-  wf2_stack,
-  resamples = folds,
-  grid = grid_regular(penalty(), mixture(), levels = 5),
-  control = ctrl
-)
+meta_fit <- fit(final_meta_wf_em1, data = meta_features_em1)
 
-ensemble_stack <- add_candidates(ensemble_stack, model2_results)
+# Evaluate on the test dataset
+meta_test_features <-
+   bind_cols(
+  predict(final_fit_m1_s1b1, new_data = df_test, type = "prob") %>%
+    rename_with(~ paste0("m1_s1b1_", .), starts_with(".pred")),
+  predict(final_fit_m1_s1b2, new_data = df_test, type = "prob") %>%
+   rename_with(~ paste0("m1_s1b2_", .), starts_with(".pred")),
+  predict(final_fit_m1_s2b1, new_data = df_test, type = "prob") %>%
+    rename_with(~ paste0("m1_s2b1_", .), starts_with(".pred")),
+  predict(final_fit_m1_s2b2, new_data = df_test, type = "prob") %>%
+    rename_with(~ paste0("m1_s2b2_", .), starts_with(".pred")),
+  predict(final_fit_m1_s3b1, new_data = df_test, type = "prob") %>%
+    rename_with(~ paste0("m1_s3b1_", .), starts_with(".pred")),
+  predict(final_fit_m1_s3b2, new_data = df_test, type = "prob") %>%
+    rename_with(~ paste0("m1_s3b2_", .), starts_with(".pred")),
+  predict(final_fit_m1_s2b2_2, new_data = df_test, type = "prob") %>%
+    rename_with(~ paste0("m1_s2b2_2_", .), starts_with(".pred")),
+  predict(final_fit_m2_s1b1, new_data = df_test, type = "prob") %>%
+    rename_with(~ paste0("m2_s1b1_", .), starts_with(".pred")),
+  predict(final_fit_m2_s1b2, new_data = df_test, type = "prob") %>%
+    rename_with(~ paste0("m2_s1b2_", .), starts_with(".pred")),
+  predict(final_fit_m2_s2b1, new_data = df_test, type = "prob") %>%
+    rename_with(~ paste0("m2_s2b1_", .), starts_with(".pred")),
+  predict(final_fit_m2_s2b2, new_data = df_test, type = "prob") %>%
+    rename_with(~ paste0("m2_s2b2_", .), starts_with(".pred")),
+  predict(final_fit_m2_s3b1, new_data = df_test, type = "prob") %>%
+    rename_with(~ paste0("m2_s3b1_", .), starts_with(".pred")),
+  predict(final_fit_m2_s3b2, new_data = df_test, type = "prob") %>%
+    rename_with(~ paste0("m2_s3b2_", .), starts_with(".pred"))) %>%
+  bind_cols(df_test %>% select(Class))
 
-# Blend the predictions using a meta-learner
-ensemble_blend <- blend_predictions(ensemble_stack)
+meta_predictions <-
+  predict(meta_fit, new_data = meta_test_features, type = "class")
 
-# Fit the stacked ensemble model
-ensemble_fit <- fit_members(ensemble_blend, df_train)
+results <- calculate_all_measures(meta_fit, meta_test_features, 0.001)
 
-# Evaluate the stacked model on the test dataset
-results_em2 <- calculate_all_measures(ensemble_fit, df_test, 0.5)
-results_em2
+results
 
-# Store the results
-store_results("em2", results_em2, "Stacked Ensemble Model - m1_s1b1 & m1_s1b2")
-
-# Save the results to an RData file
-save(results_storage, file = "results_after_em2.RData")
-
-log_message("Finished Step 6.2 - Ensemble Stacking")
+log_message("Finished Step 6.1 - Ensemble Logistic Model")
 
 #---- 7 DONE *******      Save Results ----
 # Export the results to a CSV file
