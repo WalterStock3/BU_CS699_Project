@@ -1,4 +1,4 @@
-#---- 0 DONE ******* Project Step 0 --------------------------------------------
+#---- 0 DONE ******* Proj 0 --------------------------------------------
 ## TODO:
 #  - Complete a graph for Fisher Scores for Logical - 4-2-1-1
 #  - Complete a grpah for Factor wihout processing Missing.
@@ -6256,9 +6256,9 @@ meta_spec_em1 <- logistic_reg(penalty = tune(), mixture = tune()) %>%
   set_engine("glmnet", class.weights = c("0" = 1, "1" = 3)) %>%  # Class 1 has 3x weight
   set_mode("classification")
 
-meta_spec_em1 <- logistic_reg(penalty = tune(), mixture = tune()) %>%
-  set_engine("glmnet") %>%
-  set_mode("classification")
+#meta_spec_em1 <- logistic_reg(penalty = tune(), mixture = tune()) %>%
+#  set_engine("glmnet") %>%
+#  set_mode("classification")
 
 meta_wf_em1 <- workflow() %>%
   add_model(meta_spec_em1) %>%
@@ -6273,7 +6273,7 @@ tune_grid_em1 <- grid_regular(penalty(), mixture(), levels = 5)
 
 # 6. Tune the model
 tune_results_em1 <- tune_grid(
-  meta_wf,
+  meta_wf_em1,
   resamples = folds_em1,
   grid = tune_grid_em1,
   metrics = metric_set(roc_auc, accuracy, sens, spec)
