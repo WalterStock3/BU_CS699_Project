@@ -4,6 +4,8 @@
 #  - Complete a grpah for Factor wihout processing Missing.
 #  - Look into tuning logistic regression to get the best TP0 and TP1
 #  - Look into filtering down the select to only include Details
+#  - Threshold tuning on ensemble method to get the best TP0 and TP1
+#  - PCA option in select section.
 
 # Project Goal (Lecture 1): Generate a model to predict the likelihood of a
 # person having difficulty living independently.
@@ -6232,19 +6234,20 @@ if (!exists("final_fit_m6_s3b2")) load("final_fit_m6_s3b2.RData")
 if (!exists("final_fit_m6_s4b3")) load("final_fit_m6_s4b3.RData")
 if (!exists("final_fit_m6_s2b3")) load("final_fit_m6_s2b3.RData")
 
-#---- 6.1 DONE *******      Ensemble Logistic Model - No Tuning ------- em1 ----
+#---- 6.1 DONE *******      Ensemble Logistic Model - All ------------- em1 ----
 
 log_message("Starting Step 6.1 - Ensemble Logistic Model - No Tuning")
 
+#load("df_test.RData") # nolint
 #load("df_train.RData") # nolint
 #load("df_s2b2.RData") # nolint
-#load_("df_balanced2.RData") # nolint
+#load("df_balanced2.RData") # nolint
 
 df_em1_train1 <- df_balanced2
 
 meta_features_em1 <- bind_cols(
   predict(final_fit_m1_s1b1, new_data = df_em1_train1, type = "prob") %>%
-    rename_with(~ paste0("m6_s4b3", .), starts_with(".pred")),
+    rename_with(~ paste0("m1_s1b1", .), starts_with(".pred")),
   predict(final_fit_m1_s1b2, new_data = df_em1_train1, type = "prob") %>%
     rename_with(~ paste0("m1_s1b2_", .), starts_with(".pred")),
   predict(final_fit_m1_s2b1, new_data = df_em1_train1, type = "prob") %>%
@@ -6321,14 +6324,14 @@ meta_features_em1 <- bind_cols(
     rename_with(~ paste0("m6_s4b3_", .), starts_with(".pred")),
   predict(final_fit_m6_s2b3, new_data = df_em1_train1, type = "prob") %>%
     rename_with(~ paste0("m6_s2b3_", .), starts_with(".pred"))
-    ) %>% bind_cols(df_em1_train1 %>% select(Class))
+) %>% 
+bind_cols(df_em1_train1 %>% select(Class))
 
-# Train a meta-learner
 meta_rec_em1 <- recipe(Class ~ ., data = meta_features_em1)
 
 # Add class weights to increase importance of class 1
-#meta_spec_em1 <- logistic_reg(penalty = tune(), mixture = tune()) %>%
-#  set_engine("glmnet", class.weights = c("0" = 1, "1" = 3)) %>%  # Class 1 has 3x weight
+#meta_spec_em1 <- logistic_reg(penalty = tune(), mixture = 1) %>%
+#  set_engine("glmnet", class.weights = c("0" = 1, "1" = 100)) %>%  # Class 1 has 3x weight
 #  set_mode("classification")
 
 meta_spec_em1 <- logistic_reg(penalty = tune(), mixture = 1) %>%
@@ -6363,6 +6366,16 @@ autoplot(tune_results_em1) +
 
 # 7. Select the best parameters
 best_parameters_em1 <- select_best(tune_results_em1, metric = "roc_auc")
+
+best_parameters_em1
+
+# Override the best parameters with manual values
+
+# Manually set best_parameters_em1
+best_parameters_em1 <- tibble::tibble(
+  penalty = 0.25
+  # mixture = 1  # Uncomment if your model spec includes mixture
+)
 
 # 8. Finalize the workflow
 final_meta_wf_em1 <- finalize_workflow(meta_wf_em1, best_parameters_em1)
@@ -6448,16 +6461,183 @@ meta_test_features_em1 <- bind_cols(
     rename_with(~ paste0("m6_s4b3_", .), starts_with(".pred")),
   predict(final_fit_m6_s2b3, new_data = df_test, type = "prob") %>%
     rename_with(~ paste0("m6_s2b3_", .), starts_with(".pred"))
-    ) %>% bind_cols(df_test %>% select(Class))
+) %>%
+bind_cols(df_test %>% select(Class))
 
 meta_predictions <-
   predict(meta_fit, new_data = meta_test_features_em1, type = "class")
 
-results <- calculate_all_measures(meta_fit, meta_test_features_em1, 0.002)
+results <- calculate_all_measures(meta_fit, meta_test_features_em1, 0.5)
 
 results
 
 log_message("Finished Step 6.1 - Ensemble Logistic Model")
+
+#---- 6.2 DONE *******      Ensemble Logistic Model - Select ---------- em2 ----
+
+log_message("Starting Step 6.2 - Ensemble Logistic Model - No Tuning")
+
+#load("df_test.RData") # nolint
+#load("df_train.RData") # nolint
+#load("df_s2b2.RData") # nolint
+#load("df_balanced2.RData") # nolint
+
+df_em2_train1 <- df_balanced2
+
+meta_features_em2 <- bind_cols(
+  predict(final_fit_m1_s1b2, new_data = df_em2_train1, type = "prob") %>%
+    rename_with(~ paste0("m1_s1b2_", .), starts_with(".pred")),
+  predict(final_fit_m4_s2b2, new_data = df_em2_train1, type = "prob") %>%
+    rename_with(~ paste0("m4_s2b2_", .), starts_with(".pred"))
+) %>% 
+bind_cols(df_em2_train1 %>% select(Class))
+
+meta_rec_em2 <- recipe(Class ~ ., data = meta_features_em2)
+
+# Add class weights to increase importance of class 1
+#meta_spec_em2 <- logistic_reg(penalty = tune(), mixture = 1) %>%
+#  set_engine("glmnet", class.weights = c("0" = 1, "1" = 100)) %>%  # Class 1 has 3x weight
+#  set_mode("classification")
+
+meta_spec_em2 <- logistic_reg(penalty = tune(), mixture = 1) %>%
+  set_engine("glmnet") %>%
+  set_mode("classification")
+
+meta_wf_em2 <- workflow() %>%
+  add_model(meta_spec_em2) %>%
+  add_recipe(meta_rec_em2)
+
+# 4. Cross-validation
+set.seed(123)
+folds_em2 <- vfold_cv(meta_features_em2, v = 10, strata = Class)
+
+# 5. Grid of hyperparameters
+tune_grid_em2 <- grid_regular(penalty(), levels = 5)
+
+# 6. Tune the model
+tune_results_em2 <- tune_grid(
+  meta_wf_em2,
+  resamples = folds_em2,
+  grid = tune_grid_em2,
+  metrics = metric_set(roc_auc, bal_accuracy, sens, spec)
+)
+
+# Show the tuning results
+autoplot(tune_results_em2) +
+  labs(title = "Tuning Results for Logistic Regression",
+       x = "Penalty",
+       y = "Mixture") +
+  theme_minimal()
+
+# 7. Select the best parameters
+best_parameters_em2 <- select_best(tune_results_em2, metric = "roc_auc")
+
+best_parameters_em2
+
+# Override the best parameters with manual values
+
+# Manually set best_parameters_em2
+best_parameters_em2 <- tibble::tibble(
+  penalty = 0.25
+  # mixture = 1  # Uncomment if your model spec includes mixture
+)
+
+# 8. Finalize the workflow
+final_meta_wf_em2 <- finalize_workflow(meta_wf_em2, best_parameters_em2)
+
+meta_fit <- fit(final_meta_wf_em2, data = meta_features_em2)
+
+meta_test_features_em2 <- bind_cols(
+  predict(final_fit_m1_s1b1, new_data = df_test, type = "prob") %>%
+    rename_with(~ paste0("m6_s4b3", .), starts_with(".pred")),
+  predict(final_fit_m1_s1b2, new_data = df_test, type = "prob") %>%
+    rename_with(~ paste0("m1_s1b2_", .), starts_with(".pred")),
+  predict(final_fit_m1_s2b1, new_data = df_test, type = "prob") %>%
+    rename_with(~ paste0("m1_s2b1_", .), starts_with(".pred")),
+  predict(final_fit_m1_s2b2, new_data = df_test, type = "prob") %>%
+    rename_with(~ paste0("m1_s2b2_", .), starts_with(".pred")),
+  predict(final_fit_m1_s3b1, new_data = df_test, type = "prob") %>%
+    rename_with(~ paste0("m1_s3b1_", .), starts_with(".pred")),
+  predict(final_fit_m1_s3b2, new_data = df_test, type = "prob") %>%
+    rename_with(~ paste0("m1_s3b2_", .), starts_with(".pred")),
+  predict(final_fit_m1_s2b2_2, new_data = df_test, type = "prob") %>%
+    rename_with(~ paste0("m1_s2b2_2_", .), starts_with(".pred")),
+  predict(final_fit_m2_s1b1, new_data = df_test, type = "prob") %>%
+    rename_with(~ paste0("m2_s1b1_", .), starts_with(".pred")),
+  predict(final_fit_m2_s1b2, new_data = df_test, type = "prob") %>%
+    rename_with(~ paste0("m2_s1b2_", .), starts_with(".pred")),
+  predict(final_fit_m2_s2b1, new_data = df_test, type = "prob") %>% 
+    rename_with(~ paste0("m2_s2b1_", .), starts_with(".pred")),
+  predict(final_fit_m2_s2b2, new_data = df_test, type = "prob") %>%
+    rename_with(~ paste0("m2_s2b2_", .), starts_with(".pred")),
+  predict(final_fit_m2_s3b1, new_data = df_test, type = "prob") %>%
+    rename_with(~ paste0("m2_s3b1_", .), starts_with(".pred")),
+  predict(final_fit_m2_s3b2, new_data = df_test, type = "prob") %>%
+    rename_with(~ paste0("m2_s3b2_", .), starts_with(".pred")),
+  predict(final_fit_m3_s1b1, new_data = df_test, type = "prob") %>%
+    rename_with(~ paste0("m3_s1b1_", .), starts_with(".pred")),
+  predict(final_fit_m3_s1b2, new_data = df_test, type = "prob") %>%
+    rename_with(~ paste0("m3_s1b2_", .), starts_with(".pred")),
+  predict(final_fit_m3_s2b1, new_data = df_test, type = "prob") %>%
+    rename_with(~ paste0("m3_s2b1_", .), starts_with(".pred")),
+  predict(final_fit_m3_s2b2, new_data = df_test, type = "prob") %>%
+    rename_with(~ paste0("m3_s2b2_", .), starts_with(".pred")),
+  predict(final_fit_m3_s3b1, new_data = df_test, type = "prob") %>%
+    rename_with(~ paste0("m3_s3b1_", .), starts_with(".pred")),
+  predict(final_fit_m3_s3b2, new_data = df_test, type = "prob") %>%
+    rename_with(~ paste0("m3_s3b2_", .), starts_with(".pred")),
+  predict(final_fit_m4_s1b1, new_data = df_test, type = "prob") %>%
+    rename_with(~ paste0("m4_s1b1_", .), starts_with(".pred")),
+  predict(final_fit_m4_s1b2, new_data = df_test, type = "prob") %>% 
+    rename_with(~ paste0("m4_s1b2_", .), starts_with(".pred")), 
+  predict(final_fit_m4_s2b1, new_data = df_test, type = "prob") %>%
+    rename_with(~ paste0("m4_s2b1_", .), starts_with(".pred")),
+  predict(final_fit_m4_s2b2, new_data = df_test, type = "prob") %>%
+    rename_with(~ paste0("m4_s2b2_", .), starts_with(".pred")),
+  predict(final_fit_m4_s3b1, new_data = df_test, type = "prob") %>%
+    rename_with(~ paste0("m4_s3b1_", .), starts_with(".pred")),
+  predict(final_fit_m4_s3b2, new_data = df_test, type = "prob") %>%
+    rename_with(~ paste0("m4_s3b2_", .), starts_with(".pred")),
+  predict(final_fit_m5_s1b1, new_data = df_test, type = "prob") %>%
+    rename_with(~ paste0("m5_s1b1_", .), starts_with(".pred")),
+  #predict(final_fit_m5_s1b2, new_data = df_test, type = "prob") %>%
+  #  rename_with(~ paste0("m5_s1b2_", .), starts_with(".pred")),
+  predict(final_fit_m5_s2b1, new_data = df_test, type = "prob") %>%
+    rename_with(~ paste0("m5_s2b1_", .), starts_with(".pred")),
+  #predict(final_fit_m5_s2b2, new_data = df_test, type = "prob") %>%
+  #  rename_with(~ paste0("m5_s2b2_", .), starts_with(".pred")),
+  predict(final_fit_m5_s3b1, new_data = df_test, type = "prob") %>%
+    rename_with(~ paste0("m5_s3b1_", .), starts_with(".pred")),
+  #predict(final_fit_m5_s3b2, new_data = df_test, type = "prob") %>%
+  #  rename_with(~ paste0("m5_s3b2_", .), starts_with(".pred")),
+  predict(final_fit_m6_s1b1, new_data = df_test, type = "prob") %>%
+    rename_with(~ paste0("m6_s1b1_", .), starts_with(".pred")),
+  predict(final_fit_m6_s1b2, new_data = df_test, type = "prob") %>%
+    rename_with(~ paste0("m6_s1b2_", .), starts_with(".pred")),
+  predict(final_fit_m6_s2b1, new_data = df_test, type = "prob") %>%
+    rename_with(~ paste0("m6_s2b1_", .), starts_with(".pred")),
+  predict(final_fit_m6_s2b2, new_data = df_test, type = "prob") %>%
+    rename_with(~ paste0("m6_s2b2_", .), starts_with(".pred")),
+  predict(final_fit_m6_s3b1, new_data = df_test, type = "prob") %>%
+    rename_with(~ paste0("m6_s3b1_", .), starts_with(".pred")),
+  predict(final_fit_m6_s3b2, new_data = df_test, type = "prob") %>%
+    rename_with(~ paste0("m6_s3b2_", .), starts_with(".pred")),
+  predict(final_fit_m6_s4b3, new_data = df_test, type = "prob") %>%
+    rename_with(~ paste0("m6_s4b3_", .), starts_with(".pred")),
+  predict(final_fit_m6_s2b3, new_data = df_test, type = "prob") %>%
+    rename_with(~ paste0("m6_s2b3_", .), starts_with(".pred"))
+) %>%
+bind_cols(df_test %>% select(Class))
+
+meta_predictions <-
+  predict(meta_fit, new_data = meta_test_features_em2, type = "class")
+
+results <- calculate_all_measures(meta_fit, meta_test_features_em2, 0.5)
+
+results
+
+log_message("Finished Step 6.1 - Ensemble Logistic Model")
+
 
 #---- 7 DONE *******      Save Results ----
 # Export the results to a CSV file
