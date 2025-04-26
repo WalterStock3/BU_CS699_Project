@@ -6,6 +6,8 @@
 #  - Look into filtering down the select to only include Details
 #  - Threshold tuning on ensemble method to get the best TP0 and TP1
 #  - PCA option in select section.
+#  - Consider using a decision tree ensemble method.
+#  - Consider using the caret packet to iteratively optimize logistric regression.
 
 # Project Goal (Lecture 1): Generate a model to predict the likelihood of a
 # person having difficulty living independently.
@@ -605,40 +607,18 @@ log_message("Finished Step 3.1 - Balance-DownSample - Project Step 3")
 
 log_message("Starting Step 3.2 - Balance-UpSample - Project Step 3")
 
-#load("df_train.RData")
+#load("df_train.RData") # nolint
 
-# Extract the different classes
-class0_data <- df_train[df_train$Class == 0, ]
-class1_data <- df_train[df_train$Class == 1, ]
-
-# Get counts
-n_class0 <- nrow(class0_data)
-n_class1 <- nrow(class1_data)
-
-# Calculate the target count for class 1 (twice the count of class 0)
-target_class1 <- n_class0 * 2
-
-# Perform upsampling for class 1
-class1_upsampled <- class1_data[sample(1:n_class1, 
-                   target_class1, 
-                   replace = TRUE), ]
-
-# Combine the datasets
-df_balanced2 <- rbind(class0_data, class1_upsampled)
-
-# Shuffle the data
-set.seed(123)
-df_balanced2 <- df_balanced2[sample(1:nrow(df_balanced2)), ] # nolint
-
-# Make sure Class is a factor
-df_balanced2$Class <- factor(df_balanced2$Class)
+# Undersampling
+df_balanced2 <- upSample(x = df_train[, -which(names(df_train) %in% "Class")],
+                           y = df_train$Class)
 
 print(paste("training balanced 2 dataset - dim:", dim(df_balanced2)[1],
-      ",", dim(df_balanced2)[2]))
+            ",", dim(df_balanced2)[2]))
 
 print(paste("training balanced 2 dataset - class distribution:",
-      table(df_balanced2$Class)[1], ",",
-      table(df_balanced2$Class)[2]))
+            table(df_balanced2$Class)[1], ",",
+            table(df_balanced2$Class)[2]))
 
 save(df_balanced2, file = "df_balanced2.RData")
 
@@ -656,9 +636,100 @@ df_balanced3 <- df_train
 print(paste("training balanced 3 dataset - dim:", dim(df_balanced3)[1],
             ",", dim(df_balanced3)[2]))
 
+print(paste("training balanced 3 dataset - class distribution:",
+            table(df_balanced3$Class)[1], ",",
+            table(df_balanced3$Class)[2]))
+
 save(df_balanced3, file = "df_balanced3.RData")
 
 log_message("Finished Step 3.3 - Balance-NoBalance - Project Step 3")
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#---- 3.4 DONE *****    Balance - Method 4 - SMOTE ----------- df_balanced4 ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+log_message("Starting Step 3.4 - Balance-SMOTE - Project Step 3")
+
+#load("df_train.RData") # nolint
+
+# Apply SMOTE using the themis package (which is already loaded)
+# Create a recipe with SMOTE
+smote_recipe <- recipe(Class ~ ., data = df_train) %>%
+  # Remove zero-variance predictors
+  step_zv(all_predictors()) %>%
+  # Handle missing values
+  step_impute_median(all_numeric_predictors()) %>%
+  step_impute_mode(all_nominal_predictors()) %>%
+  # Convert factor variables to dummy variables
+  step_dummy(all_nominal_predictors(), -all_outcomes()) %>%
+  # Normalize numeric predictors (helps with SMOTE)
+  step_normalize(all_numeric_predictors()) %>%
+  # Apply SMOTE to balance classes
+  step_smote(Class)
+
+# Prepare the recipe
+smote_prep <- prep(smote_recipe)
+
+# Extract the balanced data
+df_balanced4 <- juice(smote_prep)
+
+print(paste("training balanced 4 dataset - dim:", dim(df_balanced4)[1],
+            ",", dim(df_balanced4)[2]))
+
+print(paste("training balanced 4 dataset - class distribution:",
+            table(df_balanced4$Class)[1], ",",
+            table(df_balanced4$Class)[2]))
+
+save(df_balanced4, file = "df_balanced4.RData")
+
+log_message("Finished Step 3.4 - Balance-SMOTE - Project Step 3")
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#---- 3.5 DONE *****    Balance - M5 - UpSample Weighted -- df_balanced5 ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+log_message("Starting Step 3.5 - Balance-UpSampleWeighted - Project Step 3")
+
+#load("df_train.RData") # nolint
+
+df_balanced5 <- df_train
+
+# Extract the different classes
+class0_data <- df_balanced5[df_balanced5$Class == 0, ]
+class1_data <- df_balanced5[df_balanced5$Class == 1, ]
+
+# Get counts
+n_class0 <- nrow(class0_data)
+n_class1 <- nrow(class1_data)
+
+# Calculate the target count for class 1 (twice the count of class 0)
+target_class1 <- n_class0 * 2
+
+# Perform upsampling for class 1
+class1_upsampled_weighted <- class1_data[sample(1:n_class1,
+                                                target_class1,
+                                                replace = TRUE), ]
+
+# Combine the datasets
+df_balanced5 <- rbind(class0_data, class1_downsampled_weighted)
+
+# Shuffle the data
+set.seed(123)
+df_balanced5 <- df_balanced5[sample(1:nrow(df_balanced5)), ] # nolint
+
+# Make sure Class is a factor
+df_balanced5$Class <- factor(df_balanced5$Class)
+
+print(paste("training balanced 5 dataset - dim:", dim(df_balanced5)[1],
+",", dim(df_balanced5)[2]))
+
+print(paste("training balanced 5 dataset - class distribution:",
+table(df_balanced5$Class)[1], ",",
+            table(df_balanced5$Class)[2]))
+
+save(df_balanced5, file = "df_balanced5.RData")
+
+log_message("Finished Step 3.5 - Balance-UpSampleWeighted - Project Step 3")
 
 ################################################################################
 #---- 4 PROG ******* Select - Project Step 4 ------------------ df_s#b# --------
