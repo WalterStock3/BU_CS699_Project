@@ -1,0 +1,1058 @@
+2025-04-20 05:07:44 - Starting Step 1 - Preprocess - Project Step 1 
+2025-04-20 05:15:10 - Finished Step 1 - Preprocess - Project Step 1     
+2025-04-20 05:24:34 - Starting Step 2 - Split - Project Step 2 
+2025-04-20 08:25:02 - Finished Step 2 - Split - Project Step 2 
+2025-04-20 08:28:24 - Starting Step 3 - Split - Project Step 3 
+2025-04-20 08:29:08 - Starting Step 3 - Balance - Project Step 3 
+2025-04-20 08:29:09 - Starting Step 3.1 - Balance-DownSample - Project Step 3 
+2025-04-20 08:29:23 - Finished Step 3.1 - Balance-DownSample - Project Step 3 
+2025-04-20 08:30:06 - Starting Step 3.2 - Balance-UpSample - Project Step 3 
+2025-04-20 08:30:32 - Finished Step 3.2 - Balance-UpSample - Project Step 3 
+2025-04-20 08:31:00 - Starting Step 3.3 - Balance-NoBalance - Project Step 3 
+2025-04-20 08:31:27 - Finished Step 3.3 - Balance-NoBalance - Project Step 3 
+2025-04-20 08:41:50 - Starting Step 4.1.1 - Select1 - df_s1b1 - Project Step 4 
+2025-04-20 08:42:21 - Finished Step 4.1.1 - Select1 - df_s1b1 - Project Step 4 
+2025-04-20 10:13:25 - Starting Step 4.1.1 - Select1 - df_s1b1 - Project Step 4 
+2025-04-20 10:13:56 - Finished Step 4.1.1 - select1_balanced1 - df_s1b1 
+2025-04-20 10:13:59 - Starting Step 4.1.2 - select1_balanced2 - df_s1b1 
+2025-04-20 10:14:16 - Starting Step 4.1.2 - select1_balanced2 - df_s1b2 
+2025-04-20 10:16:01 - Finished Step 4.1.2 - select1_balanced2 
+2025-04-20 10:16:48 - Starting Step 4.2.1 - select2_balanced1 
+2025-04-20 10:41:02 - Starting Step 5.3.1 - model3_select1_balanced1 - m3_s1b1 
+2025-04-20 15:26:58 - Starting Step 1 - Preprocess - Project Step 1 
+2025-04-20 15:29:01 - Starting Step 1 - Preprocess - Project Step 1 
+2025-04-20 15:31:14 - Finished Step 1 - Preprocess - Project Step 1 
+2025-04-20 16:31:23 - Starting Step 2 - Split - Project Step 2 
+2025-04-20 16:31:37 - Finished Step 2 - Split - Project Step 2 
+2025-04-20 16:32:36 - Starting Step 3 - Balance - Project Step 3 
+2025-04-20 16:32:37 - Starting Step 3.1 - Balance-DownSample - Project Step 3 
+2025-04-20 16:32:37 - Finished Step 3.1 - Balance-DownSample - Project Step 3 
+2025-04-20 16:32:37 - Starting Step 3.2 - Balance-UpSample - Project Step 3 
+2025-04-20 16:32:37 - Finished Step 3.2 - Balance-UpSample - Project Step 3 
+2025-04-20 16:32:37 - Starting Step 3.3 - Balance-NoBalance - Project Step 3 
+2025-04-20 16:32:37 - Finished Step 3.3 - Balance-NoBalance - Project Step 3 
+2025-04-20 16:32:37 - Starting Step 4.1.1 - Select1 - df_s1b1 - Project Step 4 
+2025-04-20 16:32:37 - Finished Step 4.1.1 - select1_balanced1 - df_s1b1 
+2025-04-20 16:32:37 - Starting Step 4.1.2 - select1_balanced2 - df_s1b2 
+2025-04-20 16:32:38 - Finished Step 4.1.2 - select1_balanced2 - df_s1b2 
+2025-04-20 16:32:38 - Starting Step 4.2.1 - select2_balanced1 - df_s2b1 
+2025-04-20 16:32:44 - Finished Step 4.2.1 - select2_balanced1 - df_s2b1 
+2025-04-20 16:32:44 - Starting Step 4.2.2 - select2_balanced2 - df_s2b2 
+2025-04-20 16:34:44 - Finished Step 4.2.2 - select2_balanced2 - df_s2b2 
+2025-04-20 16:34:44 - Starting Step 4.2.3 - select2_balanced3 - df_s2b3 
+2025-04-20 16:35:56 - Finished Step 4.2.3 - select2_balanced3 - df_s2b3 
+2025-04-20 16:35:56 - Starting Step 4.3.1 - select3_balanced1 - df_s3b1 
+2025-04-20 16:36:11 - Finished Step 4.3.1 - select3_balanced1 - df_s3b1 
+2025-04-20 16:36:11 - Starting Step 4.3.2 - select3_balanced2 - df_s3b2 
+2025-04-20 16:37:02 - Starting Step 1 - Preprocess - Project Step 1 
+2025-04-20 16:38:05 - Starting Step 1 - Preprocess - Project Step 1 
+2025-04-20 16:39:23 - Finished Step 1 - Preprocess - Project Step 1 
+2025-04-20 16:39:23 - Starting Step 2 - Split - Project Step 2 
+2025-04-20 16:39:23 - Finished Step 2 - Split - Project Step 2 
+2025-04-20 16:39:23 - Starting Step 3 - Balance - Project Step 3 
+2025-04-20 16:39:23 - Starting Step 3.1 - Balance-DownSample - Project Step 3 
+2025-04-20 16:39:23 - Finished Step 3.1 - Balance-DownSample - Project Step 3 
+2025-04-20 16:39:23 - Starting Step 3.2 - Balance-UpSample - Project Step 3 
+2025-04-20 16:39:23 - Finished Step 3.2 - Balance-UpSample - Project Step 3 
+2025-04-20 16:39:23 - Starting Step 3.3 - Balance-NoBalance - Project Step 3 
+2025-04-20 16:39:23 - Finished Step 3.3 - Balance-NoBalance - Project Step 3 
+2025-04-20 16:39:23 - Starting Step 4.1.1 - Select1 - df_s1b1 - Project Step 4 
+2025-04-20 16:39:23 - Finished Step 4.1.1 - select1_balanced1 - df_s1b1 
+2025-04-20 16:39:23 - Starting Step 4.1.2 - select1_balanced2 - df_s1b2 
+2025-04-20 16:39:23 - Finished Step 4.1.2 - select1_balanced2 - df_s1b2 
+2025-04-20 16:39:23 - Starting Step 4.2.1 - select2_balanced1 - df_s2b1 
+2025-04-20 16:39:28 - Finished Step 4.2.1 - select2_balanced1 - df_s2b1 
+2025-04-20 16:39:28 - Starting Step 4.2.2 - select2_balanced2 - df_s2b2 
+2025-04-20 16:41:28 - Finished Step 4.2.2 - select2_balanced2 - df_s2b2 
+2025-04-20 16:41:28 - Starting Step 4.2.3 - select2_balanced3 - df_s2b3 
+2025-04-20 16:42:38 - Finished Step 4.2.3 - select2_balanced3 - df_s2b3 
+2025-04-20 16:42:38 - Starting Step 4.3.1 - select3_balanced1 - df_s3b1 
+2025-04-20 16:42:53 - Finished Step 4.3.1 - select3_balanced1 - df_s3b1 
+2025-04-20 16:42:53 - Starting Step 4.3.2 - select3_balanced2 - df_s3b2 
+2025-04-20 16:45:06 - Starting Step 4.3.2 - select3_balanced2 - df_s3b2 
+2025-04-20 16:45:06 - Starting Step 5.1.1 - model1_select1_balanced1 - m1_s1b1 
+2025-04-20 16:45:07 - Finished Step 5.1.1 - model1_select1_balanced1 - m1_s1b1 
+2025-04-20 16:45:07 - Starting Step 5.1.2 - model1_select1_balanced2 - m1_s1b2 
+2025-04-20 16:45:11 - Finished Step 5.1.2 - model1_select1_balanced2 - m1_s1b2 
+2025-04-20 16:45:11 - Starting Step 5.1.3 - model1_select2_balanced1 - m1_s2b1 
+2025-04-20 16:45:12 - Finished Step 5.1.3 - model1_select2_balanced1 - m1_s2b1 
+2025-04-20 16:45:12 - Starting Step 5.1.4 - model1_select2_balanced2 - m1_s2b2 
+2025-04-20 16:59:14 - Starting Step 1 - Preprocess - Project Step 1 
+2025-04-20 17:02:56 - Finished Step 1 - Preprocess - Project Step 1 
+2025-04-20 17:03:00 - Starting Step 2 - Split - Project Step 2 
+2025-04-20 17:03:07 - Finished Step 2 - Split - Project Step 2 
+2025-04-20 17:03:09 - Starting Step 3 - Balance - Project Step 3 
+2025-04-20 17:03:11 - Starting Step 3.1 - Balance-DownSample - Project Step 3 
+2025-04-20 17:03:19 - Finished Step 3.1 - Balance-DownSample - Project Step 3 
+2025-04-20 17:03:20 - Starting Step 3.2 - Balance-UpSample - Project Step 3 
+2025-04-20 17:03:23 - Finished Step 3.2 - Balance-UpSample - Project Step 3 
+2025-04-20 17:03:24 - Starting Step 3.3 - Balance-NoBalance - Project Step 3 
+2025-04-20 17:03:27 - Finished Step 3.3 - Balance-NoBalance - Project Step 3 
+2025-04-20 17:03:28 - Starting Step 4.1.1 - Select1 - df_s1b1 - Project Step 4 
+2025-04-20 17:03:43 - Finished Step 4.1.1 - select1_balanced1 - df_s1b1 
+2025-04-20 17:03:44 - Starting Step 4.1.2 - select1_balanced2 - df_s1b2 
+2025-04-20 17:03:56 - Finished Step 4.1.2 - select1_balanced2 - df_s1b2 
+2025-04-20 17:03:58 - Starting Step 4.2.1 - select2_balanced1 - df_s2b1 
+2025-04-20 17:10:23 - Finished Step 4.2.1 - select2_balanced1 - df_s2b1 
+2025-04-20 17:10:27 - Starting Step 4.2.2 - select2_balanced2 - df_s2b2 
+2025-04-20 17:15:51 - Finished Step 4.2.2 - select2_balanced2 - df_s2b2 
+2025-04-20 17:15:52 - Starting Step 4.2.3 - select2_balanced3 - df_s2b3 
+2025-04-20 17:24:04 - Finished Step 4.2.3 - select2_balanced3 - df_s2b3 
+2025-04-20 17:24:10 - Starting Step 4.3.1 - select3_balanced1 - df_s3b1 
+2025-04-20 17:26:35 - Finished Step 4.3.1 - select3_balanced1 - df_s3b1 
+2025-04-20 17:26:36 - Starting Step 4.3.2 - select3_balanced2 - df_s3b2 
+2025-04-20 17:31:45 - Starting Step 4.3.2 - select3_balanced2 - df_s3b2 
+2025-04-20 17:33:22 - Finished Step 4.3.2 - select3_balanced2 - df_s3b2 
+2025-04-20 17:36:16 - Finished Step 4.4 - select4_balanced3 - df_s4b3 
+2025-04-20 17:36:31 - Starting Step 5.1.1 - model1_select1_balanced1 - m1_s1b1 
+2025-04-20 17:54:11 - Finished Step 5.1.1 - model1_select1_balanced1 - m1_s1b1 
+2025-04-20 17:54:12 - Starting Step 5.1.2 - model1_select1_balanced2 - m1_s1b2 
+2025-04-20 17:57:20 - Finished Step 5.1.2 - model1_select1_balanced2 - m1_s1b2 
+2025-04-20 17:57:24 - Starting Step 5.1.3 - model1_select2_balanced1 - m1_s2b1 
+2025-04-20 17:59:10 - Finished Step 5.1.3 - model1_select2_balanced1 - m1_s2b1 
+2025-04-20 17:59:12 - Starting Step 5.1.4 - model1_select2_balanced2 - m1_s2b2 
+2025-04-20 18:09:13 - Starting Step 5.1.3 - model1_select2_balanced1 - m1_s2b2 
+2025-04-20 18:10:36 - Finished Step 5.1.3 - model1_select2_balanced1 - m1_s2b2 
+2025-04-20 18:12:17 - Starting Step 5.1.4.2 - model1-2_select2_balanced2 - m1-2_s2b2 
+2025-04-20 18:12:46 - Starting Step 5.1.4.2 - model1-2_select2_balanced2 - m1-2_s2b2 
+2025-04-20 18:14:11 - Starting Step 5.1.4.2 - model1_select2_balanced2-2 - m1_s2b2-2 
+2025-04-20 18:19:20 - Starting Step 5.1.4.2 - model1_select2_balanced2-2 - m1_s2b2_2 
+2025-04-20 18:25:35 - Finished Step 5.1.4 - model1_select2_balanced2 - m1_s2b2_2 
+2025-04-20 18:27:43 - Starting Step 5.1.5 - model1_select3_balanced1 - m1_s3b1 
+2025-04-20 18:29:00 - Finished Step 5.1.5 - model1_select3_balanced1 - m1_s3b1 
+2025-04-20 18:29:02 - Starting Step 5.1.6 - model1_select3_balanced2 - m1_s3b2 
+2025-04-20 18:31:19 - Finished Step 5.1.6 - model1_select3_balanced2 - m1_s3b2 
+2025-04-20 20:20:19 - Starting Step 5.1.6 - model1_select3_balanced2 - m1_s3b2 
+2025-04-20 20:21:55 - Starting Step 5.2.1 - model2_select1_balanced1 - m2_s1b1 
+2025-04-20 20:22:36 - Finished Step 5.2.1 - model2_select1_balanced1 - m2_s1b1 
+2025-04-20 20:22:40 - Starting Step 5.2.2 - model2_select1_balanced2 - m2_s1b2 
+2025-04-20 20:27:00 - Finished Step 5.2.2 - model2_select1_balanced2 - m2_s1b2 
+2025-04-20 20:27:46 - Starting Step 5.2.3 - model2_select2_balanced1 - m2_s2b1 
+2025-04-20 20:29:23 - Finished Step 5.2.3 - model2_select2_balanced1 - m2_s2b1 
+2025-04-20 20:29:26 - Starting Step 5.2.4 - model2_select2_balanced2 - m2_s2b2 
+2025-04-20 20:38:59 - Finished Step 5.2.4 - model2_select2_balanced2 - m2_s2b2 
+2025-04-20 20:39:00 - Starting Step 5.2.5 - model2_select3_balanced1 - m2_s3b1 
+2025-04-20 20:40:14 - Finished Step 5.2.5 - model2_select3_balanced1 - m2_s3b1 
+2025-04-20 20:40:16 - Starting Step 5.2.6 - model2_select3_balanced2 - m2_s3b2 
+2025-04-20 20:43:25 - Finished Step 5.2.6 - model2_select3_balanced2 - m2_s3b2 
+2025-04-20 20:43:31 - Starting Step 5.3.1 - model3_select1_balanced1 - m3_s1b1 
+2025-04-20 20:52:48 - Finished Step 5.3.1 - model3_select1_balanced1 - m3_s1b1 
+2025-04-20 20:52:54 - Starting Step 5.3.2 - model3_select1_balanced2 - m3_s1b2 
+2025-04-20 20:56:55 - Finished Step 5.3.2 - model3_select1_balanced2 - m3_s1b2 
+2025-04-20 20:57:46 - Starting Step 5.3.3 - model3_select2_balanced1 - m3_s2b1 
+2025-04-20 21:02:35 - Finished Step 5.3.3 - model3_select2_balanced1 - m3_s2b1 
+2025-04-20 21:02:46 - Starting Step 5.3.4 - model3_select2_balanced2 - m3_s2b2 
+2025-04-20 21:08:27 - Finished Step 5.3.4 - model3_select2_balanced2 - m3_s2b2 
+2025-04-20 21:08:30 - Starting Step 5.3.5 - model3_select3_balanced1 - m3_s3b1 
+2025-04-20 21:09:53 - Starting Step 5.3.5 - model3_select3_balanced1 - m3_s3b1 
+2025-04-20 21:09:55 - Starting Step 5.3.6 - model3_select3_balanced2 - m3_s3b2 
+2025-04-20 21:16:39 - Finished Step 5.3.6 - model3_select3_balanced2 - m3_s3b2 
+2025-04-21 13:57:20 - Starting Step 5.4.1 - model4_select1_balanced1 - m4_s1b1 
+2025-04-21 14:05:53 - Finished Step 5.4.1 - model4_select1_balanced1 - m4_s1b1 
+2025-04-21 14:06:01 - Starting Step 5.4.2 - model4_select1_balanced2 - m4_s1b2 
+2025-04-21 14:21:19 - Finished Step 5.4.2 - model4_select1_balanced2 - m4_s1b2 
+2025-04-21 14:37:21 - Starting Step 5.4.3 - model4_select2_balanced1 - m4_s2b1 
+2025-04-21 14:42:07 - Finished Step 5.4.3 - model4_select2_balanced1 - m4_s2b1 
+2025-04-21 14:42:16 - Starting Step 5.4.4 - model4_select2_balanced2 - m4_s2b2 
+2025-04-21 14:50:20 - Finished Step 5.4.4 - model4_select2_balanced2 - m4_s2b2 
+2025-04-21 14:50:27 - Starting Step 5.4.5 - model4_select3_balanced1 - m4_s3b1 
+2025-04-21 14:52:49 - Finished Step 5.4.5 - model4_select3_balanced1 - m4_s3b1 
+2025-04-21 14:53:01 - Starting Step 5.4.6 - model4_select3_balanced2 - m4_s3b2 
+2025-04-21 15:11:24 - Finished Step 5.4.6 - model4_select3_balanced2 - m4_s3b2 
+2025-04-21 15:11:26 - Starting Step 5.5.1 - model5_select1_balanced1 - m5_s1b1 
+2025-04-21 15:11:41 - Starting Step 5.5.1 - model5_select1_balanced1 - m5_s1b1 
+2025-04-21 15:15:39 - Finished Step 5.5.1 - model5_select1_balanced1 - m5_s1b1 
+2025-04-21 15:15:46 - Starting Step 5.5.2 - model5_select1_balanced2 - m5_s1b2 
+2025-04-21 18:05:46 - Removed Step 5.5.2 - model5_select1_balanced2 - m5_s1b2 
+2025-04-21 18:05:49 - Removed Step 5.5.2 - model5_select1_balanced2 - m5_s1b2 
+2025-04-21 18:05:52 - Starting Step 5.5.3 - model5_select2_balanced1 - m5_s2b1 
+2025-04-21 18:10:42 - Finished Step 5.5.3 - model5_select2_balanced1 - m5_s2b1 
+2025-04-21 18:16:59 - Starting Step 5.5.4 - model5_select2_balanced2 - m5_s2b2 
+2025-04-21 19:20:45 - Starting Step 5.5.5 - model5_select3_balanced1 - m5_s3b1 
+2025-04-21 19:22:17 - Finished Step 5.5.5 - model5_select3_balanced1 - m5_s3b1 
+2025-04-21 19:22:27 - Starting Step 5.5.6 - model5_select3_balanced2 - m5_s3b2 
+2025-04-22 05:38:32 - Starting Step 1 - Preprocess - Project Step 1 
+2025-04-22 05:42:08 - Finished Step 1 - Preprocess - Project Step 1 
+2025-04-22 05:42:10 - Starting Step 2 - Split - Project Step 2 
+2025-04-22 05:42:18 - Finished Step 2 - Split - Project Step 2 
+2025-04-22 05:42:19 - Starting Step 3 - Balance - Project Step 3 
+2025-04-22 05:42:20 - Starting Step 3.1 - Balance-DownSample - Project Step 3 
+2025-04-22 05:42:25 - Finished Step 3.1 - Balance-DownSample - Project Step 3 
+2025-04-22 05:42:26 - Starting Step 3.2 - Balance-UpSample - Project Step 3 
+2025-04-22 05:42:30 - Finished Step 3.2 - Balance-UpSample - Project Step 3 
+2025-04-22 05:42:31 - Starting Step 3.3 - Balance-NoBalance - Project Step 3 
+2025-04-22 05:42:35 - Finished Step 3.3 - Balance-NoBalance - Project Step 3 
+2025-04-22 05:42:36 - Starting Step 4.1.1 - Select1 - df_s1b1 - Project Step 4 
+2025-04-22 05:42:48 - Finished Step 4.1.1 - select1_balanced1 - df_s1b1 
+2025-04-22 05:42:49 - Starting Step 4.1.2 - select1_balanced2 - df_s1b2 
+2025-04-22 05:43:00 - Finished Step 4.1.2 - select1_balanced2 - df_s1b2 
+2025-04-22 05:43:01 - Starting Step 4.2.1 - select2_balanced1 - df_s2b1 
+2025-04-22 05:43:47 - Finished Step 4.2.1 - select2_balanced1 - df_s2b1 
+2025-04-22 05:43:48 - Starting Step 4.2.2 - select2_balanced2 - df_s2b2 
+2025-04-22 05:47:03 - Finished Step 4.2.2 - select2_balanced2 - df_s2b2 
+2025-04-22 05:47:07 - Starting Step 4.2.3 - select2_balanced3 - df_s2b3 
+2025-04-22 05:49:46 - Finished Step 4.2.3 - select2_balanced3 - df_s2b3 
+2025-04-22 05:49:49 - Starting Step 4.3.1 - select3_balanced1 - df_s3b1 
+2025-04-22 05:50:53 - Finished Step 4.3.1 - select3_balanced1 - df_s3b1 
+2025-04-22 05:50:55 - Starting Step 4.3.2 - select3_balanced2 - df_s3b2 
+2025-04-22 05:55:10 - Finished Step 4.3.2 - select3_balanced2 - df_s3b2 
+2025-04-22 05:55:11 - Starting Step 4.4 - select4_balanced3 - df_s4b3 
+2025-04-22 05:55:14 - Finished Step 4.4 - select4_balanced3 - df_s4b3 
+2025-04-22 05:55:15 - Starting Step 5.1.1 - model1_select1_balanced1 - m1_s1b1 
+2025-04-22 05:55:38 - Finished Step 5.1.1 - model1_select1_balanced1 - m1_s1b1 
+2025-04-22 05:55:39 - Starting Step 5.1.2 - model1_select1_balanced2 - m1_s1b2 
+2025-04-22 05:56:12 - Finished Step 5.1.2 - model1_select1_balanced2 - m1_s1b2 
+2025-04-22 05:56:14 - Starting Step 5.1.3 - model1_select2_balanced1 - m1_s2b1 
+2025-04-22 05:56:50 - Finished Step 5.1.3 - model1_select2_balanced1 - m1_s2b1 
+2025-04-22 05:56:51 - Starting Step 5.1.3 - model1_select2_balanced1 - m1_s2b2 
+2025-04-22 05:57:34 - Finished Step 5.1.3 - model1_select2_balanced1 - m1_s2b2 
+2025-04-22 05:57:36 - Starting Step 5.1.4.2 - model1_select2_balanced2-2 - m1_s2b2_2 
+2025-04-22 05:59:19 - Finished Step 5.1.4 - model1_select2_balanced2 - m1_s2b2_2 
+2025-04-22 05:59:20 - Starting Step 5.1.5 - model1_select3_balanced1 - m1_s3b1 
+2025-04-22 05:59:43 - Finished Step 5.1.5 - model1_select3_balanced1 - m1_s3b1 
+2025-04-22 05:59:44 - Starting Step 5.1.6 - model1_select3_balanced2 - m1_s3b2 
+2025-04-22 06:00:05 - Finished Step 5.1.6 - model1_select3_balanced2 - m1_s3b2 
+2025-04-22 06:00:06 - Starting Step 5.2.1 - model2_select1_balanced1 - m2_s1b1 
+2025-04-22 06:00:34 - Finished Step 5.2.1 - model2_select1_balanced1 - m2_s1b1 
+2025-04-22 06:00:34 - Starting Step 5.2.2 - model2_select1_balanced2 - m2_s1b2 
+2025-04-22 06:02:27 - Finished Step 5.2.2 - model2_select1_balanced2 - m2_s1b2 
+2025-04-22 06:02:30 - Starting Step 5.2.3 - model2_select2_balanced1 - m2_s2b1 
+2025-04-22 06:03:13 - Finished Step 5.2.3 - model2_select2_balanced1 - m2_s2b1 
+2025-04-22 06:03:14 - Starting Step 5.2.4 - model2_select2_balanced2 - m2_s2b2 
+2025-04-22 06:07:09 - Finished Step 5.2.4 - model2_select2_balanced2 - m2_s2b2 
+2025-04-22 06:07:13 - Starting Step 5.2.5 - model2_select3_balanced1 - m2_s3b1 
+2025-04-22 06:07:50 - Finished Step 5.2.5 - model2_select3_balanced1 - m2_s3b1 
+2025-04-22 06:07:51 - Starting Step 5.2.6 - model2_select3_balanced2 - m2_s3b2 
+2025-04-22 06:18:10 - Finished Step 5.2.6 - model2_select3_balanced2 - m2_s3b2 
+2025-04-22 06:18:12 - Starting Step 5.3.1 - model3_select1_balanced1 - m3_s1b1 
+2025-04-22 06:19:24 - Finished Step 5.3.1 - model3_select1_balanced1 - m3_s1b1 
+2025-04-22 06:19:27 - Starting Step 5.3.2 - model3_select1_balanced2 - m3_s1b2 
+2025-04-22 06:24:19 - Finished Step 5.3.2 - model3_select1_balanced2 - m3_s1b2 
+2025-04-22 06:24:20 - Starting Step 5.3.3 - model3_select2_balanced1 - m3_s2b1 
+2025-04-22 06:25:22 - Finished Step 5.3.3 - model3_select2_balanced1 - m3_s2b1 
+2025-04-22 06:25:23 - Starting Step 5.3.4 - model3_select2_balanced2 - m3_s2b2 
+2025-04-22 06:30:43 - Finished Step 5.3.4 - model3_select2_balanced2 - m3_s2b2 
+2025-04-22 06:30:45 - Starting Step 5.3.5 - model3_select3_balanced1 - m3_s3b1 
+2025-04-22 06:31:51 - Starting Step 5.3.5 - model3_select3_balanced1 - m3_s3b1 
+2025-04-22 06:31:52 - Starting Step 5.3.6 - model3_select3_balanced2 - m3_s3b2 
+2025-04-22 06:39:21 - Finished Step 5.3.6 - model3_select3_balanced2 - m3_s3b2 
+2025-04-22 06:39:22 - Starting Step 5.4.1 - model4_select1_balanced1 - m4_s1b1 
+2025-04-22 06:44:34 - Finished Step 5.4.1 - model4_select1_balanced1 - m4_s1b1 
+2025-04-22 06:44:34 - Starting Step 5.4.2 - model4_select1_balanced2 - m4_s1b2 
+2025-04-22 06:52:09 - Finished Step 5.4.2 - model4_select1_balanced2 - m4_s1b2 
+2025-04-22 06:52:10 - Starting Step 5.4.3 - model4_select2_balanced1 - m4_s2b1 
+2025-04-22 06:55:53 - Finished Step 5.4.3 - model4_select2_balanced1 - m4_s2b1 
+2025-04-22 06:55:56 - Starting Step 5.4.4 - model4_select2_balanced2 - m4_s2b2 
+2025-04-22 07:03:46 - Finished Step 5.4.4 - model4_select2_balanced2 - m4_s2b2 
+2025-04-22 07:03:48 - Starting Step 5.4.5 - model4_select3_balanced1 - m4_s3b1 
+2025-04-22 07:09:16 - Finished Step 5.4.5 - model4_select3_balanced1 - m4_s3b1 
+2025-04-22 07:09:17 - Starting Step 5.4.6 - model4_select3_balanced2 - m4_s3b2 
+2025-04-22 07:21:01 - Finished Step 5.4.6 - model4_select3_balanced2 - m4_s3b2 
+2025-04-22 07:21:02 - Starting Step 5.5.1 - model5_select1_balanced1 - m5_s1b1 
+2025-04-22 07:22:09 - Finished Step 5.5.1 - model5_select1_balanced1 - m5_s1b1 
+2025-04-22 07:22:09 - Removed Step 5.5.2 - model5_select1_balanced2 - m5_s1b2 
+2025-04-22 07:22:10 - Removed Step 5.5.2 - model5_select1_balanced2 - m5_s1b2 
+2025-04-22 07:22:11 - Starting Step 5.5.3 - model5_select2_balanced1 - m5_s2b1 
+2025-04-22 07:27:36 - Finished Step 5.5.3 - model5_select2_balanced1 - m5_s2b1 
+2025-04-22 07:27:44 - Removed Step 5.5.4 - model5_select2_balanced2 - m5_s2b2 
+2025-04-22 07:27:46 - Removed Step 5.5.4 - model5_select2_balanced2 - m5_s2b2 
+2025-04-22 07:27:50 - Starting Step 5.5.5 - model5_select3_balanced1 - m5_s3b1 
+2025-04-22 07:28:36 - Finished Step 5.5.5 - model5_select3_balanced1 - m5_s3b1 
+2025-04-22 07:28:40 - Starting Step 5.5.6 - model5_select3_balanced2 - m5_s3b2 
+2025-04-22 17:12:27 - Starting Step 6.1.1 - model6_select1_balanced1 - m6_s1b1 
+2025-04-22 17:13:35 - Finished Step 6.1.1 - model6_select1_balanced1 - m6_s1b1 
+2025-04-22 17:13:47 - Starting Step 6.1.2 - model6_select1_balanced2 - m6_s1b2 
+2025-04-22 17:14:00 - Starting Step 6.1.2 - model6_select1_balanced2 - m6_s1b2 
+2025-04-22 17:58:55 - Finished Step 6.1.2 - model6_select1_balanced2 - m6_s1b2 
+2025-04-22 17:58:56 - Starting Step 6.1.3 - model6_select2_balanced1 - m6_s2b1 
+2025-04-22 18:12:50 - Starting Step 6.1.3 - model6_select2_balanced1 - m6_s2b1 
+2025-04-22 18:15:02 - Finished Step 6.1.3 - model6_select2_balanced1 - m6_s2b1 
+2025-04-22 18:15:04 - Starting Step 6.1.4 - model6_select2_balanced2 - m6_s2b2 
+2025-04-22 18:36:45 - Finished Step 6.1.4 - model6_select2_balanced2 - m6_s2b2 
+2025-04-22 18:36:47 - Starting Step 6.1.5 - model6_select3_balanced1 - m6_s3b1 
+2025-04-22 18:40:00 - Finished Step 5.6.5 - model6_select3_balanced1 - m6_s3b1 
+2025-04-22 18:42:29 - Starting Step 5.6.6 - model6_select3_balanced2 - m6_s3b2 
+2025-04-22 18:53:43 - Finished Step 5.6.6 - model6_select3_balanced2 - m6_s3b2 
+2025-04-22 18:53:45 - Starting Step 5.6.7 - model6_select4_balanced3 - m6_s4b3 
+2025-04-22 18:58:04 - Finished Step 5.6.7 - model6_select4_balanced3 - m6_s4b3 
+2025-04-22 18:58:05 - Starting Step 5.6.8 - model6_select2_balanced3 - m6_s2b3 
+2025-04-22 19:10:01 - Finished Step 5.6.8 - model6_select2_balanced3 - m6_s2b3 
+2025-04-22 20:06:20 - Starting Seciton 6 - Ensemble Methods 
+2025-04-23 07:14:32 - Starting Step 1 - Preprocess - Project Step 1 
+2025-04-23 07:15:47 - Finished Step 1 - Preprocess - Project Step 1 
+2025-04-23 07:15:47 - Starting Step 2 - Split - Project Step 2 
+2025-04-23 07:15:48 - Finished Step 2 - Split - Project Step 2 
+2025-04-23 07:15:48 - Starting Step 3 - Balance - Project Step 3 
+2025-04-23 07:15:48 - Starting Step 3.1 - Balance-DownSample - Project Step 3 
+2025-04-23 07:15:48 - Finished Step 3.1 - Balance-DownSample - Project Step 3 
+2025-04-23 07:15:48 - Starting Step 3.2 - Balance-UpSample - Project Step 3 
+2025-04-23 07:15:48 - Finished Step 3.2 - Balance-UpSample - Project Step 3 
+2025-04-23 07:15:48 - Starting Step 3.3 - Balance-NoBalance - Project Step 3 
+2025-04-23 07:15:48 - Finished Step 3.3 - Balance-NoBalance - Project Step 3 
+2025-04-23 07:15:48 - Starting Step 4.1.1 - Select1 - df_s1b1 - Project Step 4 
+2025-04-23 07:15:48 - Finished Step 4.1.1 - select1_balanced1 - df_s1b1 
+2025-04-23 07:15:48 - Starting Step 4.1.2 - select1_balanced2 - df_s1b2 
+2025-04-23 07:15:48 - Finished Step 4.1.2 - select1_balanced2 - df_s1b2 
+2025-04-23 07:15:48 - Starting Step 4.2.1 - select2_balanced1 - df_s2b1 
+2025-04-23 07:15:53 - Finished Step 4.2.1 - select2_balanced1 - df_s2b1 
+2025-04-23 07:15:53 - Starting Step 4.2.2 - select2_balanced2 - df_s2b2 
+2025-04-23 07:17:51 - Finished Step 4.2.2 - select2_balanced2 - df_s2b2 
+2025-04-23 07:17:51 - Starting Step 4.2.3 - select2_balanced3 - df_s2b3 
+2025-04-23 07:19:02 - Finished Step 4.2.3 - select2_balanced3 - df_s2b3 
+2025-04-23 07:19:02 - Starting Step 4.3.1 - select3_balanced1 - df_s3b1 
+2025-04-23 07:19:16 - Finished Step 4.3.1 - select3_balanced1 - df_s3b1 
+2025-04-23 07:19:16 - Starting Step 4.3.2 - select3_balanced2 - df_s3b2 
+2025-04-23 07:21:28 - Finished Step 4.3.2 - select3_balanced2 - df_s3b2 
+2025-04-23 07:21:28 - Starting Step 4.4 - select4_balanced3 - df_s4b3 
+2025-04-23 07:21:28 - Finished Step 4.4 - select4_balanced3 - df_s4b3 
+2025-04-23 07:21:28 - Starting Step 5.1.1 - model1_select1_balanced1 - m1_s1b1 
+2025-04-23 07:21:31 - Finished Step 5.1.1 - model1_select1_balanced1 - m1_s1b1 
+2025-04-23 07:21:31 - Starting Step 5.1.2 - model1_select1_balanced2 - m1_s1b2 
+2025-04-23 07:21:39 - Finished Step 5.1.2 - model1_select1_balanced2 - m1_s1b2 
+2025-04-23 07:21:39 - Starting Step 5.1.3 - model1_select2_balanced1 - m1_s2b1 
+2025-04-23 07:21:41 - Finished Step 5.1.3 - model1_select2_balanced1 - m1_s2b1 
+2025-04-23 07:21:41 - Starting Step 5.1.3 - model1_select2_balanced1 - m1_s2b2 
+2025-04-23 07:21:46 - Finished Step 5.1.3 - model1_select2_balanced1 - m1_s2b2 
+2025-04-23 07:21:46 - Starting Step 5.1.4.2 - model1_select2_balanced2-2 - m1_s2b2_2 
+2025-04-23 07:38:06 - Starting Step 1 - Preprocess - Project Step 1 
+2025-04-23 07:39:23 - Finished Step 1 - Preprocess - Project Step 1 
+2025-04-23 07:39:23 - Starting Step 2 - Split - Project Step 2 
+2025-04-23 07:39:23 - Finished Step 2 - Split - Project Step 2 
+2025-04-23 07:39:23 - Starting Step 3 - Balance - Project Step 3 
+2025-04-23 07:39:23 - Starting Step 3.1 - Balance-DownSample - Project Step 3 
+2025-04-23 07:39:23 - Finished Step 3.1 - Balance-DownSample - Project Step 3 
+2025-04-23 07:39:23 - Starting Step 3.2 - Balance-UpSample - Project Step 3 
+2025-04-23 07:39:23 - Finished Step 3.2 - Balance-UpSample - Project Step 3 
+2025-04-23 07:39:23 - Starting Step 3.3 - Balance-NoBalance - Project Step 3 
+2025-04-23 07:39:23 - Finished Step 3.3 - Balance-NoBalance - Project Step 3 
+2025-04-23 07:39:23 - Starting Step 4.1.1 - Select1 - df_s1b1 - Project Step 4 
+2025-04-23 07:39:23 - Finished Step 4.1.1 - select1_balanced1 - df_s1b1 
+2025-04-23 07:39:23 - Starting Step 4.1.2 - select1_balanced2 - df_s1b2 
+2025-04-23 07:39:23 - Finished Step 4.1.2 - select1_balanced2 - df_s1b2 
+2025-04-23 07:39:23 - Starting Step 4.2.1 - select2_balanced1 - df_s2b1 
+2025-04-23 07:39:28 - Finished Step 4.2.1 - select2_balanced1 - df_s2b1 
+2025-04-23 07:39:28 - Starting Step 4.2.2 - select2_balanced2 - df_s2b2 
+2025-04-23 07:41:26 - Finished Step 4.2.2 - select2_balanced2 - df_s2b2 
+2025-04-23 07:41:26 - Starting Step 4.2.3 - select2_balanced3 - df_s2b3 
+2025-04-23 07:42:37 - Finished Step 4.2.3 - select2_balanced3 - df_s2b3 
+2025-04-23 07:42:37 - Starting Step 4.3.1 - select3_balanced1 - df_s3b1 
+2025-04-23 07:42:51 - Finished Step 4.3.1 - select3_balanced1 - df_s3b1 
+2025-04-23 07:42:51 - Starting Step 4.3.2 - select3_balanced2 - df_s3b2 
+2025-04-23 07:45:04 - Finished Step 4.3.2 - select3_balanced2 - df_s3b2 
+2025-04-23 07:45:04 - Starting Step 4.4 - select4_balanced3 - df_s4b3 
+2025-04-23 07:45:04 - Finished Step 4.4 - select4_balanced3 - df_s4b3 
+2025-04-23 07:45:04 - Starting Step 5.1.1 - model1_select1_balanced1 - m1_s1b1 
+2025-04-23 07:45:06 - Finished Step 5.1.1 - model1_select1_balanced1 - m1_s1b1 
+2025-04-23 07:45:06 - Starting Step 5.1.2 - model1_select1_balanced2 - m1_s1b2 
+2025-04-23 07:45:15 - Finished Step 5.1.2 - model1_select1_balanced2 - m1_s1b2 
+2025-04-23 07:45:15 - Starting Step 5.1.3 - model1_select2_balanced1 - m1_s2b1 
+2025-04-23 07:45:17 - Finished Step 5.1.3 - model1_select2_balanced1 - m1_s2b1 
+2025-04-23 07:45:17 - Starting Step 5.1.3 - model1_select2_balanced1 - m1_s2b2 
+2025-04-23 07:45:22 - Finished Step 5.1.3 - model1_select2_balanced1 - m1_s2b2 
+2025-04-23 07:45:22 - Starting Step 5.1.4.2 - model1_select2_balanced2-2 - m1_s2b2_2 
+2025-04-23 07:45:47 - Finished Step 5.1.4 - model1_select2_balanced2 - m1_s2b2_2 
+2025-04-23 07:45:47 - Starting Step 5.1.5 - model1_select3_balanced1 - m1_s3b1 
+2025-04-23 07:45:49 - Finished Step 5.1.5 - model1_select3_balanced1 - m1_s3b1 
+2025-04-23 07:45:49 - Starting Step 5.1.6 - model1_select3_balanced2 - m1_s3b2 
+2025-04-23 07:45:54 - Finished Step 5.1.6 - model1_select3_balanced2 - m1_s3b2 
+2025-04-23 07:45:54 - Starting Step 5.2.1 - model2_select1_balanced1 - m2_s1b1 
+2025-04-23 07:45:58 - Finished Step 5.2.1 - model2_select1_balanced1 - m2_s1b1 
+2025-04-23 07:45:58 - Starting Step 5.2.2 - model2_select1_balanced2 - m2_s1b2 
+2025-04-23 07:46:55 - Finished Step 5.2.2 - model2_select1_balanced2 - m2_s1b2 
+2025-04-23 07:46:55 - Starting Step 5.2.3 - model2_select2_balanced1 - m2_s2b1 
+2025-04-23 07:47:00 - Finished Step 5.2.3 - model2_select2_balanced1 - m2_s2b1 
+2025-04-23 07:47:00 - Starting Step 5.2.4 - model2_select2_balanced2 - m2_s2b2 
+2025-04-23 07:48:15 - Finished Step 5.2.4 - model2_select2_balanced2 - m2_s2b2 
+2025-04-23 07:48:15 - Starting Step 5.2.5 - model2_select3_balanced1 - m2_s3b1 
+2025-04-23 07:48:20 - Finished Step 5.2.5 - model2_select3_balanced1 - m2_s3b1 
+2025-04-23 07:48:20 - Starting Step 5.2.6 - model2_select3_balanced2 - m2_s3b2 
+2025-04-23 07:49:35 - Finished Step 5.2.6 - model2_select3_balanced2 - m2_s3b2 
+2025-04-23 07:49:35 - Starting Step 5.3.1 - model3_select1_balanced1 - m3_s1b1 
+2025-04-23 07:50:14 - Finished Step 5.3.1 - model3_select1_balanced1 - m3_s1b1 
+2025-04-23 07:50:14 - Starting Step 5.3.2 - model3_select1_balanced2 - m3_s1b2 
+2025-04-23 07:53:22 - Finished Step 5.3.2 - model3_select1_balanced2 - m3_s1b2 
+2025-04-23 07:53:22 - Starting Step 5.3.3 - model3_select2_balanced1 - m3_s2b1 
+2025-04-23 07:53:54 - Finished Step 5.3.3 - model3_select2_balanced1 - m3_s2b1 
+2025-04-23 07:53:54 - Starting Step 5.3.4 - model3_select2_balanced2 - m3_s2b2 
+2025-04-23 07:57:12 - Finished Step 5.3.4 - model3_select2_balanced2 - m3_s2b2 
+2025-04-23 07:57:12 - Starting Step 5.3.5 - model3_select3_balanced1 - m3_s3b1 
+2025-04-23 07:57:48 - Starting Step 5.3.5 - model3_select3_balanced1 - m3_s3b1 
+2025-04-23 07:57:48 - Starting Step 5.3.6 - model3_select3_balanced2 - m3_s3b2 
+2025-04-23 08:02:35 - Finished Step 5.3.6 - model3_select3_balanced2 - m3_s3b2 
+2025-04-23 08:02:35 - Starting Step 5.4.1 - model4_select1_balanced1 - m4_s1b1 
+2025-04-23 08:03:08 - Finished Step 5.4.1 - model4_select1_balanced1 - m4_s1b1 
+2025-04-23 08:03:08 - Starting Step 5.4.2 - model4_select1_balanced2 - m4_s1b2 
+2025-04-23 08:08:51 - Finished Step 5.4.2 - model4_select1_balanced2 - m4_s1b2 
+2025-04-23 08:08:51 - Starting Step 5.4.3 - model4_select2_balanced1 - m4_s2b1 
+2025-04-23 08:09:25 - Finished Step 5.4.3 - model4_select2_balanced1 - m4_s2b1 
+2025-04-23 08:09:25 - Starting Step 5.4.4 - model4_select2_balanced2 - m4_s2b2 
+2025-04-23 08:13:54 - Finished Step 5.4.4 - model4_select2_balanced2 - m4_s2b2 
+2025-04-23 08:13:54 - Starting Step 5.4.5 - model4_select3_balanced1 - m4_s3b1 
+2025-04-23 08:14:30 - Finished Step 5.4.5 - model4_select3_balanced1 - m4_s3b1 
+2025-04-23 08:14:30 - Starting Step 5.4.6 - model4_select3_balanced2 - m4_s3b2 
+2025-04-23 08:24:48 - Finished Step 5.4.6 - model4_select3_balanced2 - m4_s3b2 
+2025-04-23 08:24:48 - Starting Step 5.5.1 - model5_select1_balanced1 - m5_s1b1 
+2025-04-23 08:24:56 - Finished Step 5.5.1 - model5_select1_balanced1 - m5_s1b1 
+2025-04-23 08:24:56 - Removed Step 5.5.2 - model5_select1_balanced2 - m5_s1b2 
+2025-04-23 08:24:56 - Removed Step 5.5.2 - model5_select1_balanced2 - m5_s1b2 
+2025-04-23 08:24:56 - Starting Step 5.5.3 - model5_select2_balanced1 - m5_s2b1 
+2025-04-23 08:25:06 - Finished Step 5.5.3 - model5_select2_balanced1 - m5_s2b1 
+2025-04-23 08:25:06 - Removed Step 5.5.4 - model5_select2_balanced2 - m5_s2b2 
+2025-04-23 08:25:06 - Removed Step 5.5.4 - model5_select2_balanced2 - m5_s2b2 
+2025-04-23 08:25:06 - Starting Step 5.5.5 - model5_select3_balanced1 - m5_s3b1 
+2025-04-23 08:25:15 - Finished Step 5.5.5 - model5_select3_balanced1 - m5_s3b1 
+2025-04-23 08:25:15 - Removed Step 5.5.6 - model5_select3_balanced2 - m5_s3b2 
+2025-04-23 08:25:15 - Removed Step 5.5.6 - model5_select3_balanced2 - m5_s3b2 
+2025-04-23 08:25:15 - Starting Step 6.1.1 - model6_select1_balanced1 - m6_s1b1 
+2025-04-23 08:25:44 - Finished Step 6.1.1 - model6_select1_balanced1 - m6_s1b1 
+2025-04-23 08:25:44 - Starting Step 6.1.2 - model6_select1_balanced2 - m6_s1b2 
+2025-04-23 08:55:03 - Starting Step 1 - Preprocess - Project Step 1 
+2025-04-23 08:56:20 - Finished Step 1 - Preprocess - Project Step 1 
+2025-04-23 08:56:20 - Starting Step 2 - Split - Project Step 2 
+2025-04-23 08:56:20 - Finished Step 2 - Split - Project Step 2 
+2025-04-23 08:56:20 - Starting Step 3 - Balance - Project Step 3 
+2025-04-23 08:56:20 - Starting Step 3.1 - Balance-DownSample - Project Step 3 
+2025-04-23 08:56:20 - Finished Step 3.1 - Balance-DownSample - Project Step 3 
+2025-04-23 08:56:20 - Starting Step 3.2 - Balance-UpSample - Project Step 3 
+2025-04-23 08:56:20 - Finished Step 3.2 - Balance-UpSample - Project Step 3 
+2025-04-23 08:56:20 - Starting Step 3.3 - Balance-NoBalance - Project Step 3 
+2025-04-23 08:56:20 - Finished Step 3.3 - Balance-NoBalance - Project Step 3 
+2025-04-23 08:56:20 - Starting Step 4.1.1 - Select1 - df_s1b1 - Project Step 4 
+2025-04-23 08:56:20 - Finished Step 4.1.1 - select1_balanced1 - df_s1b1 
+2025-04-23 08:56:20 - Starting Step 4.1.2 - select1_balanced2 - df_s1b2 
+2025-04-23 08:56:20 - Finished Step 4.1.2 - select1_balanced2 - df_s1b2 
+2025-04-23 08:56:20 - Starting Step 4.2.1 - select2_balanced1 - df_s2b1 
+2025-04-23 08:56:26 - Finished Step 4.2.1 - select2_balanced1 - df_s2b1 
+2025-04-23 08:56:26 - Starting Step 4.2.2 - select2_balanced2 - df_s2b2 
+2025-04-23 08:58:25 - Finished Step 4.2.2 - select2_balanced2 - df_s2b2 
+2025-04-23 08:58:25 - Starting Step 4.2.3 - select2_balanced3 - df_s2b3 
+2025-04-23 08:59:36 - Finished Step 4.2.3 - select2_balanced3 - df_s2b3 
+2025-04-23 08:59:36 - Starting Step 4.3.1 - select3_balanced1 - df_s3b1 
+2025-04-23 08:59:51 - Finished Step 4.3.1 - select3_balanced1 - df_s3b1 
+2025-04-23 08:59:51 - Starting Step 4.3.2 - select3_balanced2 - df_s3b2 
+2025-04-23 09:02:03 - Finished Step 4.3.2 - select3_balanced2 - df_s3b2 
+2025-04-23 09:02:03 - Starting Step 4.4 - select4_balanced3 - df_s4b3 
+2025-04-23 09:02:03 - Finished Step 4.4 - select4_balanced3 - df_s4b3 
+2025-04-23 09:02:03 - Starting Step 5.1.1 - model1_select1_balanced1 - m1_s1b1 
+2025-04-23 09:02:06 - Finished Step 5.1.1 - model1_select1_balanced1 - m1_s1b1 
+2025-04-23 09:02:06 - Starting Step 5.1.2 - model1_select1_balanced2 - m1_s1b2 
+2025-04-23 09:02:14 - Finished Step 5.1.2 - model1_select1_balanced2 - m1_s1b2 
+2025-04-23 09:02:14 - Starting Step 5.1.3 - model1_select2_balanced1 - m1_s2b1 
+2025-04-23 09:02:17 - Finished Step 5.1.3 - model1_select2_balanced1 - m1_s2b1 
+2025-04-23 09:02:17 - Starting Step 5.1.3 - model1_select2_balanced1 - m1_s2b2 
+2025-04-23 09:02:21 - Finished Step 5.1.3 - model1_select2_balanced1 - m1_s2b2 
+2025-04-23 09:02:21 - Starting Step 5.1.4.2 - model1_select2_balanced2-2 - m1_s2b2_2 
+2025-04-23 09:02:47 - Finished Step 5.1.4 - model1_select2_balanced2 - m1_s2b2_2 
+2025-04-23 09:02:47 - Starting Step 5.1.5 - model1_select3_balanced1 - m1_s3b1 
+2025-04-23 09:02:49 - Finished Step 5.1.5 - model1_select3_balanced1 - m1_s3b1 
+2025-04-23 09:02:49 - Starting Step 5.1.6 - model1_select3_balanced2 - m1_s3b2 
+2025-04-23 09:02:54 - Finished Step 5.1.6 - model1_select3_balanced2 - m1_s3b2 
+2025-04-23 09:02:54 - Starting Step 5.2.1 - model2_select1_balanced1 - m2_s1b1 
+2025-04-23 09:02:58 - Finished Step 5.2.1 - model2_select1_balanced1 - m2_s1b1 
+2025-04-23 09:02:58 - Starting Step 5.2.2 - model2_select1_balanced2 - m2_s1b2 
+2025-04-23 09:03:54 - Finished Step 5.2.2 - model2_select1_balanced2 - m2_s1b2 
+2025-04-23 09:03:54 - Starting Step 5.2.3 - model2_select2_balanced1 - m2_s2b1 
+2025-04-23 09:04:00 - Finished Step 5.2.3 - model2_select2_balanced1 - m2_s2b1 
+2025-04-23 09:04:00 - Starting Step 5.2.4 - model2_select2_balanced2 - m2_s2b2 
+2025-04-23 09:05:15 - Finished Step 5.2.4 - model2_select2_balanced2 - m2_s2b2 
+2025-04-23 09:05:15 - Starting Step 5.2.5 - model2_select3_balanced1 - m2_s3b1 
+2025-04-23 09:05:21 - Finished Step 5.2.5 - model2_select3_balanced1 - m2_s3b1 
+2025-04-23 09:05:21 - Starting Step 5.2.6 - model2_select3_balanced2 - m2_s3b2 
+2025-04-23 09:06:36 - Finished Step 5.2.6 - model2_select3_balanced2 - m2_s3b2 
+2025-04-23 09:06:36 - Starting Step 5.3.1 - model3_select1_balanced1 - m3_s1b1 
+2025-04-23 09:07:15 - Finished Step 5.3.1 - model3_select1_balanced1 - m3_s1b1 
+2025-04-23 09:07:15 - Starting Step 5.3.2 - model3_select1_balanced2 - m3_s1b2 
+2025-04-23 09:10:27 - Finished Step 5.3.2 - model3_select1_balanced2 - m3_s1b2 
+2025-04-23 09:10:27 - Starting Step 5.3.3 - model3_select2_balanced1 - m3_s2b1 
+2025-04-23 09:10:59 - Finished Step 5.3.3 - model3_select2_balanced1 - m3_s2b1 
+2025-04-23 09:10:59 - Starting Step 5.3.4 - model3_select2_balanced2 - m3_s2b2 
+2025-04-23 09:14:20 - Finished Step 5.3.4 - model3_select2_balanced2 - m3_s2b2 
+2025-04-23 09:14:20 - Starting Step 5.3.5 - model3_select3_balanced1 - m3_s3b1 
+2025-04-23 09:14:57 - Starting Step 5.3.5 - model3_select3_balanced1 - m3_s3b1 
+2025-04-23 09:14:57 - Starting Step 5.3.6 - model3_select3_balanced2 - m3_s3b2 
+2025-04-23 09:19:47 - Finished Step 5.3.6 - model3_select3_balanced2 - m3_s3b2 
+2025-04-23 09:19:47 - Starting Step 5.4.1 - model4_select1_balanced1 - m4_s1b1 
+2025-04-23 09:20:20 - Finished Step 5.4.1 - model4_select1_balanced1 - m4_s1b1 
+2025-04-23 09:20:20 - Starting Step 5.4.2 - model4_select1_balanced2 - m4_s1b2 
+2025-04-23 09:26:30 - Finished Step 5.4.2 - model4_select1_balanced2 - m4_s1b2 
+2025-04-23 09:26:30 - Starting Step 5.4.3 - model4_select2_balanced1 - m4_s2b1 
+2025-04-23 09:27:05 - Finished Step 5.4.3 - model4_select2_balanced1 - m4_s2b1 
+2025-04-23 09:27:05 - Starting Step 5.4.4 - model4_select2_balanced2 - m4_s2b2 
+2025-04-23 09:31:37 - Finished Step 5.4.4 - model4_select2_balanced2 - m4_s2b2 
+2025-04-23 09:31:37 - Starting Step 5.4.5 - model4_select3_balanced1 - m4_s3b1 
+2025-04-23 09:32:14 - Finished Step 5.4.5 - model4_select3_balanced1 - m4_s3b1 
+2025-04-23 09:32:14 - Starting Step 5.4.6 - model4_select3_balanced2 - m4_s3b2 
+2025-04-23 09:42:28 - Finished Step 5.4.6 - model4_select3_balanced2 - m4_s3b2 
+2025-04-23 09:42:28 - Starting Step 5.5.1 - model5_select1_balanced1 - m5_s1b1 
+2025-04-23 09:42:36 - Finished Step 5.5.1 - model5_select1_balanced1 - m5_s1b1 
+2025-04-23 09:42:36 - Removed Step 5.5.2 - model5_select1_balanced2 - m5_s1b2 
+2025-04-23 09:42:36 - Removed Step 5.5.2 - model5_select1_balanced2 - m5_s1b2 
+2025-04-23 09:42:36 - Starting Step 5.5.3 - model5_select2_balanced1 - m5_s2b1 
+2025-04-23 09:42:46 - Finished Step 5.5.3 - model5_select2_balanced1 - m5_s2b1 
+2025-04-23 09:42:46 - Removed Step 5.5.4 - model5_select2_balanced2 - m5_s2b2 
+2025-04-23 09:42:46 - Removed Step 5.5.4 - model5_select2_balanced2 - m5_s2b2 
+2025-04-23 09:42:46 - Starting Step 5.5.5 - model5_select3_balanced1 - m5_s3b1 
+2025-04-23 09:42:54 - Finished Step 5.5.5 - model5_select3_balanced1 - m5_s3b1 
+2025-04-23 09:42:54 - Removed Step 5.5.6 - model5_select3_balanced2 - m5_s3b2 
+2025-04-23 09:42:54 - Removed Step 5.5.6 - model5_select3_balanced2 - m5_s3b2 
+2025-04-23 09:42:54 - Starting Step 6.1.1 - model6_select1_balanced1 - m6_s1b1 
+2025-04-23 09:43:24 - Finished Step 6.1.1 - model6_select1_balanced1 - m6_s1b1 
+2025-04-23 09:43:24 - Starting Step 6.1.2 - model6_select1_balanced2 - m6_s1b2 
+2025-04-23 09:46:07 - Finished Step 6.1.2 - model6_select1_balanced2 - m6_s1b2 
+2025-04-23 09:46:07 - Starting Step 6.1.3 - model6_select2_balanced1 - m6_s2b1 
+2025-04-23 09:46:32 - Finished Step 6.1.3 - model6_select2_balanced1 - m6_s2b1 
+2025-04-23 09:46:32 - Starting Step 6.1.4 - model6_select2_balanced2 - m6_s2b2 
+2025-04-23 09:50:54 - Finished Step 6.1.4 - model6_select2_balanced2 - m6_s2b2 
+2025-04-23 09:50:54 - Starting Step 6.1.5 - model6_select3_balanced1 - m6_s3b1 
+2025-04-23 09:51:21 - Finished Step 5.6.5 - model6_select3_balanced1 - m6_s3b1 
+2025-04-23 09:51:21 - Starting Step 5.6.6 - model6_select3_balanced2 - m6_s3b2 
+2025-04-23 09:55:30 - Finished Step 5.6.6 - model6_select3_balanced2 - m6_s3b2 
+2025-04-23 09:55:30 - Starting Step 5.6.7 - model6_select4_balanced3 - m6_s4b3 
+2025-04-23 09:56:33 - Finished Step 5.6.7 - model6_select4_balanced3 - m6_s4b3 
+2025-04-23 09:56:33 - Starting Step 5.6.8 - model6_select2_balanced3 - m6_s2b3 
+2025-04-23 10:01:03 - Finished Step 5.6.8 - model6_select2_balanced3 - m6_s2b3 
+2025-04-23 10:01:03 - Starting Seciton 6 - Ensemble Methods 
+2025-04-23 11:26:09 - Starting Step 1 - Preprocess - Project Step 1 
+2025-04-23 11:27:28 - Finished Step 1 - Preprocess - Project Step 1 
+2025-04-23 11:27:28 - Starting Step 2 - Split - Project Step 2 
+2025-04-23 11:27:28 - Finished Step 2 - Split - Project Step 2 
+2025-04-23 11:27:28 - Starting Step 3 - Balance - Project Step 3 
+2025-04-23 11:27:28 - Starting Step 3.1 - Balance-DownSample - Project Step 3 
+2025-04-23 11:27:28 - Finished Step 3.1 - Balance-DownSample - Project Step 3 
+2025-04-23 11:27:28 - Starting Step 3.2 - Balance-UpSample - Project Step 3 
+2025-04-23 11:27:28 - Finished Step 3.2 - Balance-UpSample - Project Step 3 
+2025-04-23 11:27:28 - Starting Step 3.3 - Balance-NoBalance - Project Step 3 
+2025-04-23 11:27:29 - Finished Step 3.3 - Balance-NoBalance - Project Step 3 
+2025-04-23 11:27:29 - Starting Step 4.1.1 - Select1 - df_s1b1 - Project Step 4 
+2025-04-23 11:27:29 - Finished Step 4.1.1 - select1_balanced1 - df_s1b1 
+2025-04-23 11:27:29 - Starting Step 4.1.2 - select1_balanced2 - df_s1b2 
+2025-04-23 11:27:29 - Finished Step 4.1.2 - select1_balanced2 - df_s1b2 
+2025-04-23 11:27:29 - Starting Step 4.2.1 - select2_balanced1 - df_s2b1 
+2025-04-23 11:27:34 - Finished Step 4.2.1 - select2_balanced1 - df_s2b1 
+2025-04-23 11:27:34 - Starting Step 4.2.2 - select2_balanced2 - df_s2b2 
+2025-04-23 11:29:33 - Finished Step 4.2.2 - select2_balanced2 - df_s2b2 
+2025-04-23 11:29:33 - Starting Step 4.2.3 - select2_balanced3 - df_s2b3 
+2025-04-23 11:30:44 - Finished Step 4.2.3 - select2_balanced3 - df_s2b3 
+2025-04-23 11:30:44 - Starting Step 4.3.1 - select3_balanced1 - df_s3b1 
+2025-04-23 11:30:59 - Finished Step 4.3.1 - select3_balanced1 - df_s3b1 
+2025-04-23 11:30:59 - Starting Step 4.3.2 - select3_balanced2 - df_s3b2 
+2025-04-23 11:33:12 - Finished Step 4.3.2 - select3_balanced2 - df_s3b2 
+2025-04-23 11:33:12 - Starting Step 4.4 - select4_balanced3 - df_s4b3 
+2025-04-23 11:33:12 - Finished Step 4.4 - select4_balanced3 - df_s4b3 
+2025-04-23 11:33:12 - Starting Step 5.1.1 - model1_select1_balanced1 - m1_s1b1 
+2025-04-23 11:33:14 - Finished Step 5.1.1 - model1_select1_balanced1 - m1_s1b1 
+2025-04-23 11:33:14 - Starting Step 5.1.2 - model1_select1_balanced2 - m1_s1b2 
+2025-04-23 11:33:23 - Finished Step 5.1.2 - model1_select1_balanced2 - m1_s1b2 
+2025-04-23 11:33:23 - Starting Step 5.1.3 - model1_select2_balanced1 - m1_s2b1 
+2025-04-23 11:33:25 - Finished Step 5.1.3 - model1_select2_balanced1 - m1_s2b1 
+2025-04-23 11:33:25 - Starting Step 5.1.3 - model1_select2_balanced1 - m1_s2b2 
+2025-04-23 11:33:30 - Finished Step 5.1.3 - model1_select2_balanced1 - m1_s2b2 
+2025-04-23 11:33:30 - Starting Step 5.1.4.2 - model1_select2_balanced2-2 - m1_s2b2_2 
+2025-04-23 11:33:55 - Finished Step 5.1.4 - model1_select2_balanced2 - m1_s2b2_2 
+2025-04-23 11:33:55 - Starting Step 5.1.5 - model1_select3_balanced1 - m1_s3b1 
+2025-04-23 11:33:57 - Finished Step 5.1.5 - model1_select3_balanced1 - m1_s3b1 
+2025-04-23 11:33:57 - Starting Step 5.1.6 - model1_select3_balanced2 - m1_s3b2 
+2025-04-23 11:34:02 - Finished Step 5.1.6 - model1_select3_balanced2 - m1_s3b2 
+2025-04-23 11:34:02 - Starting Step 5.2.1 - model2_select1_balanced1 - m2_s1b1 
+2025-04-23 11:34:07 - Finished Step 5.2.1 - model2_select1_balanced1 - m2_s1b1 
+2025-04-23 11:34:07 - Starting Step 5.2.2 - model2_select1_balanced2 - m2_s1b2 
+2025-04-23 11:35:03 - Finished Step 5.2.2 - model2_select1_balanced2 - m2_s1b2 
+2025-04-23 11:35:03 - Starting Step 5.2.3 - model2_select2_balanced1 - m2_s2b1 
+2025-04-23 11:35:08 - Finished Step 5.2.3 - model2_select2_balanced1 - m2_s2b1 
+2025-04-23 11:35:08 - Starting Step 5.2.4 - model2_select2_balanced2 - m2_s2b2 
+2025-04-23 11:36:24 - Finished Step 5.2.4 - model2_select2_balanced2 - m2_s2b2 
+2025-04-23 11:36:24 - Starting Step 5.2.5 - model2_select3_balanced1 - m2_s3b1 
+2025-04-23 11:36:29 - Finished Step 5.2.5 - model2_select3_balanced1 - m2_s3b1 
+2025-04-23 11:36:29 - Starting Step 5.2.6 - model2_select3_balanced2 - m2_s3b2 
+2025-04-23 11:37:45 - Finished Step 5.2.6 - model2_select3_balanced2 - m2_s3b2 
+2025-04-23 11:37:45 - Starting Step 5.3.1 - model3_select1_balanced1 - m3_s1b1 
+2025-04-23 11:38:24 - Finished Step 5.3.1 - model3_select1_balanced1 - m3_s1b1 
+2025-04-23 11:38:24 - Starting Step 5.3.2 - model3_select1_balanced2 - m3_s1b2 
+2025-04-23 11:41:36 - Finished Step 5.3.2 - model3_select1_balanced2 - m3_s1b2 
+2025-04-23 11:41:36 - Starting Step 5.3.3 - model3_select2_balanced1 - m3_s2b1 
+2025-04-23 11:42:08 - Finished Step 5.3.3 - model3_select2_balanced1 - m3_s2b1 
+2025-04-23 11:42:08 - Starting Step 5.3.4 - model3_select2_balanced2 - m3_s2b2 
+2025-04-23 11:45:27 - Finished Step 5.3.4 - model3_select2_balanced2 - m3_s2b2 
+2025-04-23 11:45:27 - Starting Step 5.3.5 - model3_select3_balanced1 - m3_s3b1 
+2025-04-23 11:46:03 - Starting Step 5.3.5 - model3_select3_balanced1 - m3_s3b1 
+2025-04-23 11:46:03 - Starting Step 5.3.6 - model3_select3_balanced2 - m3_s3b2 
+2025-04-23 11:50:55 - Finished Step 5.3.6 - model3_select3_balanced2 - m3_s3b2 
+2025-04-23 11:50:55 - Starting Step 5.4.1 - model4_select1_balanced1 - m4_s1b1 
+2025-04-23 11:51:27 - Finished Step 5.4.1 - model4_select1_balanced1 - m4_s1b1 
+2025-04-23 11:51:27 - Starting Step 5.4.2 - model4_select1_balanced2 - m4_s1b2 
+2025-04-23 11:57:29 - Finished Step 5.4.2 - model4_select1_balanced2 - m4_s1b2 
+2025-04-23 11:57:29 - Starting Step 5.4.3 - model4_select2_balanced1 - m4_s2b1 
+2025-04-23 11:58:03 - Finished Step 5.4.3 - model4_select2_balanced1 - m4_s2b1 
+2025-04-23 11:58:03 - Starting Step 5.4.4 - model4_select2_balanced2 - m4_s2b2 
+2025-04-23 12:02:33 - Finished Step 5.4.4 - model4_select2_balanced2 - m4_s2b2 
+2025-04-23 12:02:33 - Starting Step 5.4.5 - model4_select3_balanced1 - m4_s3b1 
+2025-04-23 12:03:09 - Finished Step 5.4.5 - model4_select3_balanced1 - m4_s3b1 
+2025-04-23 12:03:09 - Starting Step 5.4.6 - model4_select3_balanced2 - m4_s3b2 
+2025-04-23 12:13:50 - Finished Step 5.4.6 - model4_select3_balanced2 - m4_s3b2 
+2025-04-23 12:13:50 - Starting Step 5.5.1 - model5_select1_balanced1 - m5_s1b1 
+2025-04-23 12:13:58 - Finished Step 5.5.1 - model5_select1_balanced1 - m5_s1b1 
+2025-04-23 12:13:58 - Removed Step 5.5.2 - model5_select1_balanced2 - m5_s1b2 
+2025-04-23 12:13:58 - Removed Step 5.5.2 - model5_select1_balanced2 - m5_s1b2 
+2025-04-23 12:13:58 - Starting Step 5.5.3 - model5_select2_balanced1 - m5_s2b1 
+2025-04-23 12:14:08 - Finished Step 5.5.3 - model5_select2_balanced1 - m5_s2b1 
+2025-04-23 12:14:08 - Removed Step 5.5.4 - model5_select2_balanced2 - m5_s2b2 
+2025-04-23 12:14:08 - Removed Step 5.5.4 - model5_select2_balanced2 - m5_s2b2 
+2025-04-23 12:14:08 - Starting Step 5.5.5 - model5_select3_balanced1 - m5_s3b1 
+2025-04-23 12:14:17 - Finished Step 5.5.5 - model5_select3_balanced1 - m5_s3b1 
+2025-04-23 12:14:17 - Removed Step 5.5.6 - model5_select3_balanced2 - m5_s3b2 
+2025-04-23 12:14:17 - Removed Step 5.5.6 - model5_select3_balanced2 - m5_s3b2 
+2025-04-23 12:14:17 - Starting Step 6.1.1 - model6_select1_balanced1 - m6_s1b1 
+2025-04-23 13:23:58 - Starting Step 1 - Preprocess - Project Step 1 
+2025-04-23 13:25:16 - Finished Step 1 - Preprocess - Project Step 1 
+2025-04-23 13:25:16 - Starting Step 2 - Split - Project Step 2 
+2025-04-23 13:25:16 - Finished Step 2 - Split - Project Step 2 
+2025-04-23 13:25:16 - Starting Step 3 - Balance - Project Step 3 
+2025-04-23 13:25:16 - Starting Step 3.1 - Balance-DownSample - Project Step 3 
+2025-04-23 13:25:16 - Finished Step 3.1 - Balance-DownSample - Project Step 3 
+2025-04-23 13:25:16 - Starting Step 3.2 - Balance-UpSample - Project Step 3 
+2025-04-23 13:25:16 - Finished Step 3.2 - Balance-UpSample - Project Step 3 
+2025-04-23 13:25:16 - Starting Step 3.3 - Balance-NoBalance - Project Step 3 
+2025-04-23 13:25:16 - Finished Step 3.3 - Balance-NoBalance - Project Step 3 
+2025-04-23 13:25:16 - Starting Step 4.1.1 - Select1 - df_s1b1 - Project Step 4 
+2025-04-23 13:25:16 - Finished Step 4.1.1 - select1_balanced1 - df_s1b1 
+2025-04-23 13:25:16 - Starting Step 4.1.2 - select1_balanced2 - df_s1b2 
+2025-04-23 13:25:16 - Finished Step 4.1.2 - select1_balanced2 - df_s1b2 
+2025-04-23 13:25:16 - Starting Step 4.2.1 - select2_balanced1 - df_s2b1 
+2025-04-23 13:25:22 - Finished Step 4.2.1 - select2_balanced1 - df_s2b1 
+2025-04-23 13:25:22 - Starting Step 4.2.2 - select2_balanced2 - df_s2b2 
+2025-04-23 13:27:21 - Finished Step 4.2.2 - select2_balanced2 - df_s2b2 
+2025-04-23 13:27:21 - Starting Step 4.2.3 - select2_balanced3 - df_s2b3 
+2025-04-23 13:28:31 - Finished Step 4.2.3 - select2_balanced3 - df_s2b3 
+2025-04-23 13:28:31 - Starting Step 4.3.1 - select3_balanced1 - df_s3b1 
+2025-04-23 13:28:46 - Finished Step 4.3.1 - select3_balanced1 - df_s3b1 
+2025-04-23 13:28:46 - Starting Step 4.3.2 - select3_balanced2 - df_s3b2 
+2025-04-23 13:31:00 - Finished Step 4.3.2 - select3_balanced2 - df_s3b2 
+2025-04-23 13:31:00 - Starting Step 4.4 - select4_balanced3 - df_s4b3 
+2025-04-23 13:31:00 - Finished Step 4.4 - select4_balanced3 - df_s4b3 
+2025-04-23 13:31:00 - Starting Step 5.1.1 - model1_select1_balanced1 - m1_s1b1 
+2025-04-23 13:31:02 - Finished Step 5.1.1 - model1_select1_balanced1 - m1_s1b1 
+2025-04-23 13:31:02 - Starting Step 5.1.2 - model1_select1_balanced2 - m1_s1b2 
+2025-04-23 13:31:11 - Finished Step 5.1.2 - model1_select1_balanced2 - m1_s1b2 
+2025-04-23 13:31:11 - Starting Step 5.1.3 - model1_select2_balanced1 - m1_s2b1 
+2025-04-23 13:31:13 - Finished Step 5.1.3 - model1_select2_balanced1 - m1_s2b1 
+2025-04-23 13:31:13 - Starting Step 5.1.3 - model1_select2_balanced1 - m1_s2b2 
+2025-04-23 13:31:17 - Finished Step 5.1.3 - model1_select2_balanced1 - m1_s2b2 
+2025-04-23 13:31:17 - Starting Step 5.1.4.2 - model1_select2_balanced2-2 - m1_s2b2_2 
+2025-04-23 13:31:43 - Finished Step 5.1.4 - model1_select2_balanced2 - m1_s2b2_2 
+2025-04-23 13:31:43 - Starting Step 5.1.5 - model1_select3_balanced1 - m1_s3b1 
+2025-04-23 13:31:45 - Finished Step 5.1.5 - model1_select3_balanced1 - m1_s3b1 
+2025-04-23 13:31:45 - Starting Step 5.1.6 - model1_select3_balanced2 - m1_s3b2 
+2025-04-23 13:31:50 - Finished Step 5.1.6 - model1_select3_balanced2 - m1_s3b2 
+2025-04-23 13:31:50 - Starting Step 5.2.1 - model2_select1_balanced1 - m2_s1b1 
+2025-04-23 13:31:54 - Finished Step 5.2.1 - model2_select1_balanced1 - m2_s1b1 
+2025-04-23 13:31:54 - Starting Step 5.2.2 - model2_select1_balanced2 - m2_s1b2 
+2025-04-23 13:32:51 - Finished Step 5.2.2 - model2_select1_balanced2 - m2_s1b2 
+2025-04-23 13:32:51 - Starting Step 5.2.3 - model2_select2_balanced1 - m2_s2b1 
+2025-04-23 13:32:56 - Finished Step 5.2.3 - model2_select2_balanced1 - m2_s2b1 
+2025-04-23 13:32:56 - Starting Step 5.2.4 - model2_select2_balanced2 - m2_s2b2 
+2025-04-23 13:34:12 - Finished Step 5.2.4 - model2_select2_balanced2 - m2_s2b2 
+2025-04-23 13:34:12 - Starting Step 5.2.5 - model2_select3_balanced1 - m2_s3b1 
+2025-04-23 13:34:17 - Finished Step 5.2.5 - model2_select3_balanced1 - m2_s3b1 
+2025-04-23 13:34:17 - Starting Step 5.2.6 - model2_select3_balanced2 - m2_s3b2 
+2025-04-23 13:35:33 - Finished Step 5.2.6 - model2_select3_balanced2 - m2_s3b2 
+2025-04-23 13:35:33 - Starting Step 5.3.1 - model3_select1_balanced1 - m3_s1b1 
+2025-04-23 13:36:13 - Finished Step 5.3.1 - model3_select1_balanced1 - m3_s1b1 
+2025-04-23 13:36:13 - Starting Step 5.3.2 - model3_select1_balanced2 - m3_s1b2 
+2025-04-23 13:39:23 - Finished Step 5.3.2 - model3_select1_balanced2 - m3_s1b2 
+2025-04-23 13:39:23 - Starting Step 5.3.3 - model3_select2_balanced1 - m3_s2b1 
+2025-04-23 13:39:56 - Finished Step 5.3.3 - model3_select2_balanced1 - m3_s2b1 
+2025-04-23 13:39:56 - Starting Step 5.3.4 - model3_select2_balanced2 - m3_s2b2 
+2025-04-23 13:43:15 - Finished Step 5.3.4 - model3_select2_balanced2 - m3_s2b2 
+2025-04-23 13:43:15 - Starting Step 5.3.5 - model3_select3_balanced1 - m3_s3b1 
+2025-04-23 13:43:52 - Starting Step 5.3.5 - model3_select3_balanced1 - m3_s3b1 
+2025-04-23 13:43:52 - Starting Step 5.3.6 - model3_select3_balanced2 - m3_s3b2 
+2025-04-23 13:48:42 - Finished Step 5.3.6 - model3_select3_balanced2 - m3_s3b2 
+2025-04-23 13:48:42 - Starting Step 5.4.1 - model4_select1_balanced1 - m4_s1b1 
+2025-04-23 13:49:15 - Finished Step 5.4.1 - model4_select1_balanced1 - m4_s1b1 
+2025-04-23 13:49:15 - Starting Step 5.4.2 - model4_select1_balanced2 - m4_s1b2 
+2025-04-23 13:55:23 - Finished Step 5.4.2 - model4_select1_balanced2 - m4_s1b2 
+2025-04-23 13:55:23 - Starting Step 5.4.3 - model4_select2_balanced1 - m4_s2b1 
+2025-04-23 13:55:59 - Finished Step 5.4.3 - model4_select2_balanced1 - m4_s2b1 
+2025-04-23 13:55:59 - Starting Step 5.4.4 - model4_select2_balanced2 - m4_s2b2 
+2025-04-23 14:00:36 - Finished Step 5.4.4 - model4_select2_balanced2 - m4_s2b2 
+2025-04-23 14:00:36 - Starting Step 5.4.5 - model4_select3_balanced1 - m4_s3b1 
+2025-04-23 14:01:12 - Finished Step 5.4.5 - model4_select3_balanced1 - m4_s3b1 
+2025-04-23 14:01:12 - Starting Step 5.4.6 - model4_select3_balanced2 - m4_s3b2 
+2025-04-23 14:15:58 - Finished Step 5.4.6 - model4_select3_balanced2 - m4_s3b2 
+2025-04-23 14:15:58 - Starting Step 5.5.1 - model5_select1_balanced1 - m5_s1b1 
+2025-04-23 14:16:07 - Finished Step 5.5.1 - model5_select1_balanced1 - m5_s1b1 
+2025-04-23 14:16:07 - Removed Step 5.5.2 - model5_select1_balanced2 - m5_s1b2 
+2025-04-23 14:16:07 - Removed Step 5.5.2 - model5_select1_balanced2 - m5_s1b2 
+2025-04-23 14:16:07 - Starting Step 5.5.3 - model5_select2_balanced1 - m5_s2b1 
+2025-04-23 14:16:18 - Finished Step 5.5.3 - model5_select2_balanced1 - m5_s2b1 
+2025-04-23 14:16:18 - Removed Step 5.5.4 - model5_select2_balanced2 - m5_s2b2 
+2025-04-23 14:16:18 - Removed Step 5.5.4 - model5_select2_balanced2 - m5_s2b2 
+2025-04-23 14:16:18 - Starting Step 5.5.5 - model5_select3_balanced1 - m5_s3b1 
+2025-04-23 14:16:29 - Finished Step 5.5.5 - model5_select3_balanced1 - m5_s3b1 
+2025-04-23 14:16:29 - Removed Step 5.5.6 - model5_select3_balanced2 - m5_s3b2 
+2025-04-23 14:16:29 - Removed Step 5.5.6 - model5_select3_balanced2 - m5_s3b2 
+2025-04-23 14:16:29 - Starting Step 6.1.1 - model6_select1_balanced1 - m6_s1b1 
+2025-04-23 14:18:37 - Finished Step 6.1.1 - model6_select1_balanced1 - m6_s1b1 
+2025-04-23 14:18:37 - Starting Step 6.1.2 - model6_select1_balanced2 - m6_s1b2 
+2025-04-23 14:28:20 - Finished Step 6.1.2 - model6_select1_balanced2 - m6_s1b2 
+2025-04-23 14:28:20 - Starting Step 6.1.3 - model6_select2_balanced1 - m6_s2b1 
+2025-04-23 14:29:57 - Finished Step 6.1.3 - model6_select2_balanced1 - m6_s2b1 
+2025-04-23 14:29:57 - Starting Step 6.1.4 - model6_select2_balanced2 - m6_s2b2 
+2025-04-23 14:45:32 - Finished Step 6.1.4 - model6_select2_balanced2 - m6_s2b2 
+2025-04-23 14:45:32 - Starting Step 6.1.5 - model6_select3_balanced1 - m6_s3b1 
+2025-04-23 14:47:46 - Finished Step 5.6.5 - model6_select3_balanced1 - m6_s3b1 
+2025-04-23 14:47:46 - Starting Step 5.6.6 - model6_select3_balanced2 - m6_s3b2 
+2025-04-23 15:08:13 - Finished Step 5.6.6 - model6_select3_balanced2 - m6_s3b2 
+2025-04-23 15:08:13 - Starting Step 5.6.7 - model6_select4_balanced3 - m6_s4b3 
+2025-04-23 15:13:10 - Finished Step 5.6.7 - model6_select4_balanced3 - m6_s4b3 
+2025-04-23 15:13:10 - Starting Step 5.6.8 - model6_select2_balanced3 - m6_s2b3 
+2025-04-23 15:33:28 - Finished Step 5.6.8 - model6_select2_balanced3 - m6_s2b3 
+2025-04-23 15:33:28 - Starting Seciton 6 - Ensemble Methods 
+2025-04-23 15:33:28 - Starting Step 6.1 - Ensemble Logistic Model - No Tuning 
+2025-04-23 16:20:22 - Starting Step 1 - Preprocess - Project Step 1 
+2025-04-23 16:21:40 - Finished Step 1 - Preprocess - Project Step 1 
+2025-04-23 16:21:40 - Starting Step 2 - Split - Project Step 2 
+2025-04-23 16:21:40 - Finished Step 2 - Split - Project Step 2 
+2025-04-23 16:21:40 - Starting Step 3 - Balance - Project Step 3 
+2025-04-23 16:21:40 - Starting Step 3.1 - Balance-DownSample - Project Step 3 
+2025-04-23 16:21:40 - Finished Step 3.1 - Balance-DownSample - Project Step 3 
+2025-04-23 16:21:40 - Starting Step 3.2 - Balance-UpSample - Project Step 3 
+2025-04-23 16:21:40 - Finished Step 3.2 - Balance-UpSample - Project Step 3 
+2025-04-23 16:21:40 - Starting Step 3.3 - Balance-NoBalance - Project Step 3 
+2025-04-23 16:21:40 - Finished Step 3.3 - Balance-NoBalance - Project Step 3 
+2025-04-23 16:21:40 - Starting Step 4.1.1 - Select1 - df_s1b1 - Project Step 4 
+2025-04-23 16:21:40 - Finished Step 4.1.1 - select1_balanced1 - df_s1b1 
+2025-04-23 16:21:40 - Starting Step 4.1.2 - select1_balanced2 - df_s1b2 
+2025-04-23 16:21:40 - Finished Step 4.1.2 - select1_balanced2 - df_s1b2 
+2025-04-23 16:21:40 - Starting Step 4.2.1 - select2_balanced1 - df_s2b1 
+2025-04-23 16:21:46 - Finished Step 4.2.1 - select2_balanced1 - df_s2b1 
+2025-04-23 16:21:46 - Starting Step 4.2.2 - select2_balanced2 - df_s2b2 
+2025-04-23 16:23:44 - Finished Step 4.2.2 - select2_balanced2 - df_s2b2 
+2025-04-23 16:23:44 - Starting Step 4.2.3 - select2_balanced3 - df_s2b3 
+2025-04-23 16:24:55 - Finished Step 4.2.3 - select2_balanced3 - df_s2b3 
+2025-04-23 16:24:55 - Starting Step 4.3.1 - select3_balanced1 - df_s3b1 
+2025-04-23 16:25:10 - Finished Step 4.3.1 - select3_balanced1 - df_s3b1 
+2025-04-23 16:25:10 - Starting Step 4.3.2 - select3_balanced2 - df_s3b2 
+2025-04-23 16:27:24 - Finished Step 4.3.2 - select3_balanced2 - df_s3b2 
+2025-04-23 16:27:24 - Starting Step 4.4 - select4_balanced3 - df_s4b3 
+2025-04-23 16:27:24 - Finished Step 4.4 - select4_balanced3 - df_s4b3 
+2025-04-23 16:27:24 - Starting Step 5.1.1 - model1_select1_balanced1 - m1_s1b1 
+2025-04-23 16:27:26 - Finished Step 5.1.1 - model1_select1_balanced1 - m1_s1b1 
+2025-04-23 16:27:26 - Starting Step 5.1.2 - model1_select1_balanced2 - m1_s1b2 
+2025-04-23 16:27:34 - Finished Step 5.1.2 - model1_select1_balanced2 - m1_s1b2 
+2025-04-23 16:27:34 - Starting Step 5.1.3 - model1_select2_balanced1 - m1_s2b1 
+2025-04-23 16:27:37 - Finished Step 5.1.3 - model1_select2_balanced1 - m1_s2b1 
+2025-04-23 16:27:37 - Starting Step 5.1.3 - model1_select2_balanced1 - m1_s2b2 
+2025-04-23 16:27:41 - Finished Step 5.1.3 - model1_select2_balanced1 - m1_s2b2 
+2025-04-23 16:27:41 - Starting Step 5.1.4.2 - model1_select2_balanced2-2 - m1_s2b2_2 
+2025-04-23 16:28:08 - Finished Step 5.1.4 - model1_select2_balanced2 - m1_s2b2_2 
+2025-04-23 16:28:08 - Starting Step 5.1.5 - model1_select3_balanced1 - m1_s3b1 
+2025-04-23 16:28:10 - Finished Step 5.1.5 - model1_select3_balanced1 - m1_s3b1 
+2025-04-23 16:28:10 - Starting Step 5.1.6 - model1_select3_balanced2 - m1_s3b2 
+2025-04-23 16:28:15 - Finished Step 5.1.6 - model1_select3_balanced2 - m1_s3b2 
+2025-04-23 16:28:15 - Starting Step 5.2.1 - model2_select1_balanced1 - m2_s1b1 
+2025-04-23 16:28:19 - Finished Step 5.2.1 - model2_select1_balanced1 - m2_s1b1 
+2025-04-23 16:28:19 - Starting Step 5.2.2 - model2_select1_balanced2 - m2_s1b2 
+2025-04-23 16:29:16 - Finished Step 5.2.2 - model2_select1_balanced2 - m2_s1b2 
+2025-04-23 16:29:16 - Starting Step 5.2.3 - model2_select2_balanced1 - m2_s2b1 
+2025-04-23 16:29:21 - Finished Step 5.2.3 - model2_select2_balanced1 - m2_s2b1 
+2025-04-23 16:29:21 - Starting Step 5.2.4 - model2_select2_balanced2 - m2_s2b2 
+2025-04-23 16:30:36 - Finished Step 5.2.4 - model2_select2_balanced2 - m2_s2b2 
+2025-04-23 16:30:36 - Starting Step 5.2.5 - model2_select3_balanced1 - m2_s3b1 
+2025-04-23 16:30:42 - Finished Step 5.2.5 - model2_select3_balanced1 - m2_s3b1 
+2025-04-23 16:30:42 - Starting Step 5.2.6 - model2_select3_balanced2 - m2_s3b2 
+2025-04-23 16:31:57 - Finished Step 5.2.6 - model2_select3_balanced2 - m2_s3b2 
+2025-04-23 16:31:57 - Starting Step 5.3.1 - model3_select1_balanced1 - m3_s1b1 
+2025-04-23 16:32:36 - Finished Step 5.3.1 - model3_select1_balanced1 - m3_s1b1 
+2025-04-23 16:32:36 - Starting Step 5.3.2 - model3_select1_balanced2 - m3_s1b2 
+2025-04-23 16:35:46 - Finished Step 5.3.2 - model3_select1_balanced2 - m3_s1b2 
+2025-04-23 16:35:46 - Starting Step 5.3.3 - model3_select2_balanced1 - m3_s2b1 
+2025-04-23 16:36:18 - Finished Step 5.3.3 - model3_select2_balanced1 - m3_s2b1 
+2025-04-23 16:36:18 - Starting Step 5.3.4 - model3_select2_balanced2 - m3_s2b2 
+2025-04-23 16:39:36 - Finished Step 5.3.4 - model3_select2_balanced2 - m3_s2b2 
+2025-04-23 16:39:36 - Starting Step 5.3.5 - model3_select3_balanced1 - m3_s3b1 
+2025-04-23 16:40:12 - Starting Step 5.3.5 - model3_select3_balanced1 - m3_s3b1 
+2025-04-23 16:40:12 - Starting Step 5.3.6 - model3_select3_balanced2 - m3_s3b2 
+2025-04-23 16:45:01 - Finished Step 5.3.6 - model3_select3_balanced2 - m3_s3b2 
+2025-04-23 16:45:01 - Starting Step 5.4.1 - model4_select1_balanced1 - m4_s1b1 
+2025-04-23 16:45:35 - Finished Step 5.4.1 - model4_select1_balanced1 - m4_s1b1 
+2025-04-23 16:45:35 - Starting Step 5.4.2 - model4_select1_balanced2 - m4_s1b2 
+2025-04-23 16:59:27 - Finished Step 5.4.2 - model4_select1_balanced2 - m4_s1b2 
+2025-04-23 16:59:27 - Starting Step 5.4.3 - model4_select2_balanced1 - m4_s2b1 
+2025-04-23 17:01:29 - Finished Step 5.4.3 - model4_select2_balanced1 - m4_s2b1 
+2025-04-23 17:01:29 - Starting Step 5.4.4 - model4_select2_balanced2 - m4_s2b2 
+2025-04-23 17:21:38 - Finished Step 5.4.4 - model4_select2_balanced2 - m4_s2b2 
+2025-04-23 17:21:38 - Starting Step 5.4.5 - model4_select3_balanced1 - m4_s3b1 
+2025-04-23 17:23:54 - Finished Step 5.4.5 - model4_select3_balanced1 - m4_s3b1 
+2025-04-23 17:23:54 - Starting Step 5.4.6 - model4_select3_balanced2 - m4_s3b2 
+2025-04-23 17:40:56 - Finished Step 5.4.6 - model4_select3_balanced2 - m4_s3b2 
+2025-04-23 17:40:56 - Starting Step 5.5.1 - model5_select1_balanced1 - m5_s1b1 
+2025-04-23 17:41:04 - Finished Step 5.5.1 - model5_select1_balanced1 - m5_s1b1 
+2025-04-23 17:41:04 - Removed Step 5.5.2 - model5_select1_balanced2 - m5_s1b2 
+2025-04-23 17:41:04 - Removed Step 5.5.2 - model5_select1_balanced2 - m5_s1b2 
+2025-04-23 17:41:04 - Starting Step 5.5.3 - model5_select2_balanced1 - m5_s2b1 
+2025-04-23 17:41:14 - Finished Step 5.5.3 - model5_select2_balanced1 - m5_s2b1 
+2025-04-23 17:41:14 - Removed Step 5.5.4 - model5_select2_balanced2 - m5_s2b2 
+2025-04-23 17:41:14 - Removed Step 5.5.4 - model5_select2_balanced2 - m5_s2b2 
+2025-04-23 17:41:14 - Starting Step 5.5.5 - model5_select3_balanced1 - m5_s3b1 
+2025-04-23 17:41:23 - Finished Step 5.5.5 - model5_select3_balanced1 - m5_s3b1 
+2025-04-23 17:41:23 - Removed Step 5.5.6 - model5_select3_balanced2 - m5_s3b2 
+2025-04-23 17:41:23 - Removed Step 5.5.6 - model5_select3_balanced2 - m5_s3b2 
+2025-04-23 17:41:23 - Starting Step 6.1.1 - model6_select1_balanced1 - m6_s1b1 
+2025-04-23 17:41:52 - Finished Step 6.1.1 - model6_select1_balanced1 - m6_s1b1 
+2025-04-23 17:41:52 - Starting Step 6.1.2 - model6_select1_balanced2 - m6_s1b2 
+2025-04-23 17:44:26 - Finished Step 6.1.2 - model6_select1_balanced2 - m6_s1b2 
+2025-04-23 17:44:26 - Starting Step 6.1.3 - model6_select2_balanced1 - m6_s2b1 
+2025-04-23 17:44:49 - Finished Step 6.1.3 - model6_select2_balanced1 - m6_s2b1 
+2025-04-23 17:44:49 - Starting Step 6.1.4 - model6_select2_balanced2 - m6_s2b2 
+2025-04-23 17:48:31 - Finished Step 6.1.4 - model6_select2_balanced2 - m6_s2b2 
+2025-04-23 17:48:31 - Starting Step 6.1.5 - model6_select3_balanced1 - m6_s3b1 
+2025-04-23 17:48:55 - Finished Step 5.6.5 - model6_select3_balanced1 - m6_s3b1 
+2025-04-23 17:48:55 - Starting Step 5.6.6 - model6_select3_balanced2 - m6_s3b2 
+2025-04-23 17:52:38 - Finished Step 5.6.6 - model6_select3_balanced2 - m6_s3b2 
+2025-04-23 17:52:38 - Starting Step 5.6.7 - model6_select4_balanced3 - m6_s4b3 
+2025-04-23 17:53:37 - Finished Step 5.6.7 - model6_select4_balanced3 - m6_s4b3 
+2025-04-23 17:53:37 - Starting Step 5.6.8 - model6_select2_balanced3 - m6_s2b3 
+2025-04-23 17:57:47 - Finished Step 5.6.8 - model6_select2_balanced3 - m6_s2b3 
+2025-04-23 17:57:47 - Starting Seciton 6 - Ensemble Methods 
+2025-04-23 17:57:47 - Starting Step 6.1 - Ensemble Logistic Model - No Tuning 
+2025-04-23 17:57:53 - Finished Step 6.1 - Ensemble Logistic Model 
+2025-04-23 20:24:54 - Starting Step 3.2 - Balance-UpSample - Project Step 3 
+2025-04-23 20:25:34 - Starting Step 1 - Preprocess - Project Step 1 
+2025-04-23 20:25:46 - Starting Step 1 - Preprocess - Project Step 1 
+2025-04-23 20:29:23 - Finished Step 1 - Preprocess - Project Step 1 
+2025-04-23 20:40:48 - Starting Step 2 - Split - Project Step 2 
+2025-04-23 20:40:53 - Finished Step 2 - Split - Project Step 2 
+2025-04-23 20:41:03 - Starting Step 3 - Balance - Project Step 3 
+2025-04-23 20:41:13 - Starting Step 3.1 - Balance-DownSample - Project Step 3 
+2025-04-23 20:41:40 - Starting Step 3.1 - Balance-DownSample - Project Step 3 
+2025-04-23 20:42:22 - Finished Step 3.1 - Balance-DownSample - Project Step 3 
+2025-04-23 20:42:56 - Starting Step 3.2 - Balance-UpSample - Project Step 3 
+2025-04-23 20:47:29 - Finished Step 3.2 - Balance-UpSample - Project Step 3 
+2025-04-23 21:17:20 - Starting Step 1 - Preprocess - Project Step 1 
+2025-04-23 21:18:36 - Finished Step 1 - Preprocess - Project Step 1 
+2025-04-23 21:18:36 - Starting Step 2 - Split - Project Step 2 
+2025-04-23 21:18:37 - Finished Step 2 - Split - Project Step 2 
+2025-04-23 21:18:37 - Starting Step 3 - Balance - Project Step 3 
+2025-04-23 21:18:37 - Starting Step 3.1 - Balance-DownSample - Project Step 3 
+2025-04-23 21:18:37 - Finished Step 3.1 - Balance-DownSample - Project Step 3 
+2025-04-23 21:18:37 - Starting Step 3.2 - Balance-UpSample - Project Step 3 
+2025-04-23 21:18:37 - Finished Step 3.2 - Balance-UpSample - Project Step 3 
+2025-04-23 21:18:37 - Starting Step 3.3 - Balance-NoBalance - Project Step 3 
+2025-04-23 21:18:37 - Finished Step 3.3 - Balance-NoBalance - Project Step 3 
+2025-04-23 21:18:37 - Starting Step 4.1.1 - Select1 - df_s1b1 - Project Step 4 
+2025-04-23 21:18:37 - Finished Step 4.1.1 - select1_balanced1 - df_s1b1 
+2025-04-23 21:18:37 - Starting Step 4.1.2 - select1_balanced2 - df_s1b2 
+2025-04-23 21:18:37 - Finished Step 4.1.2 - select1_balanced2 - df_s1b2 
+2025-04-23 21:18:37 - Starting Step 4.2.1 - select2_balanced1 - df_s2b1 
+2025-04-23 21:18:43 - Finished Step 4.2.1 - select2_balanced1 - df_s2b1 
+2025-04-23 21:18:43 - Starting Step 4.2.2 - select2_balanced2 - df_s2b2 
+2025-04-23 21:20:45 - Finished Step 4.2.2 - select2_balanced2 - df_s2b2 
+2025-04-23 21:20:45 - Starting Step 4.2.3 - select2_balanced3 - df_s2b3 
+2025-04-23 21:21:56 - Finished Step 4.2.3 - select2_balanced3 - df_s2b3 
+2025-04-23 21:21:56 - Starting Step 4.3.1 - select3_balanced1 - df_s3b1 
+2025-04-23 21:22:11 - Finished Step 4.3.1 - select3_balanced1 - df_s3b1 
+2025-04-23 21:22:11 - Starting Step 4.3.2 - select3_balanced2 - df_s3b2 
+2025-04-23 21:24:26 - Finished Step 4.3.2 - select3_balanced2 - df_s3b2 
+2025-04-23 21:24:26 - Starting Step 4.4 - select4_balanced3 - df_s4b3 
+2025-04-23 21:24:26 - Finished Step 4.4 - select4_balanced3 - df_s4b3 
+2025-04-23 21:24:26 - Starting Step 5.1.1 - model1_select1_balanced1 - m1_s1b1 
+2025-04-23 21:24:29 - Finished Step 5.1.1 - model1_select1_balanced1 - m1_s1b1 
+2025-04-23 21:24:29 - Starting Step 5.1.2 - model1_select1_balanced2 - m1_s1b2 
+2025-04-23 21:24:34 - Finished Step 5.1.2 - model1_select1_balanced2 - m1_s1b2 
+2025-04-23 21:24:34 - Starting Step 5.1.3 - model1_select2_balanced1 - m1_s2b1 
+2025-04-23 21:24:37 - Finished Step 5.1.3 - model1_select2_balanced1 - m1_s2b1 
+2025-04-23 21:24:37 - Starting Step 5.1.3 - model1_select2_balanced1 - m1_s2b2 
+2025-04-23 21:24:43 - Finished Step 5.1.3 - model1_select2_balanced1 - m1_s2b2 
+2025-04-23 21:24:43 - Starting Step 5.1.4.2 - model1_select2_balanced2-2 - m1_s2b2_2 
+2025-04-23 21:25:20 - Finished Step 5.1.4 - model1_select2_balanced2 - m1_s2b2_2 
+2025-04-23 21:25:20 - Starting Step 5.1.5 - model1_select3_balanced1 - m1_s3b1 
+2025-04-23 21:25:23 - Finished Step 5.1.5 - model1_select3_balanced1 - m1_s3b1 
+2025-04-23 21:25:23 - Starting Step 5.1.6 - model1_select3_balanced2 - m1_s3b2 
+2025-04-23 21:25:29 - Finished Step 5.1.6 - model1_select3_balanced2 - m1_s3b2 
+2025-04-23 21:25:29 - Starting Step 5.2.1 - model2_select1_balanced1 - m2_s1b1 
+2025-04-23 21:25:33 - Finished Step 5.2.1 - model2_select1_balanced1 - m2_s1b1 
+2025-04-23 21:25:33 - Starting Step 5.2.2 - model2_select1_balanced2 - m2_s1b2 
+2025-04-23 21:27:20 - Finished Step 5.2.2 - model2_select1_balanced2 - m2_s1b2 
+2025-04-23 21:27:20 - Starting Step 5.2.3 - model2_select2_balanced1 - m2_s2b1 
+2025-04-23 21:27:25 - Finished Step 5.2.3 - model2_select2_balanced1 - m2_s2b1 
+2025-04-23 21:27:25 - Starting Step 5.2.4 - model2_select2_balanced2 - m2_s2b2 
+2025-04-23 21:29:44 - Finished Step 5.2.4 - model2_select2_balanced2 - m2_s2b2 
+2025-04-23 21:29:44 - Starting Step 5.2.5 - model2_select3_balanced1 - m2_s3b1 
+2025-04-23 21:29:49 - Finished Step 5.2.5 - model2_select3_balanced1 - m2_s3b1 
+2025-04-23 21:29:49 - Starting Step 5.2.6 - model2_select3_balanced2 - m2_s3b2 
+2025-04-23 21:32:08 - Finished Step 5.2.6 - model2_select3_balanced2 - m2_s3b2 
+2025-04-23 21:32:08 - Starting Step 5.3.1 - model3_select1_balanced1 - m3_s1b1 
+2025-04-23 21:32:45 - Finished Step 5.3.1 - model3_select1_balanced1 - m3_s1b1 
+2025-04-23 21:32:45 - Starting Step 5.3.2 - model3_select1_balanced2 - m3_s1b2 
+2025-04-23 21:37:16 - Finished Step 5.3.2 - model3_select1_balanced2 - m3_s1b2 
+2025-04-23 21:37:16 - Starting Step 5.3.3 - model3_select2_balanced1 - m3_s2b1 
+2025-04-23 21:37:47 - Finished Step 5.3.3 - model3_select2_balanced1 - m3_s2b1 
+2025-04-23 21:37:47 - Starting Step 5.3.4 - model3_select2_balanced2 - m3_s2b2 
+2025-04-23 21:42:50 - Finished Step 5.3.4 - model3_select2_balanced2 - m3_s2b2 
+2025-04-23 21:42:50 - Starting Step 5.3.5 - model3_select3_balanced1 - m3_s3b1 
+2025-04-23 21:43:25 - Starting Step 5.3.5 - model3_select3_balanced1 - m3_s3b1 
+2025-04-23 21:43:25 - Starting Step 5.3.6 - model3_select3_balanced2 - m3_s3b2 
+2025-04-23 21:50:40 - Finished Step 5.3.6 - model3_select3_balanced2 - m3_s3b2 
+2025-04-23 21:50:40 - Starting Step 5.4.1 - model4_select1_balanced1 - m4_s1b1 
+2025-04-23 21:51:13 - Finished Step 5.4.1 - model4_select1_balanced1 - m4_s1b1 
+2025-04-23 21:51:13 - Starting Step 5.4.2 - model4_select1_balanced2 - m4_s1b2 
+2025-04-23 22:02:38 - Finished Step 5.4.2 - model4_select1_balanced2 - m4_s1b2 
+2025-04-23 22:02:38 - Starting Step 5.4.3 - model4_select2_balanced1 - m4_s2b1 
+2025-04-23 22:03:13 - Finished Step 5.4.3 - model4_select2_balanced1 - m4_s2b1 
+2025-04-23 22:03:13 - Starting Step 5.4.4 - model4_select2_balanced2 - m4_s2b2 
+2025-04-23 22:15:06 - Finished Step 5.4.4 - model4_select2_balanced2 - m4_s2b2 
+2025-04-23 22:15:06 - Starting Step 5.4.5 - model4_select3_balanced1 - m4_s3b1 
+2025-04-23 22:15:43 - Finished Step 5.4.5 - model4_select3_balanced1 - m4_s3b1 
+2025-04-23 22:15:43 - Starting Step 5.4.6 - model4_select3_balanced2 - m4_s3b2 
+2025-04-23 22:44:14 - Finished Step 5.4.6 - model4_select3_balanced2 - m4_s3b2 
+2025-04-23 22:44:14 - Starting Step 5.5.1 - model5_select1_balanced1 - m5_s1b1 
+2025-04-23 22:44:22 - Finished Step 5.5.1 - model5_select1_balanced1 - m5_s1b1 
+2025-04-23 22:44:22 - Removed Step 5.5.2 - model5_select1_balanced2 - m5_s1b2 
+2025-04-23 22:44:22 - Removed Step 5.5.2 - model5_select1_balanced2 - m5_s1b2 
+2025-04-23 22:44:22 - Starting Step 5.5.3 - model5_select2_balanced1 - m5_s2b1 
+2025-04-23 22:44:32 - Finished Step 5.5.3 - model5_select2_balanced1 - m5_s2b1 
+2025-04-23 22:44:32 - Removed Step 5.5.4 - model5_select2_balanced2 - m5_s2b2 
+2025-04-23 22:44:32 - Removed Step 5.5.4 - model5_select2_balanced2 - m5_s2b2 
+2025-04-23 22:44:32 - Starting Step 5.5.5 - model5_select3_balanced1 - m5_s3b1 
+2025-04-23 22:44:41 - Finished Step 5.5.5 - model5_select3_balanced1 - m5_s3b1 
+2025-04-23 22:44:41 - Removed Step 5.5.6 - model5_select3_balanced2 - m5_s3b2 
+2025-04-23 22:44:41 - Removed Step 5.5.6 - model5_select3_balanced2 - m5_s3b2 
+2025-04-23 22:44:41 - Starting Step 6.1.1 - model6_select1_balanced1 - m6_s1b1 
+2025-04-23 22:45:11 - Finished Step 6.1.1 - model6_select1_balanced1 - m6_s1b1 
+2025-04-23 22:45:11 - Starting Step 6.1.2 - model6_select1_balanced2 - m6_s1b2 
+2025-04-23 22:48:49 - Finished Step 6.1.2 - model6_select1_balanced2 - m6_s1b2 
+2025-04-23 22:48:49 - Starting Step 6.1.3 - model6_select2_balanced1 - m6_s2b1 
+2025-04-23 22:49:12 - Finished Step 6.1.3 - model6_select2_balanced1 - m6_s2b1 
+2025-04-23 22:49:12 - Starting Step 6.1.4 - model6_select2_balanced2 - m6_s2b2 
+2025-04-23 22:54:30 - Finished Step 6.1.4 - model6_select2_balanced2 - m6_s2b2 
+2025-04-23 22:54:30 - Starting Step 6.1.5 - model6_select3_balanced1 - m6_s3b1 
+2025-04-23 22:54:54 - Finished Step 5.6.5 - model6_select3_balanced1 - m6_s3b1 
+2025-04-23 22:54:54 - Starting Step 5.6.6 - model6_select3_balanced2 - m6_s3b2 
+2025-04-23 23:00:11 - Finished Step 5.6.6 - model6_select3_balanced2 - m6_s3b2 
+2025-04-23 23:00:11 - Starting Step 5.6.7 - model6_select4_balanced3 - m6_s4b3 
+2025-04-23 23:01:10 - Finished Step 5.6.7 - model6_select4_balanced3 - m6_s4b3 
+2025-04-23 23:01:10 - Starting Step 5.6.8 - model6_select2_balanced3 - m6_s2b3 
+2025-04-23 23:05:17 - Finished Step 5.6.8 - model6_select2_balanced3 - m6_s2b3 
+2025-04-23 23:05:17 - Starting Seciton 6 - Ensemble Methods 
+2025-04-23 23:05:17 - Starting Step 6.1 - Ensemble Logistic Model - No Tuning 
+2025-04-23 23:05:27 - Finished Step 6.1 - Ensemble Logistic Model 
+2025-04-24 07:37:28 - Starting Step 6.1 - Ensemble Logistic Model - No Tuning 
+2025-04-24 19:31:08 - Starting Step 6.1 - Ensemble Logistic Model - No Tuning 
+2025-04-24 20:26:49 - Starting Step 6.1 - Ensemble Logistic Model - No Tuning 
+2025-04-24 20:52:36 - Finished Step 6.1 - Ensemble Logistic Model 
+2025-04-24 21:37:44 - Starting Step 1 - Preprocess - Project Step 1 
+2025-04-24 21:39:02 - Finished Step 1 - Preprocess - Project Step 1 
+2025-04-24 21:39:02 - Starting Step 2 - Split - Project Step 2 
+2025-04-24 21:39:02 - Finished Step 2 - Split - Project Step 2 
+2025-04-24 21:39:02 - Starting Step 3 - Balance - Project Step 3 
+2025-04-24 21:39:02 - Starting Step 3.1 - Balance-DownSample - Project Step 3 
+2025-04-24 21:39:02 - Finished Step 3.1 - Balance-DownSample - Project Step 3 
+2025-04-24 21:39:02 - Starting Step 3.2 - Balance-UpSample - Project Step 3 
+2025-04-24 21:39:02 - Finished Step 3.2 - Balance-UpSample - Project Step 3 
+2025-04-24 21:39:02 - Starting Step 3.3 - Balance-NoBalance - Project Step 3 
+2025-04-24 21:39:02 - Finished Step 3.3 - Balance-NoBalance - Project Step 3 
+2025-04-24 21:39:02 - Starting Step 4.1.1 - Select1 - df_s1b1 - Project Step 4 
+2025-04-24 21:39:02 - Finished Step 4.1.1 - select1_balanced1 - df_s1b1 
+2025-04-24 21:39:02 - Starting Step 4.1.2 - select1_balanced2 - df_s1b2 
+2025-04-24 21:39:02 - Finished Step 4.1.2 - select1_balanced2 - df_s1b2 
+2025-04-24 21:39:02 - Starting Step 4.2.1 - select2_balanced1 - df_s2b1 
+2025-04-24 21:39:08 - Finished Step 4.2.1 - select2_balanced1 - df_s2b1 
+2025-04-24 21:39:08 - Starting Step 4.2.2 - select2_balanced2 - df_s2b2 
+2025-04-24 21:41:12 - Finished Step 4.2.2 - select2_balanced2 - df_s2b2 
+2025-04-24 21:41:12 - Starting Step 4.2.3 - select2_balanced3 - df_s2b3 
+2025-04-24 21:42:22 - Finished Step 4.2.3 - select2_balanced3 - df_s2b3 
+2025-04-24 21:42:22 - Starting Step 4.3.1 - select3_balanced1 - df_s3b1 
+2025-04-24 21:42:37 - Finished Step 4.3.1 - select3_balanced1 - df_s3b1 
+2025-04-24 21:42:37 - Starting Step 4.3.2 - select3_balanced2 - df_s3b2 
+2025-04-24 21:44:46 - Finished Step 4.3.2 - select3_balanced2 - df_s3b2 
+2025-04-24 21:44:46 - Starting Step 4.4 - select4_balanced3 - df_s4b3 
+2025-04-24 21:44:46 - Finished Step 4.4 - select4_balanced3 - df_s4b3 
+2025-04-24 21:44:46 - Starting Step 5.1.1 - model1_select1_balanced1 - m1_s1b1 
+2025-04-24 21:44:49 - Finished Step 5.1.1 - model1_select1_balanced1 - m1_s1b1 
+2025-04-24 21:44:49 - Starting Step 5.1.2 - model1_select1_balanced2 - m1_s1b2 
+2025-04-24 21:45:03 - Finished Step 5.1.2 - model1_select1_balanced2 - m1_s1b2 
+2025-04-24 21:45:03 - Starting Step 5.1.3 - model1_select2_balanced1 - m1_s2b1 
+2025-04-24 21:45:05 - Finished Step 5.1.3 - model1_select2_balanced1 - m1_s2b1 
+2025-04-24 21:45:05 - Starting Step 5.1.3 - model1_select2_balanced1 - m1_s2b2 
+2025-04-24 21:45:14 - Finished Step 5.1.3 - model1_select2_balanced1 - m1_s2b2 
+2025-04-24 21:45:14 - Starting Step 5.1.4.2 - model1_select2_balanced2-2 - m1_s2b2_2 
+2025-04-24 21:46:20 - Finished Step 5.1.4 - model1_select2_balanced2 - m1_s2b2_2 
+2025-04-24 21:46:20 - Starting Step 5.1.5 - model1_select3_balanced1 - m1_s3b1 
+2025-04-24 21:46:22 - Finished Step 5.1.5 - model1_select3_balanced1 - m1_s3b1 
+2025-04-24 21:46:22 - Starting Step 5.1.6 - model1_select3_balanced2 - m1_s3b2 
+2025-04-24 21:46:31 - Finished Step 5.1.6 - model1_select3_balanced2 - m1_s3b2 
+2025-04-24 21:46:31 - Starting Step 5.2.1 - model2_select1_balanced1 - m2_s1b1 
+2025-04-24 21:46:35 - Finished Step 5.2.1 - model2_select1_balanced1 - m2_s1b1 
+2025-04-24 21:46:35 - Starting Step 5.2.2 - model2_select1_balanced2 - m2_s1b2 
+2025-04-24 21:50:35 - Finished Step 5.2.2 - model2_select1_balanced2 - m2_s1b2 
+2025-04-24 21:50:35 - Starting Step 5.2.3 - model2_select2_balanced1 - m2_s2b1 
+2025-04-24 21:50:40 - Finished Step 5.2.3 - model2_select2_balanced1 - m2_s2b1 
+2025-04-24 21:50:40 - Starting Step 5.2.4 - model2_select2_balanced2 - m2_s2b2 
+2025-04-24 21:56:00 - Finished Step 5.2.4 - model2_select2_balanced2 - m2_s2b2 
+2025-04-24 21:56:00 - Starting Step 5.2.5 - model2_select3_balanced1 - m2_s3b1 
+2025-04-24 21:56:05 - Finished Step 5.2.5 - model2_select3_balanced1 - m2_s3b1 
+2025-04-24 21:56:05 - Starting Step 5.2.6 - model2_select3_balanced2 - m2_s3b2 
+2025-04-24 22:01:25 - Finished Step 5.2.6 - model2_select3_balanced2 - m2_s3b2 
+2025-04-24 22:01:25 - Starting Step 5.3.1 - model3_select1_balanced1 - m3_s1b1 
+2025-04-24 22:02:04 - Finished Step 5.3.1 - model3_select1_balanced1 - m3_s1b1 
+2025-04-24 22:02:04 - Starting Step 5.3.2 - model3_select1_balanced2 - m3_s1b2 
+2025-04-24 22:10:10 - Finished Step 5.3.2 - model3_select1_balanced2 - m3_s1b2 
+2025-04-24 22:10:10 - Starting Step 5.3.3 - model3_select2_balanced1 - m3_s2b1 
+2025-04-24 22:10:41 - Finished Step 5.3.3 - model3_select2_balanced1 - m3_s2b1 
+2025-04-24 22:10:41 - Starting Step 5.3.4 - model3_select2_balanced2 - m3_s2b2 
+2025-04-24 22:19:29 - Finished Step 5.3.4 - model3_select2_balanced2 - m3_s2b2 
+2025-04-24 22:19:29 - Starting Step 5.3.5 - model3_select3_balanced1 - m3_s3b1 
+2025-04-24 22:20:05 - Starting Step 5.3.5 - model3_select3_balanced1 - m3_s3b1 
+2025-04-24 22:20:05 - Starting Step 5.3.6 - model3_select3_balanced2 - m3_s3b2 
+2025-04-24 22:33:20 - Finished Step 5.3.6 - model3_select3_balanced2 - m3_s3b2 
+2025-04-24 22:33:20 - Starting Step 5.4.1 - model4_select1_balanced1 - m4_s1b1 
+2025-04-24 22:33:53 - Finished Step 5.4.1 - model4_select1_balanced1 - m4_s1b1 
+2025-04-24 22:33:53 - Starting Step 5.4.2 - model4_select1_balanced2 - m4_s1b2 
+2025-04-24 23:06:52 - Finished Step 5.4.2 - model4_select1_balanced2 - m4_s1b2 
+2025-04-24 23:06:52 - Starting Step 5.4.3 - model4_select2_balanced1 - m4_s2b1 
+2025-04-24 23:07:26 - Finished Step 5.4.3 - model4_select2_balanced1 - m4_s2b1 
+2025-04-24 23:07:26 - Starting Step 5.4.4 - model4_select2_balanced2 - m4_s2b2 
+2025-04-24 23:44:55 - Finished Step 5.4.4 - model4_select2_balanced2 - m4_s2b2 
+2025-04-24 23:44:55 - Starting Step 5.4.5 - model4_select3_balanced1 - m4_s3b1 
+2025-04-24 23:45:31 - Finished Step 5.4.5 - model4_select3_balanced1 - m4_s3b1 
+2025-04-24 23:45:31 - Starting Step 5.4.6 - model4_select3_balanced2 - m4_s3b2 
+2025-04-25 01:05:32 - Finished Step 5.4.6 - model4_select3_balanced2 - m4_s3b2 
+2025-04-25 01:05:32 - Starting Step 5.5.1 - model5_select1_balanced1 - m5_s1b1 
+2025-04-25 01:05:40 - Finished Step 5.5.1 - model5_select1_balanced1 - m5_s1b1 
+2025-04-25 01:05:40 - Removed Step 5.5.2 - model5_select1_balanced2 - m5_s1b2 
+2025-04-25 01:05:40 - Removed Step 5.5.2 - model5_select1_balanced2 - m5_s1b2 
+2025-04-25 01:05:40 - Starting Step 5.5.3 - model5_select2_balanced1 - m5_s2b1 
+2025-04-25 01:05:50 - Finished Step 5.5.3 - model5_select2_balanced1 - m5_s2b1 
+2025-04-25 01:05:50 - Removed Step 5.5.4 - model5_select2_balanced2 - m5_s2b2 
+2025-04-25 01:05:50 - Removed Step 5.5.4 - model5_select2_balanced2 - m5_s2b2 
+2025-04-25 01:05:50 - Starting Step 5.5.5 - model5_select3_balanced1 - m5_s3b1 
+2025-04-25 01:05:59 - Finished Step 5.5.5 - model5_select3_balanced1 - m5_s3b1 
+2025-04-25 01:05:59 - Removed Step 5.5.6 - model5_select3_balanced2 - m5_s3b2 
+2025-04-25 01:05:59 - Removed Step 5.5.6 - model5_select3_balanced2 - m5_s3b2 
+2025-04-25 01:05:59 - Starting Step 6.1.1 - model6_select1_balanced1 - m6_s1b1 
+2025-04-25 01:06:28 - Finished Step 6.1.1 - model6_select1_balanced1 - m6_s1b1 
+2025-04-25 01:06:28 - Starting Step 6.1.2 - model6_select1_balanced2 - m6_s1b2 
+2025-04-25 01:12:15 - Finished Step 6.1.2 - model6_select1_balanced2 - m6_s1b2 
+2025-04-25 01:12:15 - Starting Step 6.1.3 - model6_select2_balanced1 - m6_s2b1 
+2025-04-25 01:12:38 - Finished Step 6.1.3 - model6_select2_balanced1 - m6_s2b1 
+2025-04-25 01:12:38 - Starting Step 6.1.4 - model6_select2_balanced2 - m6_s2b2 
+2025-04-25 01:21:14 - Finished Step 6.1.4 - model6_select2_balanced2 - m6_s2b2 
+2025-04-25 01:21:14 - Starting Step 6.1.5 - model6_select3_balanced1 - m6_s3b1 
+2025-04-25 01:21:39 - Finished Step 5.6.5 - model6_select3_balanced1 - m6_s3b1 
+2025-04-25 01:21:39 - Starting Step 5.6.6 - model6_select3_balanced2 - m6_s3b2 
+2025-04-25 01:30:14 - Finished Step 5.6.6 - model6_select3_balanced2 - m6_s3b2 
+2025-04-25 01:30:14 - Starting Step 5.6.7 - model6_select4_balanced3 - m6_s4b3 
+2025-04-25 01:31:13 - Finished Step 5.6.7 - model6_select4_balanced3 - m6_s4b3 
+2025-04-25 01:31:13 - Starting Step 5.6.8 - model6_select2_balanced3 - m6_s2b3 
+2025-04-25 01:35:24 - Finished Step 5.6.8 - model6_select2_balanced3 - m6_s2b3 
+2025-04-25 01:35:24 - Starting Seciton 6 - Ensemble Methods 
+2025-04-25 01:35:24 - Starting Step 6.1 - Ensemble Logistic Model - No Tuning 
+2025-04-25 01:35:43 - Finished Step 6.1 - Ensemble Logistic Model 
+2025-04-25 07:52:22 - Starting Seciton 6 - Ensemble Methods 
+2025-04-25 07:52:38 - Starting Step 6.1 - Ensemble Logistic Model - No Tuning 
+2025-04-25 16:07:13 - Finished Step 6.1 - Ensemble Logistic Model 
+2025-04-25 16:07:15 - Starting Step 6.2 - Ensemble Logistic Model - No Tuning 
+2025-04-25 16:43:12 - Starting Step 6.2 - Ensemble Logistic Model - No Tuning 
+2025-04-25 17:00:02 - Finished Step 6.1 - Ensemble Logistic Model 
+2025-04-25 17:01:25 - Finished Step 6.1 - Ensemble Logistic Model 
