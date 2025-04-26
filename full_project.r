@@ -582,7 +582,7 @@ log_message("Starting Step 3 - Balance - Project Step 3")
 
 log_message("Starting Step 3.1 - Balance-DownSample - Project Step 3")
 
-#load("df_train.RData")
+#load("df_train.RData") # nolint
 
 # Undersampling
 df_balanced1 <- downSample(x = df_train[, -which(names(df_train) %in% "Class")],
@@ -6557,19 +6557,16 @@ meta_test_features_em2 <- bind_cols(
     rename_with(~ paste0("m4_s2b2_", .), starts_with(".pred")),
   predict(final_fit_m6_s4b3, new_data = df_test, type = "prob") %>%
     rename_with(~ paste0("m6_s4b3_", .), starts_with(".pred"))
-  ) %>%
+) %>%
     select(-ends_with(".pred_0")) %>%
-bind_cols(df_test %>% select(Class))
+  bind_cols(df_test %>% select(Class))
 
 meta_predictions <-
   predict(meta_fit, new_data = meta_test_features_em2, type = "class")
 
 results <- calculate_all_measures(meta_fit, meta_test_features_em2, 0.01)
 
-hi results
-
 log_message("Finished Step 6.1 - Ensemble Logistic Model")
-
 
 #---- 7 DONE *******      Save Results ----
 # Export the results to a CSV file
