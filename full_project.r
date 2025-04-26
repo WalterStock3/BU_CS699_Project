@@ -628,7 +628,7 @@ df_balanced2 <- rbind(class0_data, class1_upsampled)
 
 # Shuffle the data
 set.seed(123)
-df_balanced2 <- df_balanced2[sample(1:nrow(df_balanced2)), ]
+df_balanced2 <- df_balanced2[sample(1:nrow(df_balanced2)), ] # nolint
 
 # Make sure Class is a factor
 df_balanced2$Class <- factor(df_balanced2$Class)
