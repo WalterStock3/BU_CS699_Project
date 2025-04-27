@@ -1700,7 +1700,6 @@ fisher_not_possible <- c("SCHL", "ANC1P", "DETAILED-SCHL_",
 
 s2b5_fisher_results <- list()
 
-
 for (col in names(df_s2b5_allfact)) {
   print(paste(Sys.time(), "- Processing column:", col))
   if (any(startsWith(col, fisher_not_possible))) {
@@ -2318,6 +2317,81 @@ df_s4b3 <- df_balanced3
 save(df_s4b3, file = "df_s4b3.RData")
 
 log_message("Finished Step 4.4 - select4_balanced3 - df_s4b3")
+
+#---- 4-5 DONE *****    Select 5 - PCA -------------------------- df_s5b# ------
+
+#---- 4-5-1 DONE ***       Select 5 - balanced 4 ------------------ df_s5b4 ----
+
+log_message("Starting Step 4.5.1 - select5_balanced4 - df_s5b4")
+
+# Load the balanced dataset if not already loaded
+#load("df_balanced4.RData")
+
+# Create a recipe for PCA
+pca_recipe <- recipe(Class ~ ., data = df_balanced4) %>%
+  # Remove zero-variance predictors
+  step_zv(all_predictors()) %>%
+  # Handle missing values
+  step_impute_median(all_numeric_predictors()) %>%
+  # Normalize all numeric predictors
+  step_normalize(all_numeric_predictors()) %>%
+  # Convert categorical variables to dummy variables
+  step_dummy(all_nominal_predictors(), -all_outcomes()) %>% 
+  # Apply PCA - retain enough components to explain 95% of the variance
+  step_pca(all_predictors(), threshold = 0.95)
+
+# Prepare the recipe
+pca_prep <- prep(pca_recipe)
+
+# Extract the PCA results to examine
+pca_results <- tidy(pca_prep, number = 5)  # 5 refers to the step_pca step
+
+# Plot the variance explained by each component
+pca_var <- pca_results %>%
+  filter(terms == "percent variance") %>%
+  ggplot(aes(x = component, y = value)) +
+  geom_col() +
+  labs(title = "Variance Explained by Each Principal Component",
+       x = "Principal Component",
+       y = "Percent Variance Explained") +
+  theme_minimal()
+
+# Plot the cumulative variance explained
+pca_cum_var <- pca_results %>%
+  filter(terms == "cumulative percent variance") %>%
+  ggplot(aes(x = component, y = value)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "Cumulative Variance Explained by Principal Components",
+       x = "Number of Principal Components",
+       y = "Cumulative Percent Variance Explained") +
+  geom_hline(yintercept = 0.95, linetype = "dashed", color = "red") +
+  theme_minimal()
+
+# Display the plots
+print(pca_var)
+ggsave("plt_s5b4_pca_variance.png", plot = pca_var, width = 10, height = 6, dpi = 300)
+print(pca_cum_var)
+ggsave("plt_s5b4_pca_cumulative.png", plot = pca_cum_var, width = 10, height = 6, dpi = 300)
+
+# Get the number of components needed to explain 95% of variance
+n_components <- pca_results %>%
+  filter(terms == "cumulative percent variance", value >= 0.95) %>%
+  slice_min(component) %>%
+  pull(component)
+
+print(paste("Number of components needed to explain 95% of variance:", n_components))
+
+# Extract the transformed data with the selected components
+df_s5b4 <- juice(pca_prep)
+
+# Print the dimensions of the resulting dataset
+print(paste("df_s5b4 dimensions:", dim(df_s5b4)[1], "x", dim(df_s5b4)[2]))
+
+# Save the PCA-transformed dataset
+save(df_s5b4, file = "df_s5b4.RData")
+
+log_message("Finished Step 4.5.1 - select5_balanced4 - df_s5b4")
 
 ################################################################################
 #---- 5 PROG ******* Models - Project Step 5 ------------------ m#_s#b# --------
@@ -3056,6 +3130,196 @@ store_results("m1s3b2", results_m1_s3b2, "Logistic Regression Model 1 - s3b2")
 save(results_storage, file = "results_after_m1_s3b2.RData")
 
 log_message("Finished Step 5.1.6 - model1_select3_balanced2 - m1_s3b2")
+
+#---- 5-1-7 DONE ***       Model 1 Logistic Regression ------------ m1_s2b4 ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+log_message("Starting Step 5.1.7 - model1_select2_balanced4 - m1_s2b4")
+
+#load("df_s2b4.RData") # nolint
+#load("df_columns_info.RData") # nolint
+#load("df_test.RData") # nolint
+
+# Logistic Regression Model
+
+df_m1_s2b4 <- df_s2b4 %>%
+  select(Class, matches(paste0("^DETAILED-(",
+                               paste(df_columns_info %>%
+                                       filter(variable_type %in%
+                                                c("integer")) %>%
+                                       pull(column_name),
+                                     collapse = "|"), ")_")))
+
+# 1. Model Specification
+spec_m1_s2b4 <- logistic_reg(penalty = tune(), mixture = tune()) %>%
+  set_engine("glmnet") %>%
+  set_mode("classification")
+
+# 2. Recipe
+rec_m1_s2b4 <- recipe(Class ~ ., data = df_m1_s2b4) %>%
+  step_zv(all_predictors()) %>%
+  step_impute_median(all_numeric_predictors()) %>%
+  step_normalize(all_predictors()) %>%
+  step_dummy(all_nominal_predictors(), -all_outcomes())
+
+# 3. Workflow
+wf_m1_s2b4 <- workflow() %>%
+  add_model(spec_m1_s2b4) %>%
+  add_recipe(rec_m1_s2b4)
+
+# 4. Cross-validation
+set.seed(123)
+folds_m1_s2b4 <- vfold_cv(df_m1_s2b4, v = 10, strata = Class)
+
+# 5. Grid of hyperparameters
+tune_grid_m1_s2b4 <- grid_regular(penalty(), mixture(), levels = 5)
+
+# 6. Tune the model
+tune_results_m1_s2b4 <- tune_grid(
+  wf_m1_s2b4,
+  resamples = folds_m1_s2b4,
+  grid = tune_grid_m1_s2b4,
+  metrics = metric_set(roc_auc, accuracy, sens, spec)
+)
+
+# Show the tuning results
+autoplot(tune_results_m1_s2b4) +
+  labs(title = "Tuning Results for Logistic Regression",
+       x = "Penalty",
+       y = "Mixture") +
+  theme_minimal()
+
+# 7. Select the best parameters
+best_parameters_m1_s2b4 <- select_best(tune_results_m1_s2b4, metric = "roc_auc")
+
+# 8. Finalize the workflow
+final_wf_m1_s2b4 <- finalize_workflow(wf_m1_s2b4, best_parameters_m1_s2b4)
+
+save(final_wf_m1_s2b4, file = "final_wf_m1_s2b4.RData")
+
+# 9. Fit the final model
+final_fit_m1_s2b4 <- fit(final_wf_m1_s2b4, data = df_m1_s2b4)
+
+save(final_fit_m1_s2b4, file = "final_fit_m1_s2b4.RData")
+
+# 10. Evaluate the model on the test dataset
+# Evaluate the model on the test dataset
+test_predications_m1_s2b4 <-
+  predict(final_fit_m1_s2b4, new_data = df_test, type = "prob") %>%
+  bind_cols(predict(final_fit_m1_s2b4, new_data = df_test, type = "class")) %>%
+  bind_cols(df_test %>% select(Class))
+
+# Generate a confusion matrix
+confusion_matrix_m1_s2b4 <- test_predications_m1_s2b4 %>%
+  conf_mat(truth = Class, estimate = .pred_class)
+
+# Print the confusion matrix
+print(confusion_matrix_m1_s2b4)
+
+results_m1_s2b4 <- calculate_all_measures(final_fit_m1_s2b4, df_test, 0.5)
+
+results_m1_s2b4
+
+store_results("m1s2b4", results_m1_s2b4, "Logistic Regression Model 1 - s2b4")
+
+save(results_storage, file = "results_after_m1_s2b4.RData")
+
+log_message("Finished Step 5.1.7 - model1_select2_balanced4 - m1_s2b4")
+
+#---- 5-1-8 DONE ***       Model 1 Logistic Regression ------------ m1_s2b5 ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+log_message("Starting Step 5.1.8 - model1_select2_balanced1 - m1_s2b5")
+
+#load("df_s2b5.RData") # nolint
+#load("df_columns_info.RData") # nolint
+#load("df_test.RData") # nolint
+
+# Logistic Regression Model
+
+df_m1_s2b5 <- df_s2b5 %>%
+  select(Class, matches(paste0("^DETAILED-(",
+                               paste(df_columns_info %>%
+                                       filter(variable_type %in%
+                                                c("integer")) %>%
+                                       pull(column_name),
+                                     collapse = "|"), ")_")))
+
+# 1. Model Specification
+spec_m1_s2b5 <- logistic_reg(penalty = tune(), mixture = tune()) %>%
+  set_engine("glmnet") %>%
+  set_mode("classification")
+
+# 2. Recipe
+rec_m1_s2b5 <- recipe(Class ~ ., data = df_m1_s2b5) %>%
+  step_zv(all_predictors()) %>%
+  step_impute_median(all_numeric_predictors()) %>%
+  step_normalize(all_predictors()) %>%
+  step_dummy(all_nominal_predictors(), -all_outcomes())
+
+# 3. Workflow
+wf_m1_s2b5 <- workflow() %>%
+  add_model(spec_m1_s2b5) %>%
+  add_recipe(rec_m1_s2b5)
+
+# 4. Cross-validation
+set.seed(123)
+folds_m1_s2b5 <- vfold_cv(df_m1_s2b5, v = 10, strata = Class)
+
+# 5. Grid of hyperparameters
+tune_grid_m1_s2b5 <- grid_regular(penalty(), mixture(), levels = 5)
+
+# 6. Tune the model
+tune_results_m1_s2b5 <- tune_grid(
+  wf_m1_s2b5,
+  resamples = folds_m1_s2b5,
+  grid = tune_grid_m1_s2b5,
+  metrics = metric_set(roc_auc, accuracy, sens, spec)
+)
+
+# Show the tuning results
+autoplot(tune_results_m1_s2b5) +
+  labs(title = "Tuning Results for Logistic Regression",
+       x = "Penalty",
+       y = "Mixture") +
+  theme_minimal()
+
+# 7. Select the best parameters
+best_parameters_m1_s2b5 <- select_best(tune_results_m1_s2b5, metric = "roc_auc")
+
+# 8. Finalize the workflow
+final_wf_m1_s2b5 <- finalize_workflow(wf_m1_s2b5, best_parameters_m1_s2b5)
+
+save(final_wf_m1_s2b5, file = "final_wf_m1_s2b5.RData")
+
+# 9. Fit the final model
+final_fit_m1_s2b5 <- fit(final_wf_m1_s2b5, data = df_m1_s2b5)
+
+save(final_fit_m1_s2b5, file = "final_fit_m1_s2b5.RData")
+
+# 10. Evaluate the model on the test dataset
+# Evaluate the model on the test dataset
+test_predications_m1_s2b5 <-
+  predict(final_fit_m1_s2b5, new_data = df_test, type = "prob") %>%
+  bind_cols(predict(final_fit_m1_s2b5, new_data = df_test, type = "class")) %>%
+  bind_cols(df_test %>% select(Class))
+
+# Generate a confusion matrix
+confusion_matrix_m1_s2b5 <- test_predications_m1_s2b5 %>%
+  conf_mat(truth = Class, estimate = .pred_class)
+
+# Print the confusion matrix
+print(confusion_matrix_m1_s2b5)
+
+results_m1_s2b5 <- calculate_all_measures(final_fit_m1_s2b5, df_test, 0.5)
+
+results_m1_s2b5
+
+store_results("m1s2b5", results_m1_s2b5, "Logistic Regression Model 1 - s2b5")
+
+save(results_storage, file = "results_after_m1_s2b5.RData")
+
+log_message("Finished Step 5.1.8 - model1_select2_balanced1 - m1_s2b5")
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #---- 5-2 DONE *****    Model 2 K-Nearest Neighbors ----------------------------
