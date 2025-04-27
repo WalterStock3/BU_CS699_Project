@@ -720,7 +720,7 @@ class1_upsampled_weighted <- class1_data[sample(1:n_class1,
                                                 replace = TRUE), ]
 
 # Combine the datasets
-df_balanced5 <- rbind(class0_data, class1_downsampled_weighted)
+df_balanced5 <- rbind(class0_data, class1_upsampled_weighted)
 
 # Shuffle the data
 set.seed(123)
