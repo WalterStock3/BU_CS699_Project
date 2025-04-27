@@ -407,6 +407,9 @@ print(paste("df - dim:", dim(df)[1], ",", dim(df)[2])) # 4318  112 -> 222
 print(paste("df - total missing values (excluding DETAILED-* columns):",
             sum(is.na(df %>% select(-starts_with("DETAILED-")))))) # 141635
 
+print(paste("df after selecting only DETAILED- columns and Class:",
+                        dim(df)[1], ",", dim(df)[2]))
+
 # Update df Class to be a binary factor variable.
 df$Class <- ifelse(df$Class == "Yes", 1, 0)
 df$Class <- as.factor(df$Class)
@@ -522,6 +525,10 @@ print(paste("Number of integer columns after integer update:",
 
 df <- df %>%
   mutate(across(names(df)[columns_with_invalid], ~ na_if(.x, "Invalid Number")))
+
+# Keep only columns that start with "DETAILED-" and the Class column
+df <- df %>%
+  select(Class, starts_with("DETAILED-"))
 
 df_preprocessed <- df
 
@@ -659,11 +666,13 @@ smote_recipe <- recipe(Class ~ ., data = df_train) %>%
   step_zv(all_predictors()) %>%
   # Handle missing values
   step_impute_median(all_numeric_predictors()) %>%
-  step_impute_mode(all_nominal_predictors()) %>%
+  step_normalize(all_numeric_predictors()) %>%
+  # Normalize numeric predictors (helps with SMOTE)
+  step_unknown(all_nominal_predictors(), new_level = "Missing") %>%
+  # Limit nominal predictors to max 3 levels (2 most frequent + "Other")
+  step_other(all_nominal_predictors(), threshold = .5, other = "Other") %>%
   # Convert factor variables to dummy variables
   step_dummy(all_nominal_predictors(), -all_outcomes()) %>%
-  # Normalize numeric predictors (helps with SMOTE)
-  step_normalize(all_numeric_predictors()) %>%
   # Apply SMOTE to balance classes
   step_smote(Class)
 
@@ -685,7 +694,7 @@ save(df_balanced4, file = "df_balanced4.RData")
 log_message("Finished Step 3.4 - Balance-SMOTE - Project Step 3")
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#---- 3.5 DONE *****    Balance - M5 - UpSample Weighted -- df_balanced5 ----
+#---- 3.5 DONE *****    Balance - Method 5 - Up Sampl Wghted - df_balanced5 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 log_message("Starting Step 3.5 - Balance-UpSampleWeighted - Project Step 3")
@@ -861,7 +870,7 @@ save(df_s1b2, file = "df_s1b2.RData")
 log_message("Finished Step 4.1.2 - select1_balanced2 - df_s1b2")
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#---- 4-2 DONE *****    Select 2 - Fisher and Corr -------------- df_s2b# ------
+#---- 4-2 DONE *****    Select 2 - Fisher and Corr (.05, .5) ---- df_s2b# ------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #---- 4-2-1 DONE ***       Select 2 - balanced 1 ------------------ df_s2b1 ----
@@ -1311,7 +1320,7 @@ log_message("Starting Step 4.2.3 - select2_balanced3 - df_s2b3")
 
 df_s2b3 <- df_balanced3
 
-#---- 4-2-2-1 DONE *          Factor and Logical Variables ---------------------
+#---- 4-2-3-1 DONE *          Factor and Logical Variables ---------------------
 
 df_s2b3_1factors <- df_balanced3 %>%
   select(Class, matches(paste0("^DETAILED-(",
@@ -1417,7 +1426,7 @@ select_cols <- df_s2b3_fisher_results %>%
 df_s2b3_allfact <- df_s2b3_allfact %>%
   select(Class, all_of(select_cols))
 
-#---- 4-2-2-2 DONE *          Integer Variables --------------------------------
+#---- 4-2-3-2 DONE *          Integer Variables --------------------------------
 
 df_s2b3_4integers <- df_balanced3 %>%
   select(Class, matches(paste0("^DETAILED-(",
@@ -1476,7 +1485,7 @@ repeat {
   print(paste("Removed variable:", highly_correlated))
 }
 
-#---- 4-2-2-3 DONE *          Outliers -----------------------------------------
+#---- 4-2-3-3 DONE *          Outliers -----------------------------------------
 # Create boxplots for each numeric variable in the dataset
 
 # Generate boxplots dynamically for all numeric columns
@@ -1517,13 +1526,351 @@ ggsave("plt_s2b3_corr.png",
 df_s2b3 <- df_s2b3_allfact %>% select(-Class) %>% # nolint
   bind_cols(df_s2b3_4integers)
 
-#---- 4-2-2-4 DONE *          Final --------------------------------------------
+#---- 4-2-3-4 DONE *          Final --------------------------------------------
 
 save(df_s2b3, file = "df_s2b3.RData")
 
 log_message("Finished Step 4.2.3 - select2_balanced3 - df_s2b3")
 
+#---- 4-2-4 DONE ***       Select 2 - balanced 4 ------------------ df_s2b4 ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+log_message("Starting Step 4.2.4 - select2_balanced4 - df_s2b4")
+
+df_s2b4 <- df_balanced4
+
+#---- 4-2-4-1-DONE *          Factor and Logical Variables ---------------------
+
+# SMOTE results in all numeric.
+
+#---- 4-2-4-2 DONE *          Integer Variables --------------------------------
+
+df_s2b4_4integers <- df_balanced4 %>%
+  select(Class, matches(paste0("^DETAILED-(",
+                               paste(df_columns_info %>%
+                                       filter(variable_type %in%
+                                                c("integer")) %>%
+                                       pull(column_name),
+                                     collapse = "|"), ")_")))
+
+in_select1_cor_threshold <- 0.5
+
+repeat {
+  df_numeric <- df_s2b4_4integers %>%
+    mutate(across(where(is.integer), as.numeric))
+
+  # Check for collinearity using a correlation matrix
+  correlation_matrix_full <- cor(df_numeric %>% select(-Class))
+  correlation_matrix <- correlation_matrix_full
+
+  # Identify the two variables that are most correlated
+  correlation_matrix[upper.tri(correlation_matrix, diag = TRUE)] <- NA
+  most_correlated_location <- which(abs(correlation_matrix) ==
+                                      max(abs(correlation_matrix),
+                                          na.rm = TRUE), arr.ind = TRUE)
+  most_correlated_vars <- colnames(correlation_matrix)[most_correlated_location]
+  most_correlated_correlation <- correlation_matrix[most_correlated_location]
+
+  # Break the loop if the highest correlation is less than a threshold.
+  if (abs(most_correlated_correlation) <= in_select1_cor_threshold) {
+    break
+  }
+
+  print(paste("Most correlated:", most_correlated_vars[1],
+              "and", most_correlated_vars[2],
+              "at", most_correlated_correlation))
+
+  # Sum the correlations to decide which one to remove
+  row_to_sum1 <- abs(correlation_matrix_full[most_correlated_vars[1],
+                                             , drop = FALSE])
+  row_sum1 <- sum(row_to_sum1, na.rm = TRUE)
+
+  row_to_sum2 <- abs(correlation_matrix_full[most_correlated_vars[2],
+                                             , drop = FALSE])
+  row_sum2 <- sum(row_to_sum2, na.rm = TRUE)
+
+  print(paste("Variable:", most_correlated_vars[1], "Row Sum:", row_sum1))
+  print(paste("Variable:", most_correlated_vars[2], "Row Sum:", row_sum2))
+
+  # Remove the variable with the highest sum of correlations
+  highly_correlated <- ifelse(row_sum1 > row_sum2, most_correlated_vars[1],
+                              most_correlated_vars[2])
+  df_s2b4_4integers <- df_numeric %>%
+    select(-all_of(highly_correlated))
+
+  print(paste("Removed variable:", highly_correlated))
+}
+
+#---- 4-2-4-3 DONE *          Outliers -----------------------------------------
+# Create boxplots for each numeric variable in the dataset
+
+# Generate boxplots dynamically for all numeric columns
+boxplots <- lapply(df_s2b4_4integers, function(col) {
+  ggplot(df_s2b4_4integers, aes(x = "", y = .data[[col]])) +
+    geom_boxplot() +
+    theme(axis.title.x = element_blank(),
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank())
+})
+
+plt_list <- lapply(names(df_s2b4_4integers)
+                   [names(df_s2b4_4integers) != "Class"],
+                   function(col_name) {
+                     ggplot(df_s2b4_4integers,
+                            aes(x = "", y = .data[[col_name]])) +
+                       geom_boxplot() +
+                       labs(title =
+                              substr(col_name, 10, regexpr("_", col_name) - 1),
+                            y = substr(col_name, regexpr("_", col_name) + 1,
+                                       regexpr("_", col_name) + 60)) +
+                       theme(plot.title = element_text(hjust = .9)) +
+                       theme_minimal() +
+                       theme(
+                             axis.title.x = element_blank(),
+                             axis.text.x  = element_blank(),
+                             axis.ticks.x = element_blank(),
+                             axis.text.y  = element_blank(),
+                             axis.ticks.y = element_blank())
+                   })
+
+plt_s2b4_corr <- grid.arrange(grobs = plt_list, ncol = 7)
+
+ggsave("plt_s2b4_corr.png",
+       plot = plt_s2b4_corr, width = 10, height = 16, dpi = 300)
+
+# Removing class to avoid duplication.  Class is included in both dfs.
+df_s2b4 <- df_s2b4_allfact %>% select(-Class) %>% # nolint
+  bind_cols(df_s2b4_4integers)
+
+#---- 4-2-4-4 DONE *          Final --------------------------------------------
+
+save(df_s2b4, file = "df_s2b4.RData")
+
+log_message("Finished Step 4.2.4 - select2_balanced4 - df_s2b4")
+
+#---- 4-2-5 DONE ***       Select 2 - balanced 5 ------------------ df_s2b5 ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+log_message("Starting Step 4.2.5 - select2_balanced5 - df_s2b5")
+
+#load("df_balanced5.RData") # nolint
+#load("df_columns_info.RData") # nolint
+
+df_s2b5 <- df_balanced5
+
+#---- 4-2-5-1-DONE *          Factor and Logical Variables ---------------------
+
+df_s2b5_1factors <- df_balanced5 %>%
+  select(Class, matches(paste0("^DETAILED-(",
+                               paste(df_columns_info %>%
+                                       filter(variable_type %in%
+                                                c("factor")) %>%
+                                       pull(column_name),
+                                     collapse = "|"), ")_")))
+
+df_s2b5_2logical <- df_balanced5 %>%
+  select(Class, matches(paste0("^DETAILED-(",
+                               paste(df_columns_info %>%
+                                       filter(variable_type %in%
+                                                c("logical")) %>%
+                                       pull(column_name),
+                                     collapse = "|"), ")_")))
+
+df_s2b5_3levels <- df_balanced5 %>%
+  select(Class, matches(paste0("^DETAILED-(",
+                               paste(df_columns_info %>%
+                                       filter(variable_type %in%
+                                                c("factor_levels")) %>%
+                                       pull(column_name),
+                                     collapse = "|"), ")_")))
+
+df_s2b5_allfact <- cbind(df_s2b5_1factors,
+                         df_s2b5_2logical %>% select(-Class),
+                         df_s2b5_3levels %>% select(-Class))
+
+##### Will use Fisher test over Chi-square to handle sparse data.
+
+# Some columns have too many levels to be used in Fisher test.
+# SCHL - LDSTP too small - 2e9
+# ANC1P - LDSTP too small - 1e9
+
+fisher_not_possible <- c("SCHL", "ANC1P", "DETAILED-SCHL_",
+                         "DETAILED-ANC1P_",
+                         "RACNH", "DETAILED-RACNH_", "Class")
+
+s2b5_fisher_results <- list()
+
+
+for (col in names(df_s2b5_allfact)) {
+  print(paste(Sys.time(), "- Processing column:", col))
+  if (any(startsWith(col, fisher_not_possible))) {
+    print(paste("Skipping column:", col))
+    next
+  }
+  tryCatch({
+    table_data <- table(df_s2b5_allfact[[col]],
+                        df_s2b5_allfact$Class)
+       fisher_test <- fisher.test(table_data, workspace = 1e9,
+                               simulate.p.value = TRUE, B = 2000000)
+    s2b5_fisher_results[[col]] <-
+      list(column = col, p_value = fisher_test$p.value)
+    print(paste(Sys.time(),
+                "- Fisher test column:", col, "p-value:", fisher_test$p.value))
+  }, error = function(e) {
+    message(paste("Error processing column:", col, "-", e$message))
+    s2b5_fisher_results[[col]] <- list(column = col, p_value = NA)
+  })
+}
+
+# Convert results to a data frame for easier interpretation
+df_s2b5_fisher_results <-
+  do.call(rbind, lapply(s2b5_fisher_results, as.data.frame))
+
+names(df_s2b5_fisher_results) <- c("Column", "P_value")
+
+df_s2b5_fisher_results$neg_log10_P_value <-
+  -log10(df_s2b5_fisher_results$P_value)
+
+# Create a bar plot for Fisher scores
+df_s2b5_fisher_plt <- df_s2b5_fisher_results %>%
+  mutate(P_value = as.numeric(as.character(P_value))) %>%
+  arrange(P_value)
+
+plt_s2b5_fisher <-
+  ggplot(df_s2b5_fisher_plt,
+         aes(x = reorder(substr(Column, 10, 60), -P_value),
+             y = -log10(P_value))) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  geom_hline(yintercept = -log10(0.05), color = "red", linetype = "dashed") +
+  coord_flip() +
+  labs(title = "Fisher Scores for Categorical and Logical Variables 
+       with Missing Included",
+       subtitle = "Select 2 - Balanced 1",
+       caption = "Red line indicates p-value threshold of 0.01",
+       x = "",
+       y = "-log10(P-value)") +
+  theme_minimal()
+
+plt_s2b5_fisher
+
+ggsave("plt_s2b5_fisher.png", plot = plt_s2b5_fisher,
+       width = 10, height = 12, dpi = 300)
+
+# Identify the columns with P-values less than 0.05
+select_cols <- df_s2b5_fisher_results %>%
+  filter(P_value < 0.05) %>%
+  arrange(desc(neg_log10_P_value)) %>%
+  pull(Column)
+
+# Create a new dataframe with those columns
+df_s2b5_allfact <- df_s2b5_allfact %>%
+  select(Class, all_of(select_cols))
+
+#---- 4-2-5-2 DONE *          Integer Variables --------------------------------
+
+df_s2b5_4integers <- df_balanced5 %>%
+  select(Class, matches(paste0("^DETAILED-(",
+                               paste(df_columns_info %>%
+                                       filter(variable_type %in%
+                                                c("integer")) %>%
+                                       pull(column_name),
+                                     collapse = "|"), ")_")))
+
+in_select1_cor_threshold <- 0.5
+
+repeat {
+  df_numeric <- df_s2b5_4integers %>%
+    mutate(across(where(is.integer), as.numeric))
+
+  # Check for collinearity using a correlation matrix
+  correlation_matrix_full <- cor(df_numeric %>% select(-Class))
+  correlation_matrix <- correlation_matrix_full
+
+  # Identify the two variables that are most correlated
+  correlation_matrix[upper.tri(correlation_matrix, diag = TRUE)] <- NA
+  most_correlated_location <- which(abs(correlation_matrix) ==
+                                      max(abs(correlation_matrix),
+                                          na.rm = TRUE), arr.ind = TRUE)
+  most_correlated_vars <- colnames(correlation_matrix)[most_correlated_location]
+  most_correlated_correlation <- correlation_matrix[most_correlated_location]
+
+  # Break the loop if the highest correlation is less than a threshold.
+  if (abs(most_correlated_correlation) <= in_select1_cor_threshold) {
+    break
+  }
+
+  print(paste("Most correlated:", most_correlated_vars[1],
+              "and", most_correlated_vars[2],
+              "at", most_correlated_correlation))
+
+  # Sum the correlations to decide which one to remove
+  row_to_sum1 <- abs(correlation_matrix_full[most_correlated_vars[1],
+                                             , drop = FALSE])
+  row_sum1 <- sum(row_to_sum1, na.rm = TRUE)
+
+  row_to_sum2 <- abs(correlation_matrix_full[most_correlated_vars[2],
+                                             , drop = FALSE])
+  row_sum2 <- sum(row_to_sum2, na.rm = TRUE)
+
+  print(paste("Variable:", most_correlated_vars[1], "Row Sum:", row_sum1))
+  print(paste("Variable:", most_correlated_vars[2], "Row Sum:", row_sum2))
+
+  # Remove the variable with the highest sum of correlations
+  highly_correlated <- ifelse(row_sum1 > row_sum2, most_correlated_vars[1],
+                              most_correlated_vars[2])
+  df_s2b5_4integers <- df_numeric %>%
+    select(-all_of(highly_correlated))
+
+  print(paste("Removed variable:", highly_correlated))
+}
+
+#---- 4-2-5-3 DONE *          Outliers -----------------------------------------
+# Create boxplots for each numeric variable in the dataset
+
+# Generate boxplots dynamically for all numeric columns
+boxplots <- lapply(df_s2b5_4integers, function(col) {
+  ggplot(df_s2b5_4integers, aes(x = "", y = .data[[col]])) +
+    geom_boxplot() +
+    theme(axis.title.x = element_blank(),
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank())
+})
+
+plt_list <- lapply(names(df_s2b5_4integers)
+                   [names(df_s2b5_4integers) != "Class"],
+                   function(col_name) {
+                     ggplot(df_s2b5_4integers,
+                            aes(x = "", y = .data[[col_name]])) +
+                       geom_boxplot() +
+                       labs(title =
+                              substr(col_name, 10, regexpr("_", col_name) - 1),
+                            y = substr(col_name, regexpr("_", col_name) + 1,
+                                       regexpr("_", col_name) + 60)) +
+                       theme(plot.title = element_text(hjust = .9)) +
+                       theme_minimal() +
+                       theme(
+                             axis.title.x = element_blank(),
+                             axis.text.x  = element_blank(),
+                             axis.ticks.x = element_blank(),
+                             axis.text.y  = element_blank(),
+                             axis.ticks.y = element_blank())
+                   })
+
+plt_s2b5_corr <- grid.arrange(grobs = plt_list, ncol = 7)
+
+ggsave("plt_s2b5_corr.png",
+       plot = plt_s2b5_corr, width = 10, height = 16, dpi = 300)
+
+# Removing class to avoid duplication.  Class is included in both dfs.
+df_s2b5 <- df_s2b5_allfact %>% select(-Class) %>% # nolint
+  bind_cols(df_s2b5_4integers)
+
+#---- 4-2-5-4 DONE *          Final --------------------------------------------
+
+save(df_s2b5, file = "df_s2b5.RData")
+
+log_message("Finished Step 4.2.5 - select2_balanced5 - df_s2b5")
+
 #---- 4-3 DONE *****    Select 3 - Missing Added ---------------- df_s3b# ------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
