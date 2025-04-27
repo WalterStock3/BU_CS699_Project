@@ -7,7 +7,7 @@
 #  - Threshold tuning on ensemble method to get the best TP0 and TP1
 #  - PCA option in select section.
 #  - Consider using a decision tree ensemble method.
-#  - Consider using the caret packet to iteratively optimize logistric regression.
+#  - Consider using the caret packet to iteratively optimize log regression.
 
 # Project Goal (Lecture 1): Generate a model to predict the likelihood of a
 # person having difficulty living independently.
@@ -408,7 +408,7 @@ print(paste("df - total missing values (excluding DETAILED-* columns):",
             sum(is.na(df %>% select(-starts_with("DETAILED-")))))) # 141635
 
 print(paste("df after selecting only DETAILED- columns and Class:",
-                        dim(df)[1], ",", dim(df)[2]))
+            dim(df)[1], ",", dim(df)[2]))
 
 # Update df Class to be a binary factor variable.
 df$Class <- ifelse(df$Class == "Yes", 1, 0)
@@ -618,7 +618,7 @@ log_message("Starting Step 3.2 - Balance-UpSample - Project Step 3")
 
 # Undersampling
 df_balanced2 <- upSample(x = df_train[, -which(names(df_train) %in% "Class")],
-                           y = df_train$Class)
+                         y = df_train$Class)
 
 print(paste("training balanced 2 dataset - dim:", dim(df_balanced2)[1],
             ",", dim(df_balanced2)[2]))
@@ -730,10 +730,10 @@ df_balanced5 <- df_balanced5[sample(1:nrow(df_balanced5)), ] # nolint
 df_balanced5$Class <- factor(df_balanced5$Class)
 
 print(paste("training balanced 5 dataset - dim:", dim(df_balanced5)[1],
-",", dim(df_balanced5)[2]))
+            ",", dim(df_balanced5)[2]))
 
 print(paste("training balanced 5 dataset - class distribution:",
-table(df_balanced5$Class)[1], ",",
+            table(df_balanced5$Class)[1], ",",
             table(df_balanced5$Class)[2]))
 
 save(df_balanced5, file = "df_balanced5.RData")
@@ -1414,7 +1414,7 @@ plt_s2b3_fisher
 ggsave("plt_s2b3_fisher.png", plot = plt_s2b3_fisher,
        width = 10, height = 12, dpi = 300)
 
-neg_log10_P_cutoff <- 0.05
+neg_log10_P_cutoff <- 0.05 #nolint
 
 # Identify the columns to keep
 select_cols <- df_s2b3_fisher_results %>%
@@ -1639,8 +1639,7 @@ ggsave("plt_s2b4_corr.png",
        plot = plt_s2b4_corr, width = 10, height = 16, dpi = 300)
 
 # Removing class to avoid duplication.  Class is included in both dfs.
-df_s2b4 <- df_s2b4_allfact %>% select(-Class) %>% # nolint
-  bind_cols(df_s2b4_4integers)
+df_s2b4 <- df_s2b4_4integers
 
 #---- 4-2-4-4 DONE *          Final --------------------------------------------
 
@@ -1709,8 +1708,8 @@ for (col in names(df_s2b5_allfact)) {
   tryCatch({
     table_data <- table(df_s2b5_allfact[[col]],
                         df_s2b5_allfact$Class)
-       fisher_test <- fisher.test(table_data, workspace = 1e9,
-                               simulate.p.value = TRUE, B = 2000000)
+    fisher_test <- fisher.test(table_data, workspace = 1e9,
+                                  simulate.p.value = TRUE, B = 2000000)
     s2b5_fisher_results[[col]] <-
       list(column = col, p_value = fisher_test$p.value)
     print(paste(Sys.time(),
@@ -2325,7 +2324,7 @@ log_message("Finished Step 4.4 - select4_balanced3 - df_s4b3")
 log_message("Starting Step 4.5.1 - select5_balanced4 - df_s5b4")
 
 # Load the balanced dataset if not already loaded
-#load("df_balanced4.RData")
+#load("df_balanced4.RData") # nolint
 
 # Create a recipe for PCA
 pca_recipe <- recipe(Class ~ ., data = df_balanced4) %>%
@@ -2336,7 +2335,7 @@ pca_recipe <- recipe(Class ~ ., data = df_balanced4) %>%
   # Normalize all numeric predictors
   step_normalize(all_numeric_predictors()) %>%
   # Convert categorical variables to dummy variables
-  step_dummy(all_nominal_predictors(), -all_outcomes()) %>% 
+  step_dummy(all_nominal_predictors(), -all_outcomes()) %>%
   # Apply PCA - retain enough components to explain 95% of the variance
   step_pca(all_predictors(), threshold = 0.95)
 
@@ -2370,9 +2369,11 @@ pca_cum_var <- pca_results %>%
 
 # Display the plots
 print(pca_var)
-ggsave("plt_s5b4_pca_variance.png", plot = pca_var, width = 10, height = 6, dpi = 300)
+ggsave("plt_s5b4_pca_variance.png",
+       plot = pca_var, width = 10, height = 6, dpi = 300)
 print(pca_cum_var)
-ggsave("plt_s5b4_pca_cumulative.png", plot = pca_cum_var, width = 10, height = 6, dpi = 300)
+ggsave("plt_s5b4_pca_cumulative.png",
+       plot = pca_cum_var, width = 10, height = 6, dpi = 300)
 
 # Get the number of components needed to explain 95% of variance
 n_components <- pca_results %>%
@@ -2380,7 +2381,8 @@ n_components <- pca_results %>%
   slice_min(component) %>%
   pull(component)
 
-print(paste("Number of components needed to explain 95% of variance:", n_components))
+print(paste("Number of components needed to explain 95% of variance:",
+            n_components))
 
 # Extract the transformed data with the selected components
 df_s5b4 <- juice(pca_prep)
